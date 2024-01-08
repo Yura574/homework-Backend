@@ -118,6 +118,6 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
 
 videoRouter.delete('/testing/all-data', (req: Request, res: Response) => {
     videos.length = 0
-    res.sendStatus(204)
-
+    res.send(204)
+return
 })

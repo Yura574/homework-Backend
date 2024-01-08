@@ -8,8 +8,9 @@ import {videoRouter} from './routes/video-router';
 export const app = express()
 export const port = 5000
 app.use(express.json())
-app.use('/videos', videoRouter)
+app.use('/hometask_01/api/videos', videoRouter)
 app.use('/blogs', authMiddleware, blogValidation(), (req: Request, res: Response) => {
 
 })
 //
+
