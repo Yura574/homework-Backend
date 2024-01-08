@@ -44,10 +44,10 @@ let videos: VideoType [] = [
     }
 ]
 
-videoRouter.get('/videos', (req: Request, res: Response) => {
+videoRouter.get('/', (req: Request, res: Response) => {
     res.send(videos)
 })
-videoRouter.get('/videos/:id', (req: Request, res: Response) => {
+videoRouter.get('/:id', (req: Request, res: Response) => {
     const video = videos.find(v => v.id === +req.params.id)
     if (video) {
         res.send(video)
@@ -68,7 +68,7 @@ type ErrorMessageType = {
 type ErrorType = {
     errorsMessages: ErrorMessageType[]
 }
-videoRouter.post('/videos', (req: RequestWithBody<CreateVideoType>, res: Response) => {
+videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => {
     let errors: ErrorType = {
         errorsMessages: []
     }
@@ -116,7 +116,7 @@ videoRouter.post('/videos', (req: RequestWithBody<CreateVideoType>, res: Respons
 
 })
 
-videoRouter.delete('/testing/all-data-delete', (req: Request, res: Response) => {
+videoRouter.delete('/testing/all-data', (req: Request, res: Response) => {
     videos.length = 0
     res.sendStatus(204)
 
