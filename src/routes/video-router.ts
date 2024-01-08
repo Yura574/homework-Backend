@@ -1,7 +1,7 @@
-import {Router, Request, Response} from 'express';
+import express, { Request, Response} from 'express';
 
 
-export const videoRouter = Router({})
+export const videoRouter = express.Router({})
 
 
 const AvailableResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160']
@@ -29,7 +29,7 @@ type VideoType = {
 }
 
 
-let videos: VideoType [] = [
+export let videos: VideoType [] = [
     {
         "id": 0,
         "title": "string",
@@ -116,8 +116,3 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
 
 })
 
-videoRouter.delete('/testing/all-data', (req: Request, res: Response) => {
-    videos.length = 0
-    res.send(204)
-return
-})
