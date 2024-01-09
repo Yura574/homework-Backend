@@ -161,7 +161,7 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
         const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
         return regex.test(dateString);
     }
-    if(publicationDate && !isValidDateFormat(publicationDate.trim())){
+    if(publicationDate && !isValidDateFormat(publicationDate.toString().trim())){
         fieldError.errorsMessages.push({field: 'publicationDate', message: 'Incorrect publicationDate'})
 
     }
