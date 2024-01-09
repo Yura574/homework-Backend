@@ -1,4 +1,4 @@
-import express, { Request, Response} from 'express';
+import express, {Request, Response} from 'express';
 
 
 export const videoRouter = express.Router({})
@@ -73,15 +73,15 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
         errorsMessages: []
     }
     let {title, author, availableResolutions} = req.body
-    if(!title || !title.trim() || typeof title !== 'string'|| title.trim().length > 40){
+    if (!title || !title.trim() || typeof title !== 'string' || title.trim().length > 40) {
         errors.errorsMessages.push({field: 'title', message: 'title incorrect'})
     }
-    if(!author || !author.trim() || typeof author !== 'string' || author.trim().length > 20){
+    if (!author || !author.trim() || typeof author !== 'string' || author.trim().length > 20) {
         errors.errorsMessages.push({field: 'author', message: 'author incorrect'})
     }
-    if(Array.isArray(availableResolutions)){
+    if (Array.isArray(availableResolutions)) {
         availableResolutions.forEach(r => {
-            if(!AvailableResolutions.includes(r)){
+            if (!AvailableResolutions.includes(r)) {
                 errors.errorsMessages.push({message: 'Available resolutions incorrect', field: 'availableResolutions'})
                 return
             }
@@ -89,7 +89,7 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
     } else {
         availableResolutions = []
     }
-    if(errors.errorsMessages.length> 0){
+    if (errors.errorsMessages.length > 0) {
         res.status(400).send(errors)
         return
     }
@@ -97,14 +97,14 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
     const createdAt = new Date()
     const publicationDate = new Date()
 
-    publicationDate.setDate(createdAt.getDate() +1)
+    publicationDate.setDate(createdAt.getDate() + 1)
     const newVideo: VideoType = {
         id: +(new Date()),
         title,
         author,
         availableResolutions,
         createdAt: createdAt.toISOString(),
-        canBeDownloaded: true,
+        canBeDownloaded: false,
         minAgeRestriction: null,
         publicationDate: createdAt.toISOString()
 
@@ -116,14 +116,15 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
 
 })
 
-videoRouter.delete('/:id', (req: Request, res: Response)=> {
+videoRouter.delete('/:id', (req: Request, res: Response) => {
     const index = videos.findIndex(v => v.id === +req.params.id)
-    if(index){
-        videos.splice(index,1 )
-        res.status(204)
+    if (index >= 0) {
+        videos.splice(index, 1)
+        res.send(204)
         return
     }
     res.send(404)
+    return;
 
 })
 
