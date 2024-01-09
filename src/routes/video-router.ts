@@ -149,7 +149,7 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
     }
 
     if (!author || !author.trim() || author.length > 20) {
-        fieldError.errorsMessages.push({field: 'title', message: 'Incorrect author'})
+        fieldError.errorsMessages.push({field: 'author', message: 'Incorrect author'})
     }
     if(typeof canBeDownloaded !== 'boolean'){
         fieldError.errorsMessages.push({field: 'canBeDownloaded', message: 'Incorrect canBeDownloaded'})
@@ -157,11 +157,21 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
     if(+minAgeRestriction < 1 || +minAgeRestriction > 18 || !+minAgeRestriction){
         fieldError.errorsMessages.push({field: 'minAgeRestriction', message: 'Incorrect minAgeRestriction'})
     }
+    function isValidDateFormat(dateString: string) {
+        const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
+        return regex.test(dateString);
+    }
+    if(publicationDate && !isValidDateFormat(publicationDate)){
+        fieldError.errorsMessages.push({field: 'publicationDate', message: 'Incorrect publicationDate'})
+        res.send(400)
+        return;
+    }
 
     if (fieldError.errorsMessages.length > 0) {
         res.status(400).send(fieldError)
         return;
     }
+
 
     const video = videos.find(v => v.id === +req.params.id)
 
@@ -180,6 +190,9 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
         minAgeRestriction: minAgeRestriction ? minAgeRestriction : video.minAgeRestriction,
         publicationDate: publicationDate ? publicationDate : video.publicationDate
     }
+    const test = new Date(Date.parse('21212'))
+    console.log(!isNaN(+test))
+
     const index = videos.findIndex(v => v.id === video.id)
 
     videos.splice(index, 1, newVideo)
