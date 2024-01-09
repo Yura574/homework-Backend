@@ -159,7 +159,7 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
     }
 
     if (fieldError.errorsMessages.length > 0) {
-        res.status(400).send(fieldError.errorsMessages)
+        res.status(400).send(fieldError)
         return;
     }
 
