@@ -116,3 +116,14 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
 
 })
 
+videoRouter.delete('/:id', (req: Request, res: Response)=> {
+    const index = videos.findIndex(v => v.id === +req.params.id)
+    if(index){
+        videos.splice(index,1 )
+        res.status(204)
+        return
+    }
+    res.send(404)
+
+})
+
