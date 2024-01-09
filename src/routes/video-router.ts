@@ -95,9 +95,8 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
     }
 
     const createdAt = new Date()
-    const publicationDate = new Date()
+    const publicationDate = new Date(createdAt.setDate(createdAt.getDate() + 1))
 
-    publicationDate.setDate(createdAt.getDate() + 1)
     const newVideo: VideoType = {
         id: +(new Date()),
         title,
@@ -106,7 +105,7 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
         createdAt: createdAt.toISOString(),
         canBeDownloaded: false,
         minAgeRestriction: null,
-        publicationDate: createdAt.toISOString()
+        publicationDate: publicationDate.toISOString()
 
     }
     videos.push(newVideo)
