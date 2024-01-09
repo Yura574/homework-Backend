@@ -151,9 +151,16 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
     if (!author || !author.trim() || author.length > 20) {
         fieldError.errorsMessages.push({field: 'title', message: 'Incorrect author'})
     }
+    if(typeof canBeDownloaded !== 'boolean'){
+        fieldError.errorsMessages.push({field: 'canBeDownloaded', message: 'Incorrect canBeDownloaded'})
+    }
+    if(+minAgeRestriction < 1 || +minAgeRestriction > 18 || !+minAgeRestriction){
+        fieldError.errorsMessages.push({field: 'minAgeRestriction', message: 'Incorrect minAgeRestriction'})
+    }
 
     if (fieldError.errorsMessages.length > 0) {
-        res.sendStatus(400).send(fieldError.errorsMessages)
+        res.status(400).send(fieldError.errorsMessages)
+        return;
     }
 
     const video = videos.find(v => v.id === +req.params.id)
