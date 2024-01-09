@@ -45,7 +45,7 @@ export let videos: VideoType [] = [
 ]
 
 videoRouter.get('/', (req: Request, res: Response) => {
-    res.send(videos)
+    res.status(200).send(videos)
 })
 videoRouter.get('/:id', (req: Request, res: Response) => {
     const video = videos.find(v => v.id === +req.params.id)
@@ -73,10 +73,10 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
         errorsMessages: []
     }
     let {title, author, availableResolutions} = req.body
-    if(!title.trim() || true || title.trim().length > 40){
+    if(!title || !title.trim() || typeof title !== 'string'|| title.trim().length > 40){
         errors.errorsMessages.push({field: 'title', message: 'title incorrect'})
     }
-    if(!author.trim() || true || author.trim().length > 20){
+    if(!author || !author.trim() || typeof author !== 'string' || author.trim().length > 20){
         errors.errorsMessages.push({field: 'author', message: 'author incorrect'})
     }
     if(Array.isArray(availableResolutions)){
@@ -104,7 +104,7 @@ videoRouter.post('/', (req: RequestWithBody<CreateVideoType>, res: Response) => 
         author,
         availableResolutions,
         createdAt: createdAt.toISOString(),
-        canBeDownloaded: false,
+        canBeDownloaded: true,
         minAgeRestriction: null,
         publicationDate: createdAt.toISOString()
 
