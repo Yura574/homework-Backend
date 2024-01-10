@@ -189,8 +189,6 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
         minAgeRestriction: minAgeRestriction ? minAgeRestriction : video.minAgeRestriction,
         publicationDate: publicationDate ? publicationDate : video.publicationDate
     }
-    const test = new Date(Date.parse('21212'))
-    console.log(!isNaN(+test))
 
     const index = videos.findIndex(v => v.id === video.id)
 
