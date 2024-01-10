@@ -4,13 +4,14 @@ import {authMiddleware} from './middleware/auth/auth-middleware';
 import {blogValidation} from './validators/blog-validators';
 import {videoRouter, videos} from './routes/video-router';
 import {db} from './db/db';
+import {coursesRouter} from './routes/courses-router';
 
 
 export const app = express()
 export const port = 5000
 app.use(express.json())
 app.use('/videos', videoRouter)
-app.use('/course')
+app.use('/course', coursesRouter)
 
 app.use('/blogs', authMiddleware, blogValidation(), (req: Request, res: Response) => {
 
@@ -25,7 +26,7 @@ app.delete('/delete-all-data', (req: Request, res: Response)=> {
     db.users = []
     db.studentCourseBindings = []
 
-    res.send(204)
+    res.sendStatus(204).send(204)
 })
 //
 

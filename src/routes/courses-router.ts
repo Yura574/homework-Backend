@@ -60,7 +60,7 @@ coursesRouter.post('/courses', (req: RequestTypes<ParamsType, BodyCoursePostType
         studentCount: 10
     }
     db.courses.push(newCourse)
-    res.status(200).send(newCourse)
+    res.status(201).send(newCourse)
     return;
 
 
