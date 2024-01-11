@@ -45,7 +45,7 @@ coursesRouter.post('/courses', (req: RequestTypes<ParamsType, BodyCoursePostType
     const errors: ErrorsType = {
         messageError: []
     }
-    if (!title || !title.trim() || typeof title !== 'string' || title.length > 20) {
+    if (!title || typeof title !== 'string' || !title.trim() || title.length > 20) {
         errors.messageError.push({field: 'Course', message: 'Course title incorrect'})
     }
 
@@ -72,14 +72,13 @@ coursesRouter.put('/courses/:id', (req: RequestTypes<ParamsType, BodyCoursePutTy
     const errors: ErrorsType = {
         messageError: []
     }
-    if (!title || !title.trim() || typeof title !== 'string' || title.length > 20) {
+    if (!title || typeof title !== 'string' || !title.trim() || title.length > 20) {
         errors.messageError.push({field: 'Course', message: 'Course title incorrect'})
     }
 
-    if (!studentCount || typeof +studentCount !== 'number') {
+    if (!studentCount || typeof  +studentCount === 'string'||  isNaN(+studentCount) || typeof +studentCount !== 'number') {
         errors.messageError.push({field: 'Student count', message: 'Student count incorrect'})
     }
-
     if (errors.messageError.length > 0) {
         res.status(400).send(errors.messageError)
         return
@@ -95,8 +94,9 @@ coursesRouter.put('/courses/:id', (req: RequestTypes<ParamsType, BodyCoursePutTy
     const newCourse: CourseType = {
         id: db.courses[index].id,
         title,
-        studentCount
+        studentCount: +studentCount
     }
+
     db.courses.splice(index, 1, newCourse)
     res.send(204)
     return;
