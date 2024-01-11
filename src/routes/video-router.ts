@@ -76,10 +76,10 @@ videoRouter.post('/', (req: RequestWithBody<ParamIdType, CreateVideoType>, res: 
         errorsMessages: []
     }
     let {title, author, availableResolutions} = req.body
-    if (!title || !title.trim() || typeof title !== 'string' || title.trim().length > 40) {
+    if (!title || typeof title !== 'string' || !title.trim() || title.trim().length > 40) {
         errors.errorsMessages.push({field: 'title', message: 'title incorrect'})
     }
-    if (!author || !author.trim() || typeof author !== 'string' || author.trim().length > 20) {
+    if (!author || typeof author !== 'string' || !author.trim() || author.trim().length > 20) {
         errors.errorsMessages.push({field: 'author', message: 'author incorrect'})
     }
     if (Array.isArray(availableResolutions)) {
@@ -134,68 +134,89 @@ videoRouter.delete('/:id', (req: Request, res: Response) => {
 type VideoUpdateType = {
     title: string
     author: string
-    availableResolutions: typeof AvailableResolutionsType
-    canBeDownloaded: boolean
-    minAgeRestriction: any
-    publicationDate: string
+    availableResolutions?: typeof AvailableResolutionsType
+    canBeDownloaded?: boolean
+    minAgeRestriction?: any
+    publicationDate?: string
 }
 videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res: Response) => {
-    const {title, author, availableResolutions, publicationDate, minAgeRestriction, canBeDownloaded} = req.body
-    const fieldError: ErrorType = {
-        errorsMessages: []
-    }
-    if (!title || !title.trim() || title.length > 40) {
-        fieldError.errorsMessages.push({field: 'title', message: 'Incorrect title'})
-    }
+        const {title, author, availableResolutions, publicationDate, minAgeRestriction, canBeDownloaded} = req.body
+        const fieldError: ErrorType = {
+            errorsMessages: []
+        }
+        if (!title || typeof title !== 'string' || !title.trim() || title.length > 40) {
+            fieldError.errorsMessages.push({field: 'title', message: 'Incorrect title'})
+        }
 
-    if (!author || !author.trim() || author.length > 20) {
-        fieldError.errorsMessages.push({field: 'author', message: 'Incorrect author'})
-    }
-    if(typeof canBeDownloaded !== 'boolean'){
-        fieldError.errorsMessages.push({field: 'canBeDownloaded', message: 'Incorrect canBeDownloaded'})
-    }
-    if(+minAgeRestriction < 1 || +minAgeRestriction > 18 || !+minAgeRestriction){
+        if (!author || typeof title !== 'string' || !author.trim() || author.length > 20) {
+            fieldError.errorsMessages.push({field: 'author', message: 'Incorrect author'})
+        }
+        if (availableResolutions && Array.isArray(availableResolutions)) {
+            availableResolutions.forEach(r => {
+                if (!AvailableResolutionsType.includes(r)) {
+                    fieldError.errorsMessages.push({
+                        message: 'Available resolutions incorrect',
+                        field: 'availableResolutions'
+                    })
+                    return
+                }
+            })
+        }
+        if (canBeDownloaded && typeof canBeDownloaded !== 'boolean') {
+            fieldError.errorsMessages.push({field: 'canBeDownloaded', message: 'Incorrect canBeDownloaded'})
+        }
+
+
+    if (minAgeRestriction  && minAgeRestriction === 0 || +minAgeRestriction < 1 || +minAgeRestriction > 18 || isNaN(+minAgeRestriction) || typeof minAgeRestriction === 'boolean' || typeof +minAgeRestriction !== 'number') {
         fieldError.errorsMessages.push({field: 'minAgeRestriction', message: 'Incorrect minAgeRestriction'})
     }
-    function isValidDateFormat(dateString: string) {
-        const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-        return regex.test(dateString);
+
+
+
+
+
+
+        function isValidDateFormat(dateString: string) {
+            const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
+            return regex.test(dateString);
+        }
+
+        if (publicationDate && !isValidDateFormat(publicationDate.toString().trim())) {
+            fieldError.errorsMessages.push({field: 'publicationDate', message: 'Incorrect publicationDate'})
+
+        }
+
+        if (fieldError.errorsMessages.length > 0) {
+            res.status(400).send(fieldError)
+            return;
+        }
+
+
+        const video = videos.find(v => v.id === +req.params.id)
+
+        if (!video) {
+            res.send(404)
+            return;
+        }
+
+        let newVideo: VideoType = {
+            id: video.id,
+            author: author,
+            title: title,
+            availableResolutions: availableResolutions ? availableResolutions : video.availableResolutions,
+            createdAt: video.createdAt,
+            canBeDownloaded: canBeDownloaded ? canBeDownloaded : video.canBeDownloaded,
+            minAgeRestriction: minAgeRestriction ? minAgeRestriction : video.minAgeRestriction,
+            publicationDate: publicationDate ? publicationDate : video.publicationDate
+        }
+
+        const index = videos.findIndex(v => v.id === video.id)
+
+        videos.splice(index, 1, newVideo)
+
+
+        res.send(204)
+        return
     }
-    if(publicationDate && !isValidDateFormat(publicationDate.toString().trim())){
-        fieldError.errorsMessages.push({field: 'publicationDate', message: 'Incorrect publicationDate'})
-
-    }
-
-    if (fieldError.errorsMessages.length > 0) {
-        res.status(400).send(fieldError)
-        return;
-    }
-
-
-    const video = videos.find(v => v.id === +req.params.id)
-
-    if (!video) {
-        res.send(404)
-        return;
-    }
-
-    let newVideo: VideoType = {
-        id: video.id,
-        author: author,
-        title: title,
-        availableResolutions: availableResolutions ? availableResolutions : video.availableResolutions,
-        createdAt: video.createdAt,
-        canBeDownloaded: canBeDownloaded ? canBeDownloaded : video.canBeDownloaded,
-        minAgeRestriction: minAgeRestriction ? minAgeRestriction : video.minAgeRestriction,
-        publicationDate: publicationDate ? publicationDate : video.publicationDate
-    }
-
-    const index = videos.findIndex(v => v.id === video.id)
-
-    videos.splice(index, 1, newVideo)
-
-
-    res.send(204)
-    return
-})
+)
 
