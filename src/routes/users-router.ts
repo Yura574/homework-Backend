@@ -1,5 +1,6 @@
 import express, {Request, Response} from 'express';
 import {CourseType, db, UserType} from '../db/db';
+import {HTTP_STATUSES} from '../utils';
 
 
 export const usersRouter = express.Router()
@@ -36,6 +37,7 @@ usersRouter.get('/:id', (req: RequestTypes<ParamsType, any>, res: Response) => {
 
 usersRouter.post('/', (req: RequestTypes<ParamsType, BodyUserType>, res: Response) => {
 
+
     const {userName} = req.body
     const errors: ErrorsType = {
         messageError: []
@@ -53,12 +55,13 @@ usersRouter.post('/', (req: RequestTypes<ParamsType, BodyUserType>, res: Respons
         id: +(new Date()),
         userName
     }
-
+    console.log(newUser)
     db.users.push(newUser)
     res.status(201).send(newUser)
     return;
 
 })
+
 usersRouter.put('/:id', (req: RequestTypes<ParamsType, BodyUserType>, res: Response) => {
     const id = +req.params.id
     const {userName} = req.body
@@ -70,12 +73,12 @@ usersRouter.put('/:id', (req: RequestTypes<ParamsType, BodyUserType>, res: Respo
     }
 
     if (errors.messageError.length > 0) {
-        res.status(400).send(errors.messageError)
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors.messageError)
         return
     }
     const user = db.users.find(u => u.id === id)
     if (!user) {
-        res.send(404)
+        res.send(HTTP_STATUSES.NOT_FOUND_404)
         return;
     }
     const index = db.users.findIndex(c => c.id === id)
@@ -84,7 +87,7 @@ usersRouter.put('/:id', (req: RequestTypes<ParamsType, BodyUserType>, res: Respo
         userName,
     }
     db.users.splice(index, 1, newUser)
-    res.send(204)
+    res.send(HTTP_STATUSES.CHANGE_204)
     return;
 })
 
