@@ -1,8 +1,7 @@
 import request from 'supertest'
 import {app, routerPaths} from '../src/settings';
 import {UserTestManager} from '../src/utils/userTestManager';
-import {HTTP_STATUSES} from '../src/utils';
-import {db, UserType} from '../src/db/db';
+import {HTTP_STATUSES} from '../src/utils/httpStatuses';
 
 const data = {
     userName: 'new user'

@@ -1,6 +1,6 @@
 import express, {Request, Response} from 'express';
 import {CourseType, db, UserType} from '../db/db';
-import {HTTP_STATUSES} from '../utils';
+import {HTTP_STATUSES} from '../utils/httpStatuses';
 
 
 export const usersRouter = express.Router()
@@ -55,7 +55,6 @@ usersRouter.post('/', (req: RequestTypes<ParamsType, BodyUserType>, res: Respons
         id: +(new Date()),
         userName
     }
-    console.log(newUser)
     db.users.push(newUser)
     res.status(201).send(newUser)
     return;

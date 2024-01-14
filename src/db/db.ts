@@ -1,10 +1,10 @@
+import {BlogViewModelType} from '../models/blogModels';
 
-
-export type  UserType ={
+export type  UserType = {
     id: number
     userName: string
 }
-export type CourseType ={
+export type CourseType = {
     id: number
     title: string
     studentCount: number
@@ -15,10 +15,12 @@ export type StudentBindingType = {
     coursedId: number
     date: Date
 }
+
 export type DBType = {
     courses: CourseType[]
     users: UserType[]
     studentCourseBindings: StudentBindingType[]
+    blogs: BlogViewModelType[]
 }
 export const db: DBType = {
     courses: [
@@ -32,8 +34,13 @@ export const db: DBType = {
         {id: 2, userName: 'Vanya'},
     ],
     studentCourseBindings: [
-        {studentId: 1, coursedId: 1, date: new Date(2022,10,1)},
-        {studentId: 1, coursedId: 2, date: new Date(2022,10,1)},
-        {studentId: 2, coursedId: 2, date: new Date(2022,10,1)},
+        {studentId: 1, coursedId: 1, date: new Date(2022, 10, 1)},
+        {studentId: 1, coursedId: 2, date: new Date(2022, 10, 1)},
+        {studentId: 2, coursedId: 2, date: new Date(2022, 10, 1)},
+    ],
+    blogs: [
+        {
+            id: '12', name: 'as', websiteUrl: 'asas', description:'asas'
+        }
     ]
 }

@@ -1,16 +1,19 @@
 import express, {Request, Response} from 'express';
-import {blogRoute} from './routes/blog-route';
 import {authMiddleware} from './middleware/auth/auth-middleware';
 import {blogValidation} from './validators/blog-validators';
 import {videoRouter, videos} from './routes/video-router';
 import {db} from './db/db';
 import {coursesRouter} from './routes/courses-router';
 import {usersRouter} from './routes/users-router';
+import {blogRouter} from './routes/blog-router';
+import {blogValidators} from './validators/blogValidators';
+import {body} from 'express-validator';
 
 export const routerPaths = {
     courses: '/courses',
     videos: '/videos',
     users: '/users',
+    blogs: '/blogs',
     deleteVideos: '/testing/all-data',
     deleteAllData: '/delete-all-data'
 }
@@ -20,10 +23,11 @@ app.use(express.json())
 app.use(routerPaths.videos, videoRouter)
 app.use(routerPaths.courses, coursesRouter)
 app.use(routerPaths.users, usersRouter)
+app.use(routerPaths.blogs, authMiddleware, blogValidators(),blogRouter)
 
-app.use('/blogs', authMiddleware, blogValidation(), (req: Request, res: Response) => {
-
-})
+// app.use('/blogs', , (req: Request, res: Response) => {
+//
+// })
 app.delete(routerPaths.deleteVideos, (req: Request, res: Response) => {
     videos.length = 0
     res.send(204)
