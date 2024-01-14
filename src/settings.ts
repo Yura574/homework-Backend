@@ -37,6 +37,7 @@ app.delete(routerPaths.deleteAllData, (req: Request, res: Response)=> {
     db.courses= []
     db.users = []
     db.studentCourseBindings = []
+    db.blogs= []
 
     res.sendStatus(204).send(204)
 })
