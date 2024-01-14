@@ -14,8 +14,8 @@ export const routerPaths = {
     videos: '/videos',
     users: '/users',
     blogs: '/blogs',
-    deleteVideos: '/testing/all-data',
-    deleteAllData: '/delete-all-data'
+    deleteVideos: '/delete-all-data',
+    deleteAllData: '/testing/all-data'
 }
 export const app = express()
 export const port = 5000
