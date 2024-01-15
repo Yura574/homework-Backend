@@ -1,12 +1,13 @@
-
-
 import request from 'supertest';
 import {app, routerPaths} from '../src/settings';
 import {BlogInputModelType} from '../src/models/blogModels';
 
-describe('tests for /users', () => {
-
-
+describe('tests for /blogs', () => {
+    beforeAll(async () => {
+       const res = await request(app)
+            .delete('/delete-all-data')
+        console.log(res.body)
+    })
     it('should create new user', async () => {
         const data: BlogInputModelType = {
             name: 'new blog',

@@ -23,7 +23,7 @@ app.use(express.json())
 app.use(routerPaths.videos, videoRouter)
 app.use(routerPaths.courses, coursesRouter)
 app.use(routerPaths.users, usersRouter)
-app.use(routerPaths.blogs, authMiddleware, blogValidators(),blogRouter)
+app.use(routerPaths.blogs,blogRouter)
 
 // app.use('/blogs', , (req: Request, res: Response) => {
 //
