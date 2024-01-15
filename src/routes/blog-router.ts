@@ -14,7 +14,7 @@ blogRouter.post('/',  authMiddleware, blogValidators(),async (req: Request, res:
 
 const result = validationResult(req)
     if(!result.isEmpty()){
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(result)
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(result.array().map(err => err.msg))
         return
     }
     const {name,description, websiteUrl} = req.body
