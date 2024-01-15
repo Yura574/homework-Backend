@@ -8,12 +8,11 @@ export const blogsTestManager = {
     async createBlog(data: BlogInputModelType, statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
         const res = await request(app)
             .post(routerPaths.blogs)
+            .auth('admin', 'qwerty', {type: 'basic'})
             .send(data)
-        console.log(res.body)
         let newBlog
         if (statusCode === HTTP_STATUSES.CREATED_201) {
             newBlog = res.body
-            console.log(newBlog)
             expect(newBlog).toEqual({
                 id: expect.any(String),
                 name: data.name,
@@ -22,5 +21,21 @@ export const blogsTestManager = {
             })
         }
         return {res, newBlog}
+    },
+
+    async getBlogById (id: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200){
+      const res =   await request(app)
+            .get(`${routerPaths.blogs}/${id}`)
+            .expect(statusCode)
+        const blog =res.body
+        return {res, blog}
+    },
+
+    async deleteBlog (id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204){
+        await request(app)
+            .delete(`${routerPaths.blogs}/${id}`)
+            .auth('admin', 'qwerty')
+            .expect(statusCode)
+
     }
 }

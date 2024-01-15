@@ -26,7 +26,7 @@ export const UserTestManager = {
 
      return res.body
     },
-    async deleteUser (id: number, statusCode: HttpStatusType = HTTP_STATUSES.CHANGE_204){
+    async deleteUser (id: number, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204){
        await request(app)
            .delete(`/users/${id}`)
            .expect(statusCode)
