@@ -2,7 +2,7 @@ import {db} from '../db/db';
 import {BlogInputModelType, BlogViewModelType} from '../models/blogModels';
 
 export class BlogRepository {
-   static  getById(id: string) {
+   static  getBlogById(id: string) {
         return db.blogs.find(b => b.id === id);
     }
 
@@ -33,4 +33,6 @@ export class BlogRepository {
         }
         return false
     }
+
+
 }

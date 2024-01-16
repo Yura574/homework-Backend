@@ -1,4 +1,4 @@
-import {BlogViewModelType} from '../models/blogModels';
+import {BlogViewModelType, PostInputModelType, PostViewModelType} from '../models/blogModels';
 
 export type  UserType = {
     id: number
@@ -21,6 +21,7 @@ export type DBType = {
     users: UserType[]
     studentCourseBindings: StudentBindingType[]
     blogs: BlogViewModelType[]
+    posts: PostViewModelType[]
 }
 export const db: DBType = {
     courses: [
@@ -38,9 +39,8 @@ export const db: DBType = {
         {studentId: 1, coursedId: 2, date: new Date(2022, 10, 1)},
         {studentId: 2, coursedId: 2, date: new Date(2022, 10, 1)},
     ],
-    blogs: [
-        {
-            id: '12', name: 'as', websiteUrl: 'asas', description:'asas'
-        }
-    ]
+    blogs: [{id: '12', name: 'as', websiteUrl: 'asas', description: 'asas'}],
+    posts: [{id: '12', title: 'test', blogId: '12', blogName: 'test', content: 'test', shortDescription: 'test'}]
+
+
 }

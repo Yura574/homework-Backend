@@ -40,7 +40,7 @@ blogRouter.get('/', async (req: Request, res: Response) => {
     }
 })
 blogRouter.get('/:id', async (req: Request, res: Response) => {
-    const blog = BlogRepository.getById(req.params.id)
+    const blog = BlogRepository.getBlogById(req.params.id)
     if (blog) {
         res.status(HTTP_STATUSES.OK_200).send(blog)
         return
@@ -69,7 +69,7 @@ blogRouter.put('/:id', authMiddleware, blogValidators(),async (req: Request, res
     }
     const id = req.params.id
     const {name, description, websiteUrl} = req.body
-    const blog = BlogRepository.getById(id)
+    const blog = BlogRepository.getBlogById(id)
     if(!blog){
         res.send(HTTP_STATUSES.NOT_FOUND_404)
         return

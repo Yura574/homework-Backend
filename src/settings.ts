@@ -4,11 +4,13 @@ import {db} from './db/db';
 import {coursesRouter} from './routes/courses-router';
 import {usersRouter} from './routes/users-router';
 import {blogRouter} from './routes/blog-router';
+import {postRouter} from './routes/post-router';
 export const routerPaths = {
     courses: '/courses',
     videos: '/videos',
     users: '/users',
     blogs: '/blogs',
+    posts: '/posts',
     deleteVideos: '/delete-all-data',
     deleteAllData: '/testing/all-data'
 }
@@ -19,6 +21,7 @@ app.use(routerPaths.videos, videoRouter)
 app.use(routerPaths.courses, coursesRouter)
 app.use(routerPaths.users, usersRouter)
 app.use(routerPaths.blogs,blogRouter)
+app.use(routerPaths.posts,postRouter)
 
 // app.use('/blogs', , (req: Request, res: Response) => {
 //

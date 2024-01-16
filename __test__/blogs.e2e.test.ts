@@ -2,7 +2,6 @@ import request from 'supertest';
 import {app, routerPaths} from '../src/settings';
 import {BlogInputModelType} from '../src/models/blogModels';
 import {blogsTestManager} from '../src/utils/blogsTestManager';
-import {BlogRepository} from '../src/repositories/blog-repository';
 import {HTTP_STATUSES} from '../src/utils/httpStatuses';
 
 const data: BlogInputModelType = {

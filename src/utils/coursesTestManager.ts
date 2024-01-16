@@ -26,7 +26,7 @@ export const CoursesTestManager = {
             .get(`/courses/${id}`)
              .expect(statusCode)
     },
-    async deleteCourse (id: number, statusCode: HttpStatusType = HTTP_STATUSES.CHANGE_204){
+    async deleteCourse (id: number, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204){
         await request(app)
             .delete(`/courses/${id}`)
             .expect(statusCode)
