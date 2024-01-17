@@ -77,15 +77,15 @@ videoRouter.post('/', (req: RequestWithBody<ParamIdType, CreateVideoType>, res: 
     }
     let {title, author, availableResolutions} = req.body
     if (!title || typeof title !== 'string' || !title.trim() || title.trim().length > 40) {
-        errors.errorsMessages.push({field: 'title', message: 'title incorrect'})
+        errors.errorsMessages.push({message: 'title incorrect', field: 'title'})
     }
     if (!author || typeof author !== 'string' || !author.trim() || author.trim().length > 20) {
-        errors.errorsMessages.push({field: 'author', message: 'author incorrect'})
+        errors.errorsMessages.push({message: 'author incorrect', field: 'author'})
     }
     if (Array.isArray(availableResolutions)) {
         availableResolutions.forEach(r => {
             if (!AvailableResolutionsType.includes(r)) {
-                errors.errorsMessages.push({field: 'availableResolutions', message: 'Available resolutions incorrect'})
+                errors.errorsMessages.push({message: 'Available resolutions incorrect', field: 'availableResolutions'})
                 return
             }
         })
@@ -145,18 +145,18 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
             errorsMessages: []
         }
         if (!title || typeof title !== 'string' || !title.trim() || title.length > 40) {
-            fieldError.errorsMessages.push({field: 'title', message: 'Incorrect title'})
+            fieldError.errorsMessages.push({message: 'Incorrect title', field: 'title'})
         }
 
         if (!author || typeof title !== 'string' || !author.trim() || author.length > 20) {
-            fieldError.errorsMessages.push({field: 'author', message: 'Incorrect author'})
+            fieldError.errorsMessages.push({message: 'Incorrect author', field: 'author'})
         }
         if (availableResolutions && Array.isArray(availableResolutions)) {
             availableResolutions.forEach(r => {
                 if (!AvailableResolutionsType.includes(r)) {
                     fieldError.errorsMessages.push({
-                        field: 'availableResolutions',
                         message: 'Available resolutions incorrect',
+                        field: 'availableResolutions',
 
                     })
                     return
@@ -164,12 +164,12 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
             })
         }
         if (canBeDownloaded && typeof canBeDownloaded !== 'boolean') {
-            fieldError.errorsMessages.push({field: 'canBeDownloaded', message: 'Incorrect canBeDownloaded'})
+            fieldError.errorsMessages.push({message: 'Incorrect canBeDownloaded', field: 'canBeDownloaded'})
         }
 
 
     if (minAgeRestriction  && minAgeRestriction === 0 || +minAgeRestriction < 1 || +minAgeRestriction > 18 || isNaN(+minAgeRestriction) || typeof minAgeRestriction === 'boolean' || typeof +minAgeRestriction !== 'number') {
-        fieldError.errorsMessages.push({field: 'minAgeRestriction', message: 'Incorrect minAgeRestriction'})
+        fieldError.errorsMessages.push({message: 'Incorrect minAgeRestriction', field: 'minAgeRestriction'})
     }
 
 
@@ -183,7 +183,7 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
         }
 
         if (publicationDate && !isValidDateFormat(publicationDate.toString().trim())) {
-            fieldError.errorsMessages.push({field: 'publicationDate', message: 'Incorrect publicationDate'})
+            fieldError.errorsMessages.push({message: 'Incorrect publicationDate', field: 'publicationDate'})
 
         }
 
