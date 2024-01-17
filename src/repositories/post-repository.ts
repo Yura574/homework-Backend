@@ -44,8 +44,20 @@ export class PostRepository {
 
     static updatePost(id: string, data: PostInputModelType) {
         const {title, shortDescription, content} = data
-        const updatedPost = db.posts.map(p => {
-            return p.id === id ? {...p, title, content, shortDescription} : p
-        })
+      const post = db.posts.find( p => p.id === id)
+        if(post){
+            const updatedPost:PostViewModelType = {
+                id,
+                shortDescription,
+                content,
+                title,
+                blogName: post.blogName,
+                blogId: post.blogId
+            }
+            const index = db.posts.findIndex(p => p.id === id)
+            db.posts.splice(index, 1, updatedPost)
+            return true
+        }
+        return false
     }
 }

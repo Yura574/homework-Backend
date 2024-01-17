@@ -36,10 +36,11 @@ app.delete(routerPaths.deleteAllData, (req: Request, res: Response)=> {
     db.users.length = 0
     db.studentCourseBindings.length = 0
     db.blogs.length = 0
+    db.posts.length = 0
 
     res.send(204)
 })
 
 
-//
+
 
