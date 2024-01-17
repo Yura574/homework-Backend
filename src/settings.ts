@@ -32,12 +32,12 @@ app.delete(routerPaths.deleteVideos, (req: Request, res: Response) => {
     return
 })
 app.delete(routerPaths.deleteAllData, (req: Request, res: Response)=> {
-    db.courses= []
-    db.users = []
-    db.studentCourseBindings = []
-    db.blogs= []
+    db.courses.length = 0
+    db.users.length = 0
+    db.studentCourseBindings.length = 0
+    db.blogs.length = 0
 
-    res.sendStatus(204).send(204)
+    res.send(204)
 })
 
 
