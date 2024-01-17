@@ -85,7 +85,7 @@ videoRouter.post('/', (req: RequestWithBody<ParamIdType, CreateVideoType>, res: 
     if (Array.isArray(availableResolutions)) {
         availableResolutions.forEach(r => {
             if (!AvailableResolutionsType.includes(r)) {
-                errors.errorsMessages.push({message: 'Available resolutions incorrect', field: 'availableResolutions'})
+                errors.errorsMessages.push({field: 'availableResolutions', message: 'Available resolutions incorrect'})
                 return
             }
         })
@@ -155,8 +155,9 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
             availableResolutions.forEach(r => {
                 if (!AvailableResolutionsType.includes(r)) {
                     fieldError.errorsMessages.push({
+                        field: 'availableResolutions',
                         message: 'Available resolutions incorrect',
-                        field: 'availableResolutions'
+
                     })
                     return
                 }
