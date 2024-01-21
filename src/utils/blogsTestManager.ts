@@ -4,8 +4,13 @@ import {BlogInputModelType, BlogViewModelType} from '../models/blogModels';
 import {HTTP_STATUSES, HttpStatusType} from './httpStatuses';
 
 
+const data: BlogInputModelType = {
+    name: 'new blog',
+    description: 'it the best blog',
+    websiteUrl: 'https://example.com/'
+}
 export const blogsTestManager = {
-    async createBlog(data: BlogInputModelType, statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
+    async createBlog( statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
         const res = await request(app)
             .post(routerPaths.blogs)
             .auth('admin', 'qwerty', {type: 'basic'})
@@ -39,12 +44,12 @@ export const blogsTestManager = {
 
     },
 
-    async updateBlog(id: string, data: BlogInputModelType, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
+    async updateBlog(id: string, updateData: BlogInputModelType, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
     await request(app)
         .put(`${routerPaths.blogs}/${id}`)
         .auth('admin', 'qwerty', {type: 'basic'})
-        .send(data)
-        .expect(204)
+        .send(updateData)
+        .expect(statusCode)
 
         const {blog} = await this.getBlogById(id)
         expect(blog).toEqual({

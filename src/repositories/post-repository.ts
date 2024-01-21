@@ -28,7 +28,7 @@ export class PostRepository {
             shortDescription,
             content
         }
-        db.posts.push(newPost)
+
         return newPost
     }
 

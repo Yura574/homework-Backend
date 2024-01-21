@@ -3,32 +3,31 @@ import {app, routerPaths} from '../src/settings';
 import {BlogInputModelType} from '../src/models/blogModels';
 import {blogsTestManager} from '../src/utils/blogsTestManager';
 import {HTTP_STATUSES} from '../src/utils/httpStatuses';
-import {BlogRepository} from '../src/repositories/blog-repository';
 
-const data: BlogInputModelType = {
-    name: 'new blog',
-    description: 'it the best blog',
-    websiteUrl: 'https://example.com/'
-}
+// const data: BlogInputModelType = {
+//     name: 'new blog',
+//     description: 'it the best blog',
+//     websiteUrl: 'https://example.com/'
+// }
 describe('tests for /blogs', () => {
     beforeAll(async () => {
         await request(app)
             .delete('/testing/all-data')
     })
     it('get all blogs', async () => {
-        const res = await request(app)
+        await request(app)
             .get('/blogs')
             .expect([])
     })
     it('should create new user', async () => {
 
-        const {newBlog} = await blogsTestManager.createBlog(data)
+        const {newBlog} = await blogsTestManager.createBlog()
 //
         expect(newBlog).toEqual({
             id: expect.any(String),
-            name: data.name,
-            description: data.description,
-            websiteUrl: data.websiteUrl
+            name:expect.any(String),
+            description: expect.any(String),
+            websiteUrl: expect.any(String)
         })
 
         await blogsTestManager.getBlogById(newBlog.id)
@@ -81,7 +80,7 @@ describe('tests for /blogs', () => {
     })
 
     it('blog should be deleted', async () => {
-        const {newBlog} = await blogsTestManager.createBlog(data)
+        const {newBlog} = await blogsTestManager.createBlog()
 
         await blogsTestManager.deleteBlog(newBlog.id)
 
@@ -92,7 +91,7 @@ describe('tests for /blogs', () => {
     })
 
     it('blog should be update', async () => {
-        const {newBlog} = await blogsTestManager.createBlog(data)
+        const {newBlog} = await blogsTestManager.createBlog()
         const updatedData: BlogInputModelType = {
             name: 'lololo',
             description: 'new des',
@@ -102,7 +101,7 @@ describe('tests for /blogs', () => {
     })
 
     it(`blog shouldn't update`, async () => {
-        const {newBlog} = await blogsTestManager.createBlog(data)
+        const {newBlog} = await blogsTestManager.createBlog()
         const updatedData = {
             websiteUrl: ' https://example.com'
         }

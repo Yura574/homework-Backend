@@ -3,6 +3,11 @@ import {PostRepository} from '../repositories/post-repository';
 import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {db} from '../db/db';
+import {authMiddleware} from '../middleware/auth/auth-middleware';
+import {postValidation} from '../validators/post-validators';
+import {Result, validationResult} from 'express-validator';
+import {PostInputModelType} from '../models/blogModels';
+import e from 'express';
 
 
 export const postRouter = express.Router()
@@ -16,28 +21,37 @@ postRouter.get('/', async (req: Request, res: Response) => {
 postRouter.get('/:id', (req: Request, res: Response) => {
     const id = req.params.id
     const post = PostRepository.getPostById(id)
-    console.log(post)
     if (!post) {
         res.send(HTTP_STATUSES.NOT_FOUND_404)
     }
     res.send(post)
 })
 
-postRouter.post('/', (req: Request, res: Response) => {
+postRouter.post('/', authMiddleware, postValidation(), (req: Request, res: Response) => {
+
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+
+        const errors = {
+            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
+        }
+        console.log(errors)
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
+        return;
+    }
     const data = req.body
     const newPost = PostRepository.createPost(data)
-    console.log(newPost)
     if (newPost) {
         db.posts.push(newPost)
         res.status(HTTP_STATUSES.CREATED_201).send(newPost)
         return
     }
-    res.status(HTTP_STATUSES.BAD_REQUEST_400).send('blog not found')
+    res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
     return;
 
 })
 
-postRouter.delete('/:id', (req: Request, res: Response) => {
+postRouter.delete('/:id', authMiddleware, (req: Request, res: Response) => {
     const id = req.params.id
     const isDeleted = PostRepository.deletePost(id)
     if (isDeleted) {
@@ -48,10 +62,20 @@ postRouter.delete('/:id', (req: Request, res: Response) => {
     return;
 })
 
-postRouter.put('/:id', (req: Request, res: Response)=> {
-    const updatedPost = PostRepository.updatePost(req.params.id, req.body)
-    if(!updatedPost){
-        res.send(400)
+postRouter.put('/:id', authMiddleware, postValidation(),(req: Request, res: Response) => {
+    const result = validationResult(req)
+    if(!result.isEmpty()){
+        const errors = {
+            errorsMessages: result.array({onlyFirstError: true}).map( err => err.msg)
+        }
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
+        return;
     }
-    res.send(204)
+    const updatedPost = PostRepository.updatePost(req.params.id, req.body)
+    if (!updatedPost) {
+        res.sendStatus(400)
+        return;
+    }
+    res.sendStatus(204)
+    return
 })
