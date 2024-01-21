@@ -10,7 +10,7 @@ const dataCreateCourse: CreateCourseModel = {
 describe('/course', () => {
     beforeAll(async () => {
         await request(app)
-            .delete('/delete-all-data')
+            .delete('/testing/all-data')
     })
 
 

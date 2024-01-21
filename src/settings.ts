@@ -28,7 +28,7 @@ app.use(routerPaths.posts,postRouter)
 // })
 app.delete(routerPaths.deleteVideos, (req: Request, res: Response) => {
     videos.length = 0
-    res.send(204)
+    res.sendStatus(204)
     return
 })
 app.delete(routerPaths.deleteAllData, (req: Request, res: Response)=> {
@@ -38,7 +38,8 @@ app.delete(routerPaths.deleteAllData, (req: Request, res: Response)=> {
     db.blogs.length = 0
     db.posts.length = 0
 
-    res.send(204)
+    res.sendStatus(204)
+    return
 })
 
 

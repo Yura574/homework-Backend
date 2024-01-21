@@ -14,8 +14,18 @@ blogRouter.post('/',  authMiddleware, blogValidators(),async (req: Request, res:
 
 const result = validationResult(req)
     if(!result.isEmpty()){
+        // let msgArray = []
+        // const field: string[] = []
+        // for(let i = 0; i< result.array().length; i++){
+        //     if(!field.includes(result.array()[i].msg.field)){
+        //         field.push(result.array()[i].msg.field)
+        //         msgArray.push(result.array()[i].msg)
+        //     }
+        //
+        // }
+
         const errors= {
-            errorsMessages : result.array().map(err => err.msg)
+            errorsMessages :result.array({onlyFirstError: true}).map(err => err.msg)
         }
         res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         return
@@ -45,7 +55,7 @@ blogRouter.get('/:id', async (req: Request, res: Response) => {
         res.status(HTTP_STATUSES.OK_200).send(blog)
         return
     } else {
-        res.send(HTTP_STATUSES.NOT_FOUND_404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return
     }
 
@@ -53,17 +63,21 @@ blogRouter.get('/:id', async (req: Request, res: Response) => {
 blogRouter.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
     const blog = BlogRepository.deleteBlog(req.params.id)
     if (blog) {
-        res.send(HTTP_STATUSES.NO_CONTENT_204)
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
         return
     } else {
-        res.send(HTTP_STATUSES.NOT_FOUND_404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return
     }
 
 })
 blogRouter.put('/:id', authMiddleware, blogValidators(),async (req: Request, res: Response)=> {
-    const errors = validationResult(req)
-    if(!errors.isEmpty()){
+    const result = validationResult(req)
+    if(!result.isEmpty()){
+
+        const errors= {
+            errorsMessages :result.array({onlyFirstError: true}).map(err => err.msg)
+        }
         res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         return
     }
@@ -71,15 +85,17 @@ blogRouter.put('/:id', authMiddleware, blogValidators(),async (req: Request, res
     const {name, description, websiteUrl} = req.body
     const blog = BlogRepository.getBlogById(id)
     if(!blog){
-        res.send(HTTP_STATUSES.NOT_FOUND_404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return
     }
 
    const isUpdatedBlog =  BlogRepository.updateBlog(id, name, description, websiteUrl)
     if(!isUpdatedBlog){
-        res.send(HTTP_STATUSES.NOT_FOUND_404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+        return
     }
-    res.send(HTTP_STATUSES.NO_CONTENT_204)
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    return
 })
 
 

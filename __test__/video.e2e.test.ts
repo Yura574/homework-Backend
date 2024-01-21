@@ -6,7 +6,7 @@ import {videos} from '../src/routes/video-router';
 describe('/video', () => {
     beforeAll(async () => {
         await request(app)
-            .delete('/testing/all-data')
+            .delete('/delete-all-data')
     })
 
     it('should get empty array', async () => {

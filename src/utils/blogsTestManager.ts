@@ -23,19 +23,35 @@ export const blogsTestManager = {
         return {res, newBlog}
     },
 
-    async getBlogById (id: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200){
-      const res =   await request(app)
+    async getBlogById(id: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
+        const res = await request(app)
             .get(`${routerPaths.blogs}/${id}`)
             .expect(statusCode)
-        const blog =res.body
+        const blog = res.body
         return {res, blog}
     },
 
-    async deleteBlog (id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204){
+    async deleteBlog(id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
         await request(app)
             .delete(`${routerPaths.blogs}/${id}`)
             .auth('admin', 'qwerty')
             .expect(statusCode)
 
+    },
+
+    async updateBlog(id: string, data: BlogInputModelType, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
+    await request(app)
+        .put(`${routerPaths.blogs}/${id}`)
+        .auth('admin', 'qwerty', {type: 'basic'})
+        .send(data)
+        .expect(204)
+
+        const {blog} = await this.getBlogById(id)
+        expect(blog).toEqual({
+            id: expect.any(String),
+            name: 'lololo',
+            description: 'new des',
+            websiteUrl: blog.websiteUrl
+        })
     }
 }

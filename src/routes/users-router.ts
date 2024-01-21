@@ -86,7 +86,7 @@ usersRouter.put('/:id', (req: RequestTypes<ParamsType, BodyUserType>, res: Respo
         userName,
     }
     db.users.splice(index, 1, newUser)
-    res.send(HTTP_STATUSES.NOT_FOUND_404)
+    res.send(HTTP_STATUSES.NO_CONTENT_204)
     return;
 })
 

@@ -123,10 +123,10 @@ videoRouter.delete('/:id', (req: Request, res: Response) => {
     const index = videos.findIndex(v => v.id === +req.params.id)
     if (index >= 0) {
         videos.splice(index, 1)
-        res.send(204)
+        res.sendStatus(204)
         return
     }
-    res.send(404)
+    res.sendStatus(404)
     return;
 
 })
@@ -196,7 +196,7 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
         const video = videos.find(v => v.id === +req.params.id)
 
         if (!video) {
-            res.send(404)
+            res.sendStatus(404)
             return;
         }
 
@@ -216,7 +216,7 @@ videoRouter.put('/:id', (req: RequestWithBody<ParamIdType, VideoUpdateType>, res
         videos.splice(index, 1, newVideo)
 
 
-        res.send(204)
+        res.sendStatus(204)
         return
     }
 )

@@ -9,7 +9,7 @@ const data = {
 describe('tests for /users', () => {
     beforeAll(async () => {
         await request(app)
-            .delete('/delete-all-data')
+            .delete('/testing/all-data')
     })
 
 
@@ -42,7 +42,7 @@ describe('tests for /users', () => {
            await request(app)
                 .put(`${routerPaths.users}/${createdUser.id}`)
                 .send({userName: 'new user name'})
-                .expect(HTTP_STATUSES.CHANGE_204)
+                .expect(HTTP_STATUSES.NO_CONTENT_204)
 
      await UserTestManager.getUser(createdUser.id)
 

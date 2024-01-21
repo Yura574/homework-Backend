@@ -3,6 +3,7 @@ import {app, routerPaths} from '../src/settings';
 import {BlogInputModelType} from '../src/models/blogModels';
 import {blogsTestManager} from '../src/utils/blogsTestManager';
 import {HTTP_STATUSES} from '../src/utils/httpStatuses';
+import {BlogRepository} from '../src/repositories/blog-repository';
 
 const data: BlogInputModelType = {
     name: 'new blog',
@@ -37,17 +38,45 @@ describe('tests for /blogs', () => {
         const response = await request(app)
             .post(routerPaths.blogs)
             .auth('admin', 'qwerty')
-            .send({ name: true, description: "2332", websiteUrl: "https://example.com" })
+            .send({description: true, websiteUrl: "https://example.com"})
 
+        expect(response.body.errorsMessages.length).toBe(2)
         expect(response.status)
             .toEqual(400);
         expect(response.body)
             .toEqual({
                 errorsMessages: [{
                     field: 'name',
-                    message: 'should be string'
-                }]
+                    message: `name can't be empty`
+                }, {
+                    field: 'description',
+                    message: `should be string`
+                },
+                ]
             });
+
+        const response2 = await request(app)
+            .post(routerPaths.blogs)
+            .auth('admin', 'qwerty')
+            .send({websiteUrl: "https://example.com"})
+
+        expect(response2.body.errorsMessages.length).toBe(2)
+        expect(response2.status)
+            .toEqual(400);
+        expect(response2.body)
+            .toEqual({
+                errorsMessages: [
+                    {
+                        field: 'name',
+                        message: `name can't be empty`
+                    },
+                    {
+                        field: 'description',
+                        message: `description can't be empty`
+                    }
+                ]
+            });
+
 
     })
 
@@ -58,8 +87,54 @@ describe('tests for /blogs', () => {
 
         await blogsTestManager.getBlogById(newBlog.id, HTTP_STATUSES.NOT_FOUND_404)
     })
-    it(`blog shouldn't be deleted`, async ()=> {
+    it(`blog shouldn't be deleted`, async () => {
         await blogsTestManager.deleteBlog('23', HTTP_STATUSES.NOT_FOUND_404)
+    })
+
+    it('blog should be update', async () => {
+        const {newBlog} = await blogsTestManager.createBlog(data)
+        const updatedData: BlogInputModelType = {
+            name: 'lololo',
+            description: 'new des',
+            websiteUrl: ' https://example.com'
+        }
+        await blogsTestManager.updateBlog(newBlog.id, updatedData)
+    })
+
+    it(`blog shouldn't update`, async () => {
+        const {newBlog} = await blogsTestManager.createBlog(data)
+        const updatedData = {
+            websiteUrl: ' https://example.com'
+        }
+       const res = await request(app)
+            .put(`${routerPaths.blogs}/${newBlog.id}`)
+            .auth('admin', 'qwerty', {type: 'basic'})
+            .send(updatedData)
+            .expect(HTTP_STATUSES.BAD_REQUEST_400, {
+                errorsMessages: [
+                    {field: 'name', message: "name can't be empty"},
+                    {field: 'description', message: "description can't be empty"},
+
+                ]
+            })
+            expect(res.body.errorsMessages.length).toBe(2)
+
+        const updatedData2: BlogInputModelType = {
+            name: 'lolololkldskldslkdslksdklkldslkdslkdskldslkkldslksd',
+            description: 'new des',
+            websiteUrl: ' httpss://example.com'
+        }
+        await request(app)
+            .put(`${routerPaths.blogs}/${newBlog.id}`)
+            .auth('admin', 'qwerty', {type: 'basic'})
+            .send(updatedData2)
+            .expect(HTTP_STATUSES.BAD_REQUEST_400, {
+                errorsMessages: [
+                    {field: 'name', message: "max 15 symbols"},
+                    {field: 'websiteUrl', message: "invalid web site url, example: https://example.com"},
+
+                ]
+            })
     })
 
 })
