@@ -42,7 +42,6 @@ postRouter.post('/', authMiddleware, postValidation(), (req: Request, res: Respo
         const errors = {
             errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
         }
-        console.log(errors)
         res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         return;
     }

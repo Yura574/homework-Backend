@@ -1,5 +1,5 @@
 import express, {Request, Response} from 'express';
-import {CourseType, db, UserType} from '../db/db';
+import { db, UserType} from '../db/db';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 
 
@@ -77,7 +77,7 @@ usersRouter.put('/:id', (req: RequestTypes<ParamsType, BodyUserType>, res: Respo
     }
     const user = db.users.find(u => u.id === id)
     if (!user) {
-        res.send(HTTP_STATUSES.NOT_FOUND_404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return;
     }
     const index = db.users.findIndex(c => c.id === id)
@@ -86,18 +86,18 @@ usersRouter.put('/:id', (req: RequestTypes<ParamsType, BodyUserType>, res: Respo
         userName,
     }
     db.users.splice(index, 1, newUser)
-    res.send(HTTP_STATUSES.NO_CONTENT_204)
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return;
 })
 
 usersRouter.delete('/:id', (req: RequestTypes<ParamsType, any>, res: Response) => {
     const user = db.users.find(u => u.id === +req.params.id)
     if (!user) {
-        res.send(404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return
     }
     const index = db.users.findIndex(u => u.id === +req.params.id)
     db.users.splice(index, 1)
-    res.send(204)
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return;
 })

@@ -1,5 +1,6 @@
 import express, {Request, Response} from 'express';
 import {CourseType, db} from '../db/db';
+import {HTTP_STATUSES} from '../utils/httpStatuses';
 
 
 export const coursesRouter = express.Router()
@@ -34,7 +35,7 @@ coursesRouter.get('/:id', (req: RequestTypes<ParamsType, any>, res: Response) =>
         res.status(200).send(course)
         return
     }
-    res.send(404)
+    res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
 })
 coursesRouter.post('/', (req: RequestTypes<ParamsType, BodyCoursePostType>, res: Response) => {
 
@@ -83,7 +84,7 @@ coursesRouter.put('/:id', (req: RequestTypes<ParamsType, BodyCoursePutType>, res
 
     const course = db.courses.find(c => c.id === id)
     if (!course) {
-        res.send(404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return;
     }
     const index = db.courses.findIndex(c => c.id === +req.params.id)
@@ -95,18 +96,18 @@ coursesRouter.put('/:id', (req: RequestTypes<ParamsType, BodyCoursePutType>, res
     }
 
     db.courses.splice(index, 1, newCourse)
-    res.send(204)
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return;
 })
 
 coursesRouter.delete('/:id', (req: RequestTypes<ParamsType, any>, res: Response) => {
     const course = db.courses.find(c => c.id === +req.params.id)
     if (!course) {
-        res.send(404)
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return
     }
     const index = db.courses.findIndex(u => u.id === +req.params.id)
     db.courses.splice(index, 1)
-    res.send(204)
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return;
 })
