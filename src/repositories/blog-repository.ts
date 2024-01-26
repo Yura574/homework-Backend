@@ -1,13 +1,14 @@
 import {db} from '../db/db';
 import {BlogInputModelType, BlogViewModelType} from '../models/blogModels';
+import {blogCollection} from '../index';
 
 export class BlogRepository {
-   static  getBlogById(id: string) {
+    static getBlogById(id: string) {
         return db.blogs.find(b => b.id === id);
     }
 
-    static getAllBlogs() {
-        return db.blogs;
+    static async getAllBlogs() {
+        return  blogCollection.find({});
     }
 
     static deleteBlog(id: string) {

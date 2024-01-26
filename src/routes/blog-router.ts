@@ -5,6 +5,7 @@ import { validationResult} from 'express-validator';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators} from '../validators/blogValidators';
+import {blogCollection} from '../index';
 
 export const blogRouter = express.Router()
 
@@ -38,7 +39,7 @@ const result = validationResult(req)
         websiteUrl
     }
 
-    db.blogs.push(newBlog)
+    await blogCollection.insertOne(newBlog)
 
     res.status(HTTP_STATUSES.CREATED_201).send(newBlog)
     return;

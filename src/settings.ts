@@ -1,3 +1,4 @@
+
 import express, {Request, Response} from 'express';
 import {videoRouter, videos} from './routes/video-router';
 import {db} from './db/db';
@@ -5,6 +6,11 @@ import {coursesRouter} from './routes/courses-router';
 import {usersRouter} from './routes/users-router';
 import {blogRouter} from './routes/blog-router';
 import {postRouter} from './routes/post-router';
+import dotenv from 'dotenv';
+
+dotenv.config()
+
+
 export const routerPaths = {
     courses: '/courses',
     videos: '/videos',
@@ -15,7 +21,8 @@ export const routerPaths = {
     deleteAllData: '/testing/all-data'
 }
 export const app =  express()
-export const port = 5000
+export const port = process.env.PORT
+
 app.use(express.json())
 app.use(routerPaths.videos, videoRouter)
 app.use(routerPaths.courses, coursesRouter)
@@ -23,9 +30,7 @@ app.use(routerPaths.users, usersRouter)
 app.use(routerPaths.blogs,blogRouter)
 app.use(routerPaths.posts,postRouter)
 
-// app.use('/blogs', , (req: Request, res: Response) => {
-//
-// })
+
 app.delete(routerPaths.deleteVideos, (req: Request, res: Response) => {
     videos.length = 0
     res.sendStatus(204)
