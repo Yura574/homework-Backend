@@ -1,20 +1,21 @@
-import express, {Router, Request, Response} from 'express';
+import express, {Request, Response} from 'express';
 import {BlogRepository} from '../repositories/blog-repository';
-import {db} from '../db/db';
-import { validationResult} from 'express-validator';
+import {validationResult} from 'express-validator';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
-import {blogValidators} from '../validators/blogValidators';
-import {blogCollection} from '../index';
+import {blogValidators, findBlog} from '../validators/blogValidators';
+import {blogCollection, client, database} from '../index';
+import {BlogViewModelType} from '../models/blogModels';
+import {ObjectId} from 'mongodb';
 
 export const blogRouter = express.Router()
 
 
 type RequestWithBody<B> = Request<unknown, unknown, B, unknown>
-blogRouter.post('/',  authMiddleware, blogValidators(),async (req: Request, res: Response)=> {
+blogRouter.post('/', authMiddleware, blogValidators(), async (req: Request, res: Response) => {
 
-const result = validationResult(req)
-    if(!result.isEmpty()){
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
         // let msgArray = []
         // const field: string[] = []
         // for(let i = 0; i< result.array().length; i++){
@@ -25,19 +26,21 @@ const result = validationResult(req)
         //
         // }
 
-        const errors= {
-            errorsMessages :result.array({onlyFirstError: true}).map(err => err.msg)
+        const errors = {
+            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
         }
         res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         return
     }
-    const {name,description, websiteUrl} = req.body
-    const newBlog = {
-        id: (+new Date()).toString(),
+    const {name, description, websiteUrl} = req.body
+    const newBlog: BlogViewModelType = {
         name,
         description,
-        websiteUrl
+        websiteUrl,
+        createdAt: new Date().toISOString(),
+        isMembership: true
     }
+
 
     await blogCollection.insertOne(newBlog)
 
@@ -45,14 +48,14 @@ const result = validationResult(req)
     return;
 })
 blogRouter.get('/', async (req: Request, res: Response) => {
-    const allBlogs = await BlogRepository.getAllBlogs().then(res=> res.toArray())
-    console.log('all blogs', allBlogs)
+    const allBlogs = await BlogRepository.getAllBlogs().then(res => res.toArray())
     if (allBlogs) {
         res.status(HTTP_STATUSES.OK_200).send(allBlogs)
     }
 })
 blogRouter.get('/:id', async (req: Request, res: Response) => {
-    const blog = BlogRepository.getBlogById(req.params.id)
+    const blog = await BlogRepository.getBlogById(req.params.id)
+    console.log(blog)
     if (blog) {
         res.status(HTTP_STATUSES.OK_200).send(blog)
         return
@@ -62,40 +65,46 @@ blogRouter.get('/:id', async (req: Request, res: Response) => {
     }
 
 })
-blogRouter.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
-    const blog = BlogRepository.deleteBlog(req.params.id)
-    if (blog) {
-        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
-        return
-    } else {
-        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+blogRouter.delete('/:id', authMiddleware, findBlog, async (req: Request, res: Response) => {
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+
+        const errors = {
+            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
+        }
+        if (errors.errorsMessages[0].field === 'id') {
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+            return;
+        }
         return
     }
+    await blogCollection.deleteOne({_id: new ObjectId(req.params.id)})
+
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    return
+
 
 })
-blogRouter.put('/:id', authMiddleware, blogValidators(),async (req: Request, res: Response)=> {
+blogRouter.put('/:id', authMiddleware, findBlog, blogValidators(), async (req: Request, res: Response) => {
     const result = validationResult(req)
-    if(!result.isEmpty()){
+    if (!result.isEmpty()) {
 
-        const errors= {
-            errorsMessages :result.array({onlyFirstError: true}).map(err => err.msg)
+        const errors = {
+            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
+        }
+        if (errors.errorsMessages[0].field === 'id') {
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+            return;
         }
         res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         return
     }
     const id = req.params.id
     const {name, description, websiteUrl} = req.body
-    const blog = BlogRepository.getBlogById(id)
-    if(!blog){
-        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-        return
-    }
 
-   const isUpdatedBlog =  BlogRepository.updateBlog(id, name, description, websiteUrl)
-    if(!isUpdatedBlog){
-        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-        return
-    }
+
+    await BlogRepository.updateBlog(id, name, description, websiteUrl)
+
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return
 })

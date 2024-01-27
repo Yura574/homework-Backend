@@ -6,7 +6,7 @@ app.get('/', (req,res)=> {
     res.send('hi')
 })
 const url = 'mongodb+srv://yura574:unbiliever13@cluster0.zlgf1i6.mongodb.net/?retryWrites=true&w=majority'
-const client = new MongoClient(url!);
+export const client = new MongoClient(url!);
 async function runDB() {
     try {
         await client.connect();
@@ -16,8 +16,10 @@ async function runDB() {
     }
 
 }
+export const database = client.db("backhomework")
 
-export const blogCollection = client.db().collection('blogs')
+export const blogCollection = database.collection('blogs')
+export const postCollection = database.collection('posts')
 
 
 app.listen(port, ()=> {

@@ -1,6 +1,16 @@
-import {body} from 'express-validator';
+import {body, param} from 'express-validator';
+import {db} from '../db/db';
+import {blogCollection} from '../index';
+import {ObjectId} from 'mongodb';
 
 
+export const findBlog = param('id').custom((id) => {
+    const findPost = blogCollection.findOne({_id: new ObjectId(id)})
+    if (!findPost) {
+        throw new Error()
+    }
+    return true
+}).withMessage({field: 'id', message: 'post not found'})
 export const inputName = body('name')
     .notEmpty().withMessage({field: 'name', message: `name can't be empty`})
     .isString().withMessage({field: 'name', message: `should be string`})
