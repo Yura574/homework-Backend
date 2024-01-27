@@ -14,15 +14,13 @@ async function runDB() {
     } catch (err) {
         console.log(err);
     }
-    finally {
-        await client.close();
-    }
+
 }
 
 export const blogCollection = client.db().collection('blogs')
 
 
 app.listen(port, ()=> {
-    runDB().catch(console.dir);
+    runDB().catch(console.log);
     console.log(`App started ${port} port`)
 })

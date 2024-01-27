@@ -45,7 +45,8 @@ const result = validationResult(req)
     return;
 })
 blogRouter.get('/', async (req: Request, res: Response) => {
-    const allBlogs = BlogRepository.getAllBlogs()
+    const allBlogs = await BlogRepository.getAllBlogs().then(res=> res.toArray())
+    console.log('all blogs', allBlogs)
     if (allBlogs) {
         res.status(HTTP_STATUSES.OK_200).send(allBlogs)
     }
