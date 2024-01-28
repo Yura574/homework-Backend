@@ -63,9 +63,16 @@ blogRouter.get('/', async (req: Request, res: Response) => {
 })
 blogRouter.get('/:id', async (req: Request, res: Response) => {
     const blog = await BlogRepository.getBlogById(req.params.id)
-    console.log(blog)
+    const returnBlog: BlogViewModelType = {
+        id: blog!._id.toString(),
+        createdAt: blog?.createdAt,
+        isMembership: blog?.isMembership,
+        websiteUrl: blog?.websiteUrl,
+        name: blog?.name,
+        description: blog?.description
+    }
     if (blog) {
-        res.status(HTTP_STATUSES.OK_200).send(blog)
+        res.status(HTTP_STATUSES.OK_200).send(returnBlog)
         return
     } else {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
