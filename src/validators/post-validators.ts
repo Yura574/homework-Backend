@@ -1,10 +1,12 @@
 import {body, param} from 'express-validator';
 import {BlogRepository} from '../repositories/blog-repository';
 import {db} from '../db/db';
+import {postCollection} from '../index';
+import {ObjectId} from 'mongodb';
 
 
 export const findPost = param('id').custom((id) => {
-    const findPost = db.posts.find(p => p.id === id)
+    const findPost = postCollection.find({_id: new ObjectId(id)})
     if (!findPost) {
         throw new Error()
     }

@@ -5,8 +5,8 @@ import {ObjectId} from 'mongodb';
 
 
 export const findBlog = param('id').custom((id) => {
-    const findPost = blogCollection.findOne({_id: new ObjectId(id)})
-    if (!findPost) {
+    const findBlog = blogCollection.findOne({_id: new ObjectId(id)})
+    if (!findBlog) {
         throw new Error()
     }
     return true

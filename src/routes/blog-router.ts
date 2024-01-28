@@ -57,8 +57,19 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: Request, res:
 })
 blogRouter.get('/', async (req: Request, res: Response) => {
     const allBlogs = await BlogRepository.getAllBlogs().then(res => res.toArray())
+    const returnBlogs = allBlogs.map((blog) => {
+        return {
+            id: blog._id.toString(),
+            name: blog.name,
+            description: blog.description,
+            websiteUrl: blog.websiteUrl,
+            createdAt: blog.createdAt,
+            isMembership: blog.isMembership
+
+        }
+    })
     if (allBlogs) {
-        res.status(HTTP_STATUSES.OK_200).send(allBlogs)
+        res.status(HTTP_STATUSES.OK_200).send(returnBlogs)
     }
 })
 blogRouter.get('/:id', async (req: Request, res: Response) => {
