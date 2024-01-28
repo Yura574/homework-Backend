@@ -4,8 +4,9 @@ import {blogCollection} from '../index';
 import {ObjectId} from 'mongodb';
 
 
-export const findBlog = param('id').custom((id) => {
-    const findBlog = blogCollection.findOne({_id: new ObjectId(id)})
+export const findBlog = param('id').custom(async (id) => {
+    const findBlog = await blogCollection.findOne({_id: new ObjectId(id)})
+    console.log('find blog', findBlog)
     if (!findBlog) {
         throw new Error()
     }

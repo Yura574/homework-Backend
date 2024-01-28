@@ -5,8 +5,8 @@ import {postCollection} from '../index';
 import {ObjectId} from 'mongodb';
 
 
-export const findPost = param('id').custom((id) => {
-    const findPost = postCollection.find({_id: new ObjectId(id)})
+export const findPost = param('id').custom(async (id) => {
+    const findPost =await postCollection.findOne({_id: new ObjectId(id)})
     if (!findPost) {
         throw new Error()
     }
