@@ -1,17 +1,18 @@
 import {body, param} from 'express-validator';
 import {BlogRepository} from '../repositories/blog-repository';
 import {db} from '../db/db';
-import {postCollection} from '../index';
+import {blogCollection, postCollection} from '../index';
 import {ObjectId} from 'mongodb';
 
 
 export const findPost = param('id').custom(async (id) => {
-    const findPost =await postCollection.findOne({_id: new ObjectId(id)})
+    const findPost = await postCollection.findOne({_id: new ObjectId(id)})
     if (!findPost) {
         throw new Error()
     }
     return true
 }).withMessage({field: 'id', message: 'post not found'})
+
 const titleValidator = body('title').trim()
     .notEmpty().withMessage({field: 'title', message: 'title is required'})
     .isString().withMessage({field: 'title', message: 'title should be string'})
@@ -30,9 +31,10 @@ const contentValidator = body('content').trim()
 const blogIdValidator = body('blogId').trim()
     .notEmpty().withMessage({field: 'blogId', message: 'blogId is required'})
     .isString().withMessage({field: 'blogId', message: 'blogId should be string'})
-    .custom((value) => {
+    // .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
+    .custom(async (value) => {
 
-        const blog = BlogRepository.getBlogById(value)
+        const blog = await blogCollection.findOne({_id: new ObjectId(value)})
         if (!blog) {
             throw new Error('Blog not found')
         }

@@ -6,6 +6,8 @@ import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {findPost, postValidation} from '../validators/post-validators';
 import {validationResult} from 'express-validator';
 import {ValidateError} from '../utils/validateError';
+import {postCollection} from '../index';
+import {PostViewModelType} from '../models/blogModels';
 
 
 export const postRouter = express.Router()
@@ -34,48 +36,57 @@ postRouter.get('/:id', findPost, (req: Request, res: Response) => {
     res.send(post)
 })
 
-// postRouter.post('/', authMiddleware, postValidation(), (req: Request, res: Response) => {
-//
-//     const result = validationResult(req)
-//     if (!result.isEmpty()) {
-//
-//         const errors = {
-//             errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
-//         }
-//         res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
-//         return;
-//     }
-//     const data = req.body
-//     const newPost = PostRepository.createPost(data)
-//     if (newPost) {
-//         db.posts.push(newPost)
-//         res.status(HTTP_STATUSES.CREATED_201).send(newPost)
-//         return
-//     }
-//     res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
-//     return;
-//
-// })
+postRouter.post('/', authMiddleware, postValidation(), async (req: Request, res: Response) => {
 
-// postRouter.delete('/:id', authMiddleware, findPost, (req: Request, res: Response) => {
-//     const result = validationResult(req)
-//     const errors = ValidateError(result)
-//     if (errors) {
-//         if (errors.errorsMessages[0].field === 'id') {
-//             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-//             return;
-//         }
-//     }
-//
-//     const id = req.params.id
-//     const isDeleted = PostRepository.deletePost(id)
-//     if (isDeleted) {
-//         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
-//         return
-//     }
-//     res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-//     return;
-// })
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+        const errors = {
+            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
+        }
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
+        return;
+    }
+    const data = req.body
+    const newPost = await PostRepository.createPost(data)
+    if (newPost) {
+        const createdPost = await postCollection.insertOne(newPost)
+        const post = await postCollection.findOne({_id: createdPost.insertedId})
+        const returnPost = {
+            id: post?._id,
+            blogId: post?.blogId,
+            title: post?.title,
+            blogName: post?.blogName,
+            content: post?.content,
+            shortDescription: post?.shortDescription,
+            createdAt: post?.createdAt
+        }
+        res.status(HTTP_STATUSES.CREATED_201).send(returnPost)
+        return
+    }
+    res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
+    return;
+
+})
+
+postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
+    const result = validationResult(req)
+    const errors = ValidateError(result)
+    if (errors) {
+        if (errors.errorsMessages[0].field === 'id') {
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+            return;
+        }
+    }
+
+    const id = req.params.id
+    const isDeleted = await PostRepository.deletePost(id)
+    if (isDeleted) {
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+        return
+    }
+    res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    return;
+})
 
 // postRouter.put('/:id', authMiddleware, findPost, postValidation(), (req: Request, res: Response) => {
 //     const result = validationResult(req)
