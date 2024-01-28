@@ -3,6 +3,8 @@ import {app, routerPaths} from '../src/settings';
 import {BlogInputModelType} from '../src/models/blogModels';
 import {blogsTestManager} from '../src/utils/blogsTestManager';
 import {HTTP_STATUSES} from '../src/utils/httpStatuses';
+import {MongoClient} from 'mongodb';
+
 
 // const data: BlogInputModelType = {
 //     name: 'new blog',
@@ -10,7 +12,14 @@ import {HTTP_STATUSES} from '../src/utils/httpStatuses';
 //     websiteUrl: 'https://example.com/'
 // }
 describe('tests for /blogs', () => {
+    let connection
+    let db
     beforeAll(async () => {
+        connection = await MongoClient.connect(globalThis.__MONGO_URI__, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        db = await connection.db(globalThis.__MONGO_DB_NAME__);
         await request(app)
             .delete('/testing/all-data')
     })

@@ -1,5 +1,4 @@
-import {db} from '../db/db';
-import {BlogInputModelType, BlogViewModelType} from '../models/blogModels';
+
 import {blogCollection} from '../index';
 import {ObjectId} from 'mongodb';
 

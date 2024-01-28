@@ -33,7 +33,7 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: Request, res:
         return
     }
     const {name, description, websiteUrl} = req.body
-    const newBlog: BlogViewModelType = {
+    const newBlog = {
         name,
         description,
         websiteUrl,
@@ -42,9 +42,17 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: Request, res:
     }
 
 
-    await blogCollection.insertOne(newBlog)
-
-    res.status(HTTP_STATUSES.CREATED_201).send(newBlog)
+    const createdBlog = await blogCollection.insertOne(newBlog)
+    const blog = await blogCollection.findOne({_id: createdBlog.insertedId})
+    const returnBlog: BlogViewModelType = {
+        id: blog!._id.toString(),
+        name,
+        description,
+        websiteUrl,
+        isMembership: blog?.isMembership,
+        createdAt: blog?.createdAt,
+    }
+    res.status(HTTP_STATUSES.CREATED_201).send(returnBlog)
     return;
 })
 blogRouter.get('/', async (req: Request, res: Response) => {

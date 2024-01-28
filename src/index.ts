@@ -1,12 +1,13 @@
 import {app, port} from './settings';
 import {MongoClient} from 'mongodb';
 
-
-app.get('/', (req,res)=> {
+app.get('/', (req, res) => {
     res.send('hi')
 })
-const url = 'mongodb+srv://yura574:unbiliever13@cluster0.zlgf1i6.mongodb.net/?retryWrites=true&w=majority'
-export const client = new MongoClient(url!);
+export const urlMongo = process.env.MONGO_URL || 'mongodb://0.0.0.0:27017'
+export const client = new MongoClient(urlMongo);
+console.log(process.env.MONGO_URL)
+
 async function runDB() {
     try {
         await client.connect();
@@ -16,13 +17,14 @@ async function runDB() {
     }
 
 }
+
 export const database = client.db("backhomework")
 
 export const blogCollection = database.collection('blogs')
 export const postCollection = database.collection('posts')
 
 
-app.listen(port, ()=> {
+app.listen(port, () => {
     runDB().catch(console.log);
     console.log(`App started ${port} port`)
 })
