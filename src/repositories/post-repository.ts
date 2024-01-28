@@ -53,9 +53,12 @@ export class PostRepository {
         const post = await postCollection.findOne({_id: new ObjectId(id)})
         if (post) {
             const updatedPost = {
-                shortDescription,
-                content,
-                title,
+                $set :{
+                    shortDescription,
+                    content,
+                    title,
+                }
+
             }
             await postCollection.updateOne({_id: new ObjectId(id)}, updatedPost)
             return true

@@ -38,7 +38,6 @@ postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
     }
     const id = req.params.id
     const post = await PostRepository.getPostById(id)
-    console.log(post)
     if (!post) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return;
