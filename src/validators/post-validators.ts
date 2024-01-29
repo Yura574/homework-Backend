@@ -1,8 +1,6 @@
 import {body, param} from 'express-validator';
-import {BlogRepository} from '../repositories/blog-repository';
-import {db} from '../db/db';
-import {blogCollection, postCollection} from '../index';
 import {ObjectId} from 'mongodb';
+import {blogCollection, postCollection} from '../db/db';
 
 
 export const findPost = param('id').custom(async (id) => {

@@ -1,6 +1,5 @@
-
-import {blogCollection} from '../index';
 import {ObjectId} from 'mongodb';
+import {blogCollection} from '../db/db';
 
 export class BlogRepository {
     static async getBlogById(id: string) {
@@ -8,18 +7,17 @@ export class BlogRepository {
 
     }
 
-    static async getAllBlogs() {
-        return blogCollection.find({});
+    static async getAllBlogs(pageNumber: number, pageSize: number) {
+        const skip = pageNumber * pageSize +1
+        const count = await blogCollection.count()
+        console.log(count)
+        return blogCollection.find({}).skip(skip).limit(pageSize).toArray();
     }
 
-    // static deleteBlog(id: string) {
-    //     const index = db.blogs.findIndex(b => b.id === id)
-    //     if (index >= 0) {
-    //         db.blogs.splice(index, 1)
-    //         return true
-    //     }
-    //     return false
-    // }
+    static async deleteBlog(id: string) {
+        return await blogCollection.deleteOne({_id: new ObjectId(id)})
+
+    }
 
     static async updateBlog(id: string, name: string, description: string, websiteUrl: string) {
         const filter = {_id: new ObjectId(id)}
@@ -31,7 +29,7 @@ export class BlogRepository {
             }
         }
         console.log(name)
-        return  await blogCollection.updateOne(filter, update)
+        return await blogCollection.updateOne(filter, update)
     }
 
 

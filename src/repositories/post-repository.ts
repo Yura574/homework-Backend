@@ -1,6 +1,6 @@
 import { PostInputModelType, PostViewModelType} from '../models/blogModels';
-import {blogCollection, postCollection} from '../index';
 import {ObjectId} from 'mongodb';
+import {blogCollection, postCollection} from '../db/db';
 
 
 export class PostRepository {

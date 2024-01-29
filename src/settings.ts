@@ -3,7 +3,7 @@ import express, {Request, Response} from 'express';
 import {blogRouter} from './routes/blog-router';
 import {postRouter} from './routes/post-router';
 import dotenv from 'dotenv';
-import { database} from './index';
+import {database} from './db/db';
 
 dotenv.config()
 

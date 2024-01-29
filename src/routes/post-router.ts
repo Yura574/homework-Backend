@@ -5,7 +5,7 @@ import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {findPost, postValidation} from '../validators/post-validators';
 import {validationResult} from 'express-validator';
 import {ValidateError} from '../utils/validateError';
-import {postCollection} from '../index';
+import {postCollection} from '../db/db';
 
 
 export const postRouter = express.Router()
@@ -28,14 +28,15 @@ postRouter.get('/', async (req: Request, res: Response) => {
 })
 
 postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
-    const result = validationResult(req)
-    const errors = ValidateError(result)
-    if (errors) {
-        if (errors.errorsMessages[0].field === 'id') {
-            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-            return;
-        }
-    }
+    // const result = validationResult(req)
+    // const errors = ValidateError(result)
+    // if (errors) {
+    //     if (errors.errorsMessages[0].field === 'id') {
+    //         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    //         return;
+    //     }
+    // }
+    ValidateError(req, res)
     const id = req.params.id
     const post = await PostRepository.getPostById(id)
     if (!post) {
@@ -78,14 +79,15 @@ postRouter.post('/', authMiddleware, postValidation(), async (req: Request, res:
 })
 
 postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
-    const result = validationResult(req)
-    const errors = ValidateError(result)
-    if (errors) {
-        if (errors.errorsMessages[0].field === 'id') {
-            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-            return;
-        }
-    }
+    // const result = validationResult(req)
+    // const errors = ValidateError(result)
+    // if (errors) {
+    //     if (errors.errorsMessages[0].field === 'id') {
+    //         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    //         return;
+    //     }
+    // }
+    ValidateError(req, res)
 
     const id = req.params.id
     const isDeleted = await PostRepository.deletePost(id)
@@ -98,16 +100,17 @@ postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Re
 })
 
 postRouter.put('/:id', authMiddleware, findPost, postValidation(), async (req: Request, res: Response) => {
-    const result = validationResult(req)
-    const errors = ValidateError(result)
-    if (errors) {
-        if (errors.errorsMessages[0].field === 'id') {
-            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-            return;
-        }
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
-        return;
-    }
+    // const result = validationResult(req)
+    // const errors = ValidateError(result)
+    // if (errors) {
+    //     if (errors.errorsMessages[0].field === 'id') {
+    //         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    //         return;
+    //     }
+    //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
+    //     return;
+    // }
+    ValidateError(req, res)
 
     const updatedPost = await PostRepository.updatePost(req.params.id, req.body)
     if (!updatedPost) {

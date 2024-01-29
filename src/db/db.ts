@@ -1,46 +1,24 @@
-import {BlogViewModelType, PostInputModelType, PostViewModelType} from '../models/blogModels';
+import {MongoClient} from 'mongodb';
+import dotenv from 'dotenv';
 
-export type  UserType = {
-    id: number
-    userName: string
-}
-export type CourseType = {
-    id: number
-    title: string
-    studentCount: number
-}
-
-export type StudentBindingType = {
-    studentId: number
-    coursedId: number
-    date: Date
-}
-
-export type DBType = {
-    courses: CourseType[]
-    users: UserType[]
-    studentCourseBindings: StudentBindingType[]
-    blogs: BlogViewModelType[]
-    posts: PostViewModelType[]
-}
-export const db: DBType = {
-    courses: [
-        {id: 1, title: 'front-end', studentCount: 10},
-        {id: 2, title: 'back-end', studentCount: 10},
-        {id: 3, title: 'qa', studentCount: 10},
-        {id: 4, title: 'devops', studentCount: 10},
-    ],
-    users: [
-        {id: 1, userName: 'Dima'},
-        {id: 2, userName: 'Vanya'},
-    ],
-    studentCourseBindings: [
-        {studentId: 1, coursedId: 1, date: new Date(2022, 10, 1)},
-        {studentId: 1, coursedId: 2, date: new Date(2022, 10, 1)},
-        {studentId: 2, coursedId: 2, date: new Date(2022, 10, 1)},
-    ],
-    blogs: [{id: '12', name: 'as', websiteUrl: 'asas', description: 'asas'}],
-    posts: [{id: '12', title: 'test', blogId: '12', blogName: 'test', content: 'test', shortDescription: 'test'}]
+dotenv.config()
 
 
+export const urlMongo = process.env.MONGO_URL || 'mongodb://0.0.0.0:27017'
+export const client = new MongoClient(urlMongo);
+console.log(process.env.MONGO_URL)
+console.log(process.env.PORT)
+
+export async function runDB() {
+    try {
+        await client.connect();
+        console.log("Successfully connected to Atlas");
+    } catch (err) {
+        console.log(err);
+    }
+
 }
+export const database = client.db("backhomework")
+
+export const blogCollection = database.collection('blogs')
+export const postCollection = database.collection('posts')
