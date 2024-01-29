@@ -12,7 +12,8 @@ export const blogRouter = express.Router()
 
 
 type RequestWithBody<B> = Request<{}, {}, B, {}>
-type RequestWithParams<P> = Request<{}, {}, {}, P>
+type RequestWithParams<P> = Request<P, {}, {}, {}>
+type RequestWithQuery<Q> = Request<{}, {}, {}, Q>
 type BodyType = {
     name: string,
     description: string,
@@ -53,7 +54,7 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
     res.status(HTTP_STATUSES.CREATED_201).send(returnBlog)
     return;
 })
-blogRouter.get('/', async (req: RequestWithParams<GetBlogsType>, res: Response) => {
+blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: Response) => {
     // const allBlogs = await BlogRepository.getAllBlogs().then(res => res.toArray())
     // const returnBlogs = allBlogs.map((blog) => {
     //     return {
