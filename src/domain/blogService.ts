@@ -1,7 +1,6 @@
 import {BlogRepository} from '../repositories/blog-repository';
 import {
     BlogType,
-    PostInputModelType,
     PostInputType,
     PostViewModelType,
     ReturnViewModelType,
@@ -65,11 +64,11 @@ export class BlogService {
 
     static async getAllPostsByBlogId(blogId: string, data: GetPostsType) {
 
-        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
+        const {sortBy = 'createdAt', sortDirection = 'asc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
 
         let direction = sortDirection
         if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-            direction = 'desc'
+            direction = 'asc'
         }
         const {
             posts,

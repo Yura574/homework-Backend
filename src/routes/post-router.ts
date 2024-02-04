@@ -3,7 +3,6 @@ import {PostRepository} from '../repositories/post-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
-import {validationResult} from 'express-validator';
 import {ValidateError} from '../utils/validateError';
 import {postCollection} from '../db/db';
 
@@ -27,7 +26,7 @@ postRouter.get('/', async (req: Request, res: Response) => {
     res.send(returnAllPosts)
 })
 
-postRouter.get('/:id', findPost, blogIdValidator, async (req: Request, res: Response) => {
+postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
     // const result = validationResult(req)
     // const errors = ValidateError(result)
     // if (errors) {
