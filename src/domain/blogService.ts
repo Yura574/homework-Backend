@@ -45,6 +45,7 @@ export class BlogService {
 
     static async getBlogById(id: string) {
         const blog = await BlogRepository.getBlogById(id)
+        console.log(blog)
         const returnBlog: BlogType = {
             id: blog!._id.toString(),
             createdAt: blog?.createdAt,

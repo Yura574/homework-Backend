@@ -6,7 +6,7 @@ import {blogCollection} from '../db/db';
 export const findBlog = param('id').custom(async (id) => {
     const findBlog = await blogCollection.findOne({_id: new ObjectId(id)})
     if (!findBlog) {
-        throw new Error('blog not found')
+        throw new Error('not found')
     }
 })
 export const inputName = body('name')

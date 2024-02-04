@@ -95,7 +95,10 @@ blogRouter.get('/:id', findBlog, async (req: RequestWithParams<ParamsType>, res:
 
 })
 
-blogRouter.get('/:id/posts',  findBlog,async (req: RequestWithParamsAndQuery<ParamsType,GetPostsType>, res: Response)=> {
+blogRouter.get('/:id/posts',  findBlog,async (
+    // req: RequestType<ParamsType, {}, GetPostsType>,
+    req: RequestWithParamsAndQuery<ParamsType,GetPostsType>,
+    res: Response)=> {
 
     // const isError = ValidateError(req, res)
     // if (isError) {
@@ -122,7 +125,7 @@ blogRouter.get('/:id/posts',  findBlog,async (req: RequestWithParamsAndQuery<Par
 
 
 })
-blogRouter.post('/:id/posts', findBlog, postValidation(), async (req: RequestType<ParamsType, PostInputModelType, {}>, res: Response)=> {
+blogRouter.post('/:id/posts',  authMiddleware, postValidation(), async (req: RequestType<ParamsType, PostInputModelType, {}>, res: Response)=> {
 
     const isError = ValidateError(req, res)
     if (isError) {
@@ -131,7 +134,7 @@ blogRouter.post('/:id/posts', findBlog, postValidation(), async (req: RequestTyp
     const newPost = await BlogService.createPostForBlog(req.params.id, req.body)
     if(newPost){
 
-        res.send(newPost)
+        res.status(HTTP_STATUSES.CREATED_201).send(newPost)
     } else {
         res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
 
