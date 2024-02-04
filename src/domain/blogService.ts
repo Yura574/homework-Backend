@@ -13,20 +13,19 @@ import {postCollection} from '../db/db';
 export class BlogService {
 
     static async getBlogs(data: GetBlogsType) {
-        const {sortBy = 'createdAt', sortDirection = 'asc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
+        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
         let direction = sortDirection
         const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, searchNameTerm)
         const pagesCount = Math.ceil(totalCount / pageSize)
         if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-            direction = 'asc'
+            direction = 'desc'
         }
         const items = blogs.sort((b1, b2): number => {
             if (b1[sortBy] > b2[sortBy]) {
-                return direction === 'asc' ? 1 : -1
+                return direction === 'desc' ? 1 : -1
             }
             return 0
         })
-        console.log(items)
 
 
         const returnBlog: ReturnViewModelType<BlogType[]> = {
@@ -65,11 +64,11 @@ export class BlogService {
 
     static async getAllPostsByBlogId(blogId: string, data: GetPostsType) {
 
-        const {sortBy = 'createdAt', sortDirection = 'asc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
+        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
 
         let direction = sortDirection
         if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-            direction = 'asc'
+            direction = 'desc'
         }
         const {
             posts,
@@ -78,7 +77,7 @@ export class BlogService {
         const pagesCount = Math.ceil(totalCount / pageSize)
         const items = posts.sort((b1, b2): number => {
             if (b1[sortBy] > b2[sortBy]) {
-                return direction === 'asc' ? 1 : -1
+                return direction === 'desc' ? 1 : -1
             }
             return 0
         })
