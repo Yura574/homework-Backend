@@ -3,7 +3,7 @@ import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
-import {BlogType, PostInputModelType} from '../models/blogModels';
+import {BlogType, PostInputModelType, PostInputType} from '../models/blogModels';
 import {blogCollection} from '../db/db';
 import {ValidateError} from '../utils/validateError';
 import {BlogService} from '../domain/blogService';
@@ -125,7 +125,7 @@ blogRouter.get('/:id/posts',  findBlog,async (
 
 
 })
-blogRouter.post('/:id/posts',  authMiddleware, postValidation(), async (req: RequestType<ParamsType, PostInputModelType, {}>, res: Response)=> {
+blogRouter.post('/:id/posts',  authMiddleware, postValidation(), async (req: RequestType<ParamsType, PostInputType, {}>, res: Response)=> {
 
     const isError = ValidateError(req, res)
     if (isError) {

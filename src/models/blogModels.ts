@@ -25,6 +25,11 @@ export type PostInputModelType = {
     shortDescription: string
     content: string
 }
+export type PostInputType = {
+    title: string
+    shortDescription: string
+    content: string
+}
 export type PostViewModelType = {
     id?: string,
     title: string,

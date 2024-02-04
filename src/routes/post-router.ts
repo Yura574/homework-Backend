@@ -2,7 +2,7 @@ import express, {Request, Response} from 'express';
 import {PostRepository} from '../repositories/post-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
-import {findPost, postValidation} from '../validators/post-validators';
+import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
 import {validationResult} from 'express-validator';
 import {ValidateError} from '../utils/validateError';
 import {postCollection} from '../db/db';
@@ -27,7 +27,7 @@ postRouter.get('/', async (req: Request, res: Response) => {
     res.send(returnAllPosts)
 })
 
-postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
+postRouter.get('/:id', findPost, blogIdValidator, async (req: Request, res: Response) => {
     // const result = validationResult(req)
     // const errors = ValidateError(result)
     // if (errors) {
@@ -77,7 +77,7 @@ postRouter.post('/', authMiddleware, postValidation(), async (req: Request, res:
 
 })
 
-postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
+postRouter.delete('/:id', authMiddleware, findPost, blogIdValidator, async (req: Request, res: Response) => {
     // const result = validationResult(req)
     // const errors = ValidateError(result)
     // if (errors) {
@@ -101,7 +101,7 @@ postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Re
     return;
 })
 
-postRouter.put('/:id', authMiddleware, findPost, postValidation(), async (req: Request, res: Response) => {
+postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
     // const result = validationResult(req)
     // const errors = ValidateError(result)
     // if (errors) {

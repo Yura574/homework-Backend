@@ -1,5 +1,11 @@
 import {BlogRepository} from '../repositories/blog-repository';
-import {BlogType, PostInputModelType, PostViewModelType, ReturnViewModelType,} from '../models/blogModels';
+import {
+    BlogType,
+    PostInputModelType,
+    PostInputType,
+    PostViewModelType,
+    ReturnViewModelType,
+} from '../models/blogModels';
 import {PostRepository} from '../repositories/post-repository';
 import {GetBlogsType, GetPostsType} from '../routes/blog-router';
 import {postCollection} from '../db/db';
@@ -98,7 +104,7 @@ export class BlogService {
         return returnBlog
     }
 
-    static async createPostForBlog(blogId: string, data: PostInputModelType) {
+    static async createPostForBlog(blogId: string, data: PostInputType) {
         const {content, shortDescription, title} = data
         const newPost = await PostRepository.createPost({blogId, title, shortDescription, content})
         if (newPost) {

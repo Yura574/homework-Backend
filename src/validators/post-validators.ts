@@ -26,7 +26,7 @@ const contentValidator = body('content').trim()
     .notEmpty().withMessage({field: 'content', message: 'content is required'})
     .isString().withMessage({field: 'content', message: 'content should be string'})
     .isLength({min: 1, max: 1000}).withMessage({field: 'content', message: 'max length 1000 symbols'})
-const blogIdValidator = body('blogId').trim()
+export const blogIdValidator = body('blogId').trim()
     .notEmpty().withMessage({field: 'blogId', message: 'blogId is required'})
     .isString().withMessage({field: 'blogId', message: 'blogId should be string'})
     // .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
@@ -40,4 +40,4 @@ const blogIdValidator = body('blogId').trim()
     }).withMessage({field: 'blogId', message: 'blog not found'})
 
 
-export const postValidation = () => [titleValidator,shortDescriptionValidator, contentValidator, blogIdValidator]
+export const postValidation = () => [titleValidator,shortDescriptionValidator, contentValidator]
