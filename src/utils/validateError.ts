@@ -1,4 +1,4 @@
-import {Result, ValidationError, validationResult} from 'express-validator';
+import {validationResult} from 'express-validator';
 import {HTTP_STATUSES} from './httpStatuses';
 import {Request, Response} from 'express';
 
@@ -12,7 +12,7 @@ export const ValidateError = (req: Request, res: Response) => {
         }
         if (errors.errorsMessages[0].field === 'id') {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-            return;
+            return true;
         }
         res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         return true

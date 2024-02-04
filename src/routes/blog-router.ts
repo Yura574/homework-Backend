@@ -3,10 +3,12 @@ import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
-import {BlogType, BlogViewModelType} from '../models/blogModels';
+import {BlogType, PostInputModelType} from '../models/blogModels';
 import {blogCollection} from '../db/db';
 import {ValidateError} from '../utils/validateError';
-import {BlogService, GetBlogsType} from '../domain/blogService';
+import {BlogService} from '../domain/blogService';
+import {validationResult} from 'express-validator';
+import {postValidation} from '../validators/post-validators';
 
 export const blogRouter = express.Router()
 
@@ -14,14 +16,30 @@ export const blogRouter = express.Router()
 type RequestWithBody<B> = Request<{}, {}, B, {}>
 type RequestWithParams<P> = Request<P, {}, {}, {}>
 type RequestWithQuery<Q> = Request<{}, {}, {}, Q>
+export type RequestWithParamsAndQuery<P,Q> = Request<P, {}, {}, Q>
+export type RequestType<P,B,Q> = Request<P, {}, B, Q>
+
 type BodyType = {
     name: string,
     description: string,
     websiteUrl: string
 }
-type RequestType = {
+export type ParamsType = {
     id: string
-    term: string
+}
+ export type GetBlogsType = {
+    sortBy: string,
+    sortDirection: string,
+    pageNumber: number,
+    pageSize: number,
+    searchNameTerm?: string
+}
+ export type GetPostsType = {
+    sortBy: string,
+    sortDirection: string,
+    pageNumber: number,
+    pageSize: number,
+    searchNameTerm?: string
 }
 
 blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBody<BodyType>, res: Response) => {
@@ -60,7 +78,7 @@ blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: Response) =
         res.status(HTTP_STATUSES.OK_200).send(blogs)
     }
 })
-blogRouter.get('/:id', findBlog, async (req: RequestWithParams<RequestType>, res: Response) => {
+blogRouter.get('/:id', findBlog, async (req: RequestWithParams<ParamsType>, res: Response) => {
 
     const isError = ValidateError(req, res)
     if (isError) {
@@ -77,15 +95,49 @@ blogRouter.get('/:id', findBlog, async (req: RequestWithParams<RequestType>, res
 
 })
 
-blogRouter.get('/:id/post', findBlog, async (req: RequestWithParams<RequestType>, res: Response)=> {
-    const isError = ValidateError(req, res)
-    if (isError) {
+blogRouter.get('/:id/posts',  findBlog,async (req: RequestWithParamsAndQuery<ParamsType,GetPostsType>, res: Response)=> {
+
+    // const isError = ValidateError(req, res)
+    // if (isError) {
+    //     return
+    // }
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+        const errors = {
+            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
+        }
+        if (errors.errorsMessages[0].field === 'id') {
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+            return
+        }
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         return
     }
 
 
+
+    const posts =  await BlogService.getAllPostsByBlogId(req.params.id, req.query)
+    
+    res.send(posts)
+
+
 })
-blogRouter.delete('/:id', authMiddleware, findBlog, async (req: RequestWithParams<RequestType>, res: Response) => {
+blogRouter.post('/:id/posts', findBlog, postValidation(), async (req: RequestType<ParamsType, PostInputModelType, {}>, res: Response)=> {
+
+    const isError = ValidateError(req, res)
+    if (isError) {
+        return
+    }
+    const newPost = await BlogService.createPostForBlog(req.params.id, req.body)
+    if(newPost){
+
+        res.send(newPost)
+    } else {
+        res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
+
+    }
+})
+blogRouter.delete('/:id', authMiddleware, findBlog, async (req: RequestWithParams<ParamsType>, res: Response) => {
     const isError = ValidateError(req, res)
     if (isError) {
         return

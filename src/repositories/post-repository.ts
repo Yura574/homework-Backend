@@ -20,6 +20,13 @@ export class PostRepository {
             blogName: post?.blogName
         }
     }
+    static async getAllPostsByBlogId (blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string | undefined) {
+        let skip = (pageNumber - 1) * pageSize
+        const totalCount = await postCollection.countDocuments({blogId, title: {$regex: searchNameTerm? searchNameTerm : ''}})
+        const posts =  await postCollection.find({blogId, title: {$regex: searchNameTerm? searchNameTerm : ''}}).skip(skip).limit(pageSize).toArray()
+        return {posts, totalCount}
+
+}
 
     //
     static async createPost(data: PostInputModelType) {
@@ -28,7 +35,9 @@ export class PostRepository {
             return false
         }
 
+
         const {blogId, title, shortDescription, content} = data
+        console.log(blogId)
         const newPost: PostViewModelType = {
             blogId,
             blogName: blog.name,
@@ -37,7 +46,7 @@ export class PostRepository {
             content,
             createdAt: new Date().toISOString()
         }
-
+        console.log(newPost)
         return newPost
     }
 

@@ -1,11 +1,11 @@
-export type BlogViewModelType = {
+export type ReturnViewModelType<Items> = {
     pagesCount: number,
     page: number,
     pageSize: number,
     totalCount: number,
-    items: BlogType[]
+    items: Items
 }
-export type BlogType ={
+export type BlogType = {
     id: string,
     name: string,
     description: string,
@@ -13,7 +13,7 @@ export type BlogType ={
     "createdAt": string,
     "isMembership": boolean
 }
-export type BlogInputModelType= {
+export type BlogInputModelType = {
     name: string
     description: string
     websiteUrl: string
@@ -26,11 +26,27 @@ export type PostInputModelType = {
     content: string
 }
 export type PostViewModelType = {
-    title: string
-    shortDescription: string
-    content: string
-    blogId: string
-    blogName: string
+    id?: string,
+    title: string,
+    shortDescription: string,
+    content: string,
+    blogId: string,
+    blogName: string,
     createdAt: string
+}
 
+export type ReturnPostsType = {
+    pagesCount: number,
+    page: number,
+    pageSize: number,
+    totalCount: number,
+    items: {
+        id: string,
+        title: string,
+        shortDescription: string,
+        content: string,
+        blogId: string,
+        blogName: string,
+        createdAt: string
+    }[]
 }

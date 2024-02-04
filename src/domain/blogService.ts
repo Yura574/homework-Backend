@@ -1,20 +1,16 @@
 import {BlogRepository} from '../repositories/blog-repository';
-import {BlogType, BlogViewModelType} from '../models/blogModels';
+import {BlogType, PostInputModelType, PostViewModelType, ReturnViewModelType,} from '../models/blogModels';
+import {PostRepository} from '../repositories/post-repository';
+import {GetBlogsType, GetPostsType} from '../routes/blog-router';
+import {postCollection} from '../db/db';
 
-export type GetBlogsType = {
-    sortBy: string,
-    sortDirection: string,
-    pageNumber: number,
-    pageSize: number,
-    term?: string
-}
 
 export class BlogService {
 
     static async getBlogs(data: GetBlogsType) {
-        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10} = data
+        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
         let direction = sortDirection
-        const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize)
+        const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, searchNameTerm)
         const pagesCount = Math.ceil(totalCount / pageSize)
         if (sortDirection !== 'asc' && sortDirection !== 'desc') {
             direction = 'desc'
@@ -27,7 +23,7 @@ export class BlogService {
         })
 
 
-        const returnBlog: BlogViewModelType = {
+        const returnBlog: ReturnViewModelType<BlogType[]> = {
             page: pageNumber,
             pageSize,
             pagesCount,
@@ -58,5 +54,67 @@ export class BlogService {
             description: blog?.description
         }
         return returnBlog
+    }
+
+    static async getAllPostsByBlogId(blogId: string, data: GetPostsType) {
+
+        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
+
+        let direction = sortDirection
+        if (sortDirection !== 'asc' && sortDirection !== 'desc') {
+            direction = 'desc'
+        }
+        const {
+            posts,
+            totalCount
+        } = await PostRepository.getAllPostsByBlogId(blogId, pageNumber, pageSize, searchNameTerm)
+        const pagesCount = Math.ceil(totalCount / pageSize)
+        const items = posts.sort((b1, b2): number => {
+            if (b1[sortBy] > b2[sortBy]) {
+                return direction === 'asc' ? 1 : -1
+            }
+            return 0
+        })
+        const returnBlog: ReturnViewModelType<PostViewModelType[]> = {
+            page: pageNumber,
+            pageSize,
+            pagesCount,
+            totalCount,
+            items: items.map(post => {
+                return {
+                    id: post._id.toString(),
+                    blogName: post.blogName,
+                    content: post.content,
+                    title: post.title,
+                    shortDescription: post.shortDescription,
+                    createdAt: post.createdAt,
+                    blogId: post.blogId
+
+                }
+            })
+        }
+
+        return returnBlog
+    }
+
+    static async createPostForBlog(blogId: string, data: PostInputModelType) {
+        const {content, shortDescription, title} = data
+        const newPost = await PostRepository.createPost({blogId, title, shortDescription, content})
+        if (newPost) {
+            const createdPost = await postCollection.insertOne(newPost)
+            const post = await postCollection.findOne({_id: createdPost.insertedId})
+            return {
+                id: post?._id,
+                blogId: post?.blogId,
+                title: post?.title,
+                blogName: post?.blogName,
+                content: post?.content,
+                shortDescription: post?.shortDescription,
+                createdAt: post?.createdAt
+            }
+        }
+        // res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
+        return false;
+        // return await PostRepository.createPost({blogId, title, shortDescription, content})
     }
 }
