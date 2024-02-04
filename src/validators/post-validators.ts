@@ -1,6 +1,6 @@
 import {body, param} from 'express-validator';
 import {ObjectId} from 'mongodb';
-import { postCollection} from '../db/db';
+import {blogCollection, postCollection} from '../db/db';
 
 
 export const findPost = param('id').custom(async (id) => {
@@ -26,18 +26,18 @@ const contentValidator = body('content').trim()
     .notEmpty().withMessage({field: 'content', message: 'content is required'})
     .isString().withMessage({field: 'content', message: 'content should be string'})
     .isLength({min: 1, max: 1000}).withMessage({field: 'content', message: 'max length 1000 symbols'})
-// const blogIdValidator = body('blogId').trim()
-//     .notEmpty().withMessage({field: 'blogId', message: 'blogId is required'})
-//     .isString().withMessage({field: 'blogId', message: 'blogId should be string'})
-//     // .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
-//     .custom(async (value) => {
-//
-//         const blog = await blogCollection.findOne({_id: new ObjectId(value)})
-//         if (!blog) {
-//             throw new Error('Blog not found')
-//         }
-//         return true
-//     }).withMessage({field: 'blogId', message: 'blog not found'})
+const blogIdValidator = body('blogId').trim()
+    .notEmpty().withMessage({field: 'blogId', message: 'blogId is required'})
+    .isString().withMessage({field: 'blogId', message: 'blogId should be string'})
+    // .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
+    .custom(async (value) => {
+
+        const blog = await blogCollection.findOne({_id: new ObjectId(value)})
+        if (!blog) {
+            throw new Error('Blog not found')
+        }
+        return true
+    }).withMessage({field: 'blogId', message: 'blog not found'})
 
 
-export const postValidation = () => [titleValidator, shortDescriptionValidator, contentValidator]
+export const postValidation = () => [titleValidator,shortDescriptionValidator, contentValidator, blogIdValidator]

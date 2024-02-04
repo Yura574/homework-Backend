@@ -135,8 +135,10 @@ blogRouter.post('/:id/posts',  authMiddleware, postValidation(), async (req: Req
     if(newPost){
 
         res.status(HTTP_STATUSES.CREATED_201).send(newPost)
+        return
     } else {
         res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
+        return
 
     }
 })

@@ -6,9 +6,10 @@ import {blogCollection} from '../db/db';
 export const findBlog = param('id').custom(async (id) => {
     const findBlog = await blogCollection.findOne({_id: new ObjectId(id)})
     if (!findBlog) {
-        throw new Error('not found')
+        throw new Error()
     }
-})
+    return true
+}).withMessage({field: 'id', message: 'blog not found'})
 export const inputName = body('name')
     .notEmpty().withMessage({field: 'name', message: `name can't be empty`})
     .isString().withMessage({field: 'name', message: `should be string`})

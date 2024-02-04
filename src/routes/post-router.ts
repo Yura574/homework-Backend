@@ -36,7 +36,10 @@ postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
     //         return;
     //     }
     // }
-    ValidateError(req, res)
+    const isError = ValidateError(req, res)
+    if (isError) {
+        return
+    }
     const id = req.params.id
     const post = await PostRepository.getPostById(id)
     if (!post) {
@@ -48,13 +51,9 @@ postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
 
 postRouter.post('/', authMiddleware, postValidation(), async (req: Request, res: Response) => {
 
-    const result = validationResult(req)
-    if (!result.isEmpty()) {
-        const errors = {
-            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
-        }
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
-        return;
+    const isError = ValidateError(req, res)
+    if (isError) {
+        return
     }
     const data = req.body
     const newPost = await PostRepository.createPost(data)
@@ -87,7 +86,10 @@ postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Re
     //         return;
     //     }
     // }
-    ValidateError(req, res)
+    const isError = ValidateError(req, res)
+    if (isError) {
+        return
+    }
 
     const id = req.params.id
     const isDeleted = await PostRepository.deletePost(id)
@@ -110,7 +112,10 @@ postRouter.put('/:id', authMiddleware, findPost, postValidation(), async (req: R
     //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
     //     return;
     // }
-    ValidateError(req, res)
+    const isError = ValidateError(req, res)
+    if (isError) {
+        return
+    }
 
     const updatedPost = await PostRepository.updatePost(req.params.id, req.body)
     if (!updatedPost) {
