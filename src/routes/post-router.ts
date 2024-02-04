@@ -48,7 +48,7 @@ postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
     res.send(post)
 })
 
-postRouter.post('/', authMiddleware, postValidation(), async (req: Request, res: Response) => {
+postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
 
     const isError = ValidateError(req, res)
     if (isError) {
@@ -76,7 +76,7 @@ postRouter.post('/', authMiddleware, postValidation(), async (req: Request, res:
 
 })
 
-postRouter.delete('/:id', authMiddleware, findPost, blogIdValidator, async (req: Request, res: Response) => {
+postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
     // const result = validationResult(req)
     // const errors = ValidateError(result)
     // if (errors) {
