@@ -1,5 +1,6 @@
 import {ObjectId} from 'mongodb';
 import {blogCollection} from '../db/db';
+import {log} from 'node:util';
 
 export class BlogRepository {
     static async getBlogById(id: string) {
@@ -8,10 +9,13 @@ export class BlogRepository {
     }
 
     static async getAllBlogs(pageNumber: number, pageSize: number) {
-        const skip = pageNumber * pageSize +1
-        const count = await blogCollection.count()
-        console.log(count)
-        return blogCollection.find({}).skip(skip).limit(pageSize).toArray();
+        let skip = (pageNumber - 1) * pageSize
+        const totalCount = await blogCollection.countDocuments({})
+        if (skip > totalCount) {
+            skip = 0
+        }
+        const blogs = await blogCollection.find({}).skip(skip).limit(+pageSize).toArray();
+        return {blogs, totalCount}
     }
 
     static async deleteBlog(id: string) {

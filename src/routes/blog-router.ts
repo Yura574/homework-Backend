@@ -3,7 +3,7 @@ import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
-import {BlogViewModelType} from '../models/blogModels';
+import {BlogType, BlogViewModelType} from '../models/blogModels';
 import {blogCollection} from '../db/db';
 import {ValidateError} from '../utils/validateError';
 import {BlogService, GetBlogsType} from '../domain/blogService';
@@ -43,7 +43,7 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
 
     const createdBlog = await blogCollection.insertOne(newBlog)
     const blog = await blogCollection.findOne({_id: createdBlog.insertedId})
-    const returnBlog: BlogViewModelType = {
+    const returnBlog: BlogType = {
         id: blog!._id.toString(),
         name,
         description,
@@ -55,18 +55,6 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
     return;
 })
 blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: Response) => {
-    // const allBlogs = await BlogRepository.getAllBlogs().then(res => res.toArray())
-    // const returnBlogs = allBlogs.map((blog) => {
-    //     return {
-    //         id: blog._id.toString(),
-    //         name: blog.name,
-    //         description: blog.description,
-    //         websiteUrl: blog.websiteUrl,
-    //         createdAt: blog.createdAt,
-    //         isMembership: blog.isMembership
-    //
-    //     }
-    // })
     const blogs = await BlogService.getBlogs(req.query)
     if (blogs) {
         res.status(HTTP_STATUSES.OK_200).send(blogs)
@@ -86,6 +74,15 @@ blogRouter.get('/:id', findBlog, async (req: RequestWithParams<RequestType>, res
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return
     }
+
+})
+
+blogRouter.get('/:id/post', findBlog, async (req: RequestWithParams<RequestType>, res: Response)=> {
+    const isError = ValidateError(req, res)
+    if (isError) {
+        return
+    }
+
 
 })
 blogRouter.delete('/:id', authMiddleware, findBlog, async (req: RequestWithParams<RequestType>, res: Response) => {

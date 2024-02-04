@@ -1,4 +1,11 @@
 export type BlogViewModelType = {
+    pagesCount: number,
+    page: number,
+    pageSize: number,
+    totalCount: number,
+    items: BlogType[]
+}
+export type BlogType ={
     id: string,
     name: string,
     description: string,
