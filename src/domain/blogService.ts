@@ -13,12 +13,12 @@ import {postCollection} from '../db/db';
 export class BlogService {
 
     static async getBlogs(data: GetBlogsType) {
-        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
+        const {sortBy = 'createdAt', sortDirection = 'asc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
         let direction = sortDirection
         const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, searchNameTerm)
         const pagesCount = Math.ceil(totalCount / pageSize)
         if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-            direction = 'desc'
+            direction = 'asc'
         }
         const items = blogs.sort((b1, b2): number => {
             if (b1[sortBy] > b2[sortBy]) {
@@ -26,6 +26,7 @@ export class BlogService {
             }
             return 0
         })
+        console.log(items)
 
 
         const returnBlog: ReturnViewModelType<BlogType[]> = {
