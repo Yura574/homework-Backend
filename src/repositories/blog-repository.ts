@@ -16,7 +16,7 @@ export class BlogRepository {
             skip = 0
         }
 
-        const blogs = await blogCollection.find({name: {$regex: searchNameTerm? searchNameTerm : ''}}).skip(skip).limit(+pageSize).toArray();
+        const blogs = await blogCollection.find({name: {$regex: searchNameTerm? searchNameTerm : ''}}).sort({createdAt: -1}).skip(skip).limit(+pageSize).toArray();
         return {blogs, totalCount}
     }
 
