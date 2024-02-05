@@ -3,7 +3,7 @@ import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
-import {BlogType,  PostInputType} from '../models/blogModels';
+import {BlogItem, PostInputType} from '../models/blogModels';
 import {blogCollection} from '../db/db';
 import {ValidateError} from '../utils/validateError';
 import {BlogService} from '../domain/blogService';
@@ -61,7 +61,7 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
 
     const createdBlog = await blogCollection.insertOne(newBlog)
     const blog = await blogCollection.findOne({_id: createdBlog.insertedId})
-    const returnBlog: BlogType = {
+    const returnBlog: BlogItem = {
         id: blog!._id.toString(),
         name,
         description,
