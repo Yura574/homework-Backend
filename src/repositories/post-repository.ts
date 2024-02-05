@@ -4,11 +4,11 @@ import {blogCollection, postCollection} from '../db/db';
 
 
 export class PostRepository {
-    static async getPosts(pageSize:number, pageNumber: number,sortBy: string) {
+    static async getPosts(pageSize:number, pageNumber: number,sortBy: string, sortDirection: 'asc' | 'desc') {
         const skip = (pageNumber-1)* pageSize
         const totalCount = await postCollection.countDocuments()
         const sortObject: any = {}
-        sortObject[sortBy] = -1
+        sortObject[sortBy] = sortDirection === 'asc'? 1 : -1
         const posts =  await postCollection.find({}).sort({createdAt: -1}).skip(skip).limit(pageSize).toArray()
         return {posts, totalCount}
     }
