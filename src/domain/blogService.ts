@@ -22,8 +22,10 @@ export class BlogService {
             direction = 'desc'
         }
         const items = blogs.sort((b1, b2): number => {
-            if (b1[sortBy] > b2[sortBy]) {
-                return direction === 'desc' ? 1 : -1
+            if (b1[sortBy] < b2[sortBy]) {
+                return direction === 'asc' ? -1 : 1
+            } else if (b1[sortBy] > b2[sortBy]) {
+                return direction === 'asc' ? 1 : -1
             }
             return 0
         })

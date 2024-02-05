@@ -15,12 +15,9 @@ export class PostService {
             direction = 'desc'
         }
         const sortedItems = posts.sort((b1, b2): number => {
-            console.log(b1[sortBy] < b2[sortBy])
             if (b1[sortBy] < b2[sortBy]) {
-                console.log(b1[sortBy] > b2[sortBy])
                 return direction === 'asc' ? -1 : 1
             } else if (b1[sortBy] > b2[sortBy]) {
-                console.log(b1[sortBy] > b2[sortBy])
                 return direction === 'asc' ? 1 : -1
             }
             return 0
