@@ -5,36 +5,40 @@ import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
 import {ValidateError} from '../utils/validateError';
 import {postCollection} from '../db/db';
+import {PostItem, ReturnViewModelType} from '../models/blogModels';
+import {PostService} from '../domain/PostService';
 
 
 export const postRouter = express.Router()
 
-postRouter.get('/', async (req: Request, res: Response) => {
-    const allPosts = await PostRepository.getAllPost()
-    const returnAllPosts = allPosts.map(post => {
-        return {
-            id: post?._id,
-            blogId: post?.blogId,
-            title: post?.title,
-            shortDescription: post?.shortDescription,
-            content: post?.content,
-            createdAt: post?.createdAt,
-            blogName: post?.blogName
-        }
-    })
+type RequestPostType<P, B, Q> = Request<P, {}, B, Q>
+type ParamsType = {
+    id: string
+}
+type BodyType = {
+    blogId: string
+    title: string
+    shortDescription: string
+    content: string
+}
+export type QueryType = {
+    pageNumber: string
+    pageSize: string
+    sortBy: string
+    sortDirection: 'asc' | 'desc'
+}
+type ResponsePostType<R> = Response<R>
 
-    res.send(returnAllPosts)
+
+postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModelType<PostItem[]>>) => {
+    console.log(123)
+    const posts: ReturnViewModelType<PostItem[]> = await PostService.getPosts(req.query)
+
+    res.send(posts)
 })
 
 postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
-    // const result = validationResult(req)
-    // const errors = ValidateError(result)
-    // if (errors) {
-    //     if (errors.errorsMessages[0].field === 'id') {
-    //         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-    //         return;
-    //     }
-    // }
+
     const isError = ValidateError(req, res)
     if (isError) {
         return
@@ -77,14 +81,7 @@ postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (r
 })
 
 postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
-    // const result = validationResult(req)
-    // const errors = ValidateError(result)
-    // if (errors) {
-    //     if (errors.errorsMessages[0].field === 'id') {
-    //         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-    //         return;
-    //     }
-    // }
+
     const isError = ValidateError(req, res)
     if (isError) {
         return

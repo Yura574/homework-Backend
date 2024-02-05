@@ -1,6 +1,7 @@
 import {BlogRepository} from '../repositories/blog-repository';
 import {
-    BlogType,
+    BlogItem,
+
     PostInputType,
     PostViewModelType,
     ReturnViewModelType,
@@ -28,7 +29,7 @@ export class BlogService {
         })
 
 
-        const returnBlog: ReturnViewModelType<BlogType[]> = {
+        const returnBlog: ReturnViewModelType<BlogItem[]> = {
             page: pageNumber,
             pageSize,
             pagesCount,
@@ -51,7 +52,7 @@ export class BlogService {
     static async getBlogById(id: string) {
         const blog = await BlogRepository.getBlogById(id)
         console.log(blog)
-        const returnBlog: BlogType = {
+        const returnBlog: BlogItem = {
             id: blog!._id.toString(),
             createdAt: blog?.createdAt,
             isMembership: blog?.isMembership,
