@@ -1,14 +1,15 @@
-import { PostInputModelType, PostViewModelType} from '../models/blogModels';
+import {PostInputModelType, PostViewModelType} from '../models/blogModels';
 import {ObjectId} from 'mongodb';
 import {blogCollection, postCollection} from '../db/db';
-import {QueryType} from '../routes/post-router';
 
 
 export class PostRepository {
-    static async getPosts(pageSize:number, pageNumber: number) {
+    static async getPosts(pageSize:number, pageNumber: number,sortBy: string) {
         const skip = (pageNumber-1)* pageSize
         const totalCount = await postCollection.countDocuments()
-        const posts =  await postCollection.find({}).skip(skip).limit(pageSize).toArray()
+        const sortObject: any = {}
+        sortObject[sortBy] = -1
+        const posts =  await postCollection.find({}).sort(sortObject).skip(skip).limit(pageSize).toArray()
         return {posts, totalCount}
     }
 
