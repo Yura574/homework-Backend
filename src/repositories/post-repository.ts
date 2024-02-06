@@ -9,7 +9,7 @@ export class PostRepository {
         const totalCount = await postCollection.countDocuments()
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc'? 1 : -1
-        const posts =  await postCollection.find({}).sort({createdAt: -1}).skip(skip).limit(pageSize).toArray()
+        const posts =  await postCollection.find({}).sort(sortObject).skip(skip).limit(pageSize).toArray()
         return {posts, totalCount}
     }
 

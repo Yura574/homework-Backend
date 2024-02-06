@@ -15,28 +15,14 @@ export class BlogService {
 
     static async getBlogs(data: GetBlogsType) {
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
-        let direction = sortDirection
-        const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, searchNameTerm)
+        const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, sortBy, searchNameTerm, sortDirection)
         const pagesCount = Math.ceil(totalCount / pageSize)
-        if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-            direction = 'desc'
-        }
-        const items = blogs.sort((b1, b2): number => {
-            if (b1[sortBy] < b2[sortBy]) {
-                return direction === 'asc' ? -1 : 1
-            } else if (b1[sortBy] > b2[sortBy]) {
-                return direction === 'asc' ? 1 : -1
-            }
-            return 0
-        })
-
-
         const returnBlog: ReturnViewModelType<BlogItem[]> = {
             page: pageNumber,
             pageSize,
             pagesCount,
             totalCount,
-            items: items.map(b => {
+            items: blogs.map(b => {
                 return {
                     id: b._id.toString(),
                     name: b.name,

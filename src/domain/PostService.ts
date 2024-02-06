@@ -7,23 +7,23 @@ export class PostService {
     static async getPosts(dataQuery: QueryType) {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
 
-        const {posts, totalCount} = await PostRepository.getPosts(+pageSize, +pageNumber, sortBy)
+        const {posts, totalCount} = await PostRepository.getPosts(+pageSize, +pageNumber, sortBy, sortDirection)
 
 
-        let direction = sortDirection
-        if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-            direction = 'desc'
-        }
-        const sortedItems = posts.sort((b1, b2): number => {
-            if (b1[sortBy] < b2[sortBy]) {
-                return direction === 'asc' ? -1 : 1
-            } else if (b1[sortBy] > b2[sortBy]) {
-                return direction === 'asc' ? 1 : -1
-            }
-            return 0
-
-        })
-        const editedPost: PostItem[] = sortedItems.map(post => {
+        // let direction = sortDirection
+        // if (sortDirection !== 'asc' && sortDirection !== 'desc') {
+        //     direction = 'desc'
+        // }
+        // const sortedItems = posts.sort((b1, b2): number => {
+        //     if (b1[sortBy] < b2[sortBy]) {
+        //         return direction === 'asc' ? -1 : 1
+        //     } else if (b1[sortBy] > b2[sortBy]) {
+        //         return direction === 'asc' ? 1 : -1
+        //     }
+        //     return 0
+        //
+        // })
+        const editedPost: PostItem[] = posts.map(post => {
             return {
                 id: post?._id.toString(),
                 blogId: post?.blogId,
@@ -34,7 +34,6 @@ export class PostService {
                 blogName: post?.blogName
             }
         })
-        console.log(sortedItems)
         const pagesCount = Math.ceil(totalCount / +pageSize)
         const returnPosts: ReturnViewModelType<PostItem[]> = {
             page: +pageNumber,

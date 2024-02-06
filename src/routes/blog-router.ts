@@ -29,7 +29,7 @@ export type ParamsType = {
 }
  export type GetBlogsType = {
     sortBy: string,
-    sortDirection: string,
+    sortDirection: 'asc'| 'desc',
     pageNumber: number,
     pageSize: number,
     searchNameTerm?: string
