@@ -1,6 +1,6 @@
 import request from 'supertest';
 import {app, routerPaths} from '../settings';
-import {BlogInputModelType, BlogViewModelType} from '../models/blogModels';
+import {BlogInputModelType} from '../models/blogModels';
 import {HTTP_STATUSES, HttpStatusType} from './httpStatuses';
 
 

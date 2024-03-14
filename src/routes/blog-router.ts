@@ -3,7 +3,7 @@ import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
-import {BlogItem, PostInputType} from '../models/blogModels';
+import {BlogItem, PostInputType, ReturnViewModelType} from '../models/blogModels';
 import {blogCollection} from '../db/db';
 import {ValidateError} from '../utils/validateError';
 import {BlogService} from '../domain/blogService';
@@ -18,6 +18,8 @@ type RequestWithParams<P> = Request<P, {}, {}, {}>
 type RequestWithQuery<Q> = Request<{}, {}, {}, Q>
 export type RequestWithParamsAndQuery<P,Q> = Request<P, {}, {}, Q>
 export type RequestType<P,B,Q> = Request<P, {}, B, Q>
+
+export type ResponseType<R> = Response<R>
 
 type BodyType = {
     name: string,
@@ -54,8 +56,8 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
         name,
         description,
         websiteUrl,
-        createdAt: new Date().toISOString(),
-        isMembership: false
+        isMembership: false,
+        createdAt: new Date().toISOString()
     }
 
 
@@ -72,7 +74,7 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
     res.status(HTTP_STATUSES.CREATED_201).send(returnBlog)
     return;
 })
-blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: Response) => {
+blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: ResponseType<ReturnViewModelType<BlogItem[]>>) => {
     const blogs = await BlogService.getBlogs(req.query)
     if (blogs) {
         res.status(HTTP_STATUSES.OK_200).send(blogs)
@@ -100,10 +102,6 @@ blogRouter.get('/:id/posts',  findBlog,async (
     req: RequestWithParamsAndQuery<ParamsType,GetPostsType>,
     res: Response)=> {
 
-    // const isError = ValidateError(req, res)
-    // if (isError) {
-    //     return
-    // }
     const result = validationResult(req)
     if (!result.isEmpty()) {
         const errors = {

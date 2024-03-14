@@ -9,6 +9,7 @@ import {
 import {PostRepository} from '../repositories/post-repository';
 import {GetBlogsType, GetPostsType} from '../routes/blog-router';
 import {postCollection} from '../db/db';
+import {isNumber} from "node:util";
 
 
 export class BlogService {
@@ -18,8 +19,8 @@ export class BlogService {
         const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, sortBy, searchNameTerm, sortDirection)
         const pagesCount = Math.ceil(totalCount / pageSize)
         const returnBlog: ReturnViewModelType<BlogItem[]> = {
-            page: pageNumber,
-            pageSize,
+            page: +pageNumber,
+            pageSize: +pageSize,
             pagesCount,
             totalCount,
             items: blogs.map(b => {
@@ -28,8 +29,8 @@ export class BlogService {
                     name: b.name,
                     description: b.description,
                     websiteUrl: b.websiteUrl,
-                    createdAt: b.createdAt,
-                    isMembership: b.isMembership
+                    isMembership: b.isMembership,
+                    createdAt: b.createdAt
 
                 }
             })
@@ -39,7 +40,6 @@ export class BlogService {
 
     static async getBlogById(id: string) {
         const blog = await BlogRepository.getBlogById(id)
-        console.log(blog)
         const returnBlog: BlogItem = {
             id: blog!._id.toString(),
             createdAt: blog?.createdAt,
@@ -108,8 +108,6 @@ export class BlogService {
                 createdAt: post?.createdAt
             }
         }
-        // res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
         return false;
-        // return await PostRepository.createPost({blogId, title, shortDescription, content})
     }
 }
