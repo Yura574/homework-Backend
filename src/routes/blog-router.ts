@@ -98,7 +98,6 @@ blogRouter.get('/:id', findBlog, async (req: RequestWithParams<ParamsType>, res:
 })
 
 blogRouter.get('/:id/posts',  findBlog,async (
-    // req: RequestType<ParamsType, {}, GetPostsType>,
     req: RequestWithParamsAndQuery<ParamsType,GetPostsType>,
     res: Response)=> {
 

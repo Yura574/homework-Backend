@@ -9,7 +9,6 @@ import {
 import {PostRepository} from '../repositories/post-repository';
 import {GetBlogsType, GetPostsType} from '../routes/blog-router';
 import {postCollection} from '../db/db';
-import {isNumber} from "node:util";
 
 
 export class BlogService {
@@ -52,7 +51,7 @@ export class BlogService {
 
     static async getAllPostsByBlogId(blogId: string, data: GetPostsType) {
 
-        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
+        const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm=''} = data
 
         let direction = sortDirection
         if (sortDirection !== 'asc' && sortDirection !== 'desc') {
@@ -70,8 +69,8 @@ export class BlogService {
             return 0
         })
         const returnBlog: ReturnViewModelType<PostViewModelType[]> = {
-            page: pageNumber,
-            pageSize,
+            page: +pageNumber,
+            pageSize: +pageSize,
             pagesCount,
             totalCount,
             items: items.map(post => {

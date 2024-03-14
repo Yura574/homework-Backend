@@ -28,7 +28,7 @@ export class PostRepository {
     static async getAllPostsByBlogId (blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string | undefined) {
         let skip = (pageNumber - 1) * pageSize
         const totalCount = await postCollection.countDocuments({blogId, title: {$regex: searchNameTerm? searchNameTerm : ''}})
-        const posts =  await postCollection.find({blogId, title: {$regex: searchNameTerm? searchNameTerm : ''}}).sort({createdAt: -1}).skip(skip).limit(pageSize).toArray()
+        const posts =  await postCollection.find({blogId, title: {$regex: searchNameTerm? searchNameTerm : ''}}).sort({createdAt: -1}).skip(skip).limit(+pageSize).toArray()
         return {posts, totalCount}
 
 }
@@ -42,7 +42,6 @@ export class PostRepository {
 
 
         const {blogId, title, shortDescription, content} = data
-        console.log(blogId)
         const newPost: PostViewModelType = {
             blogId,
             blogName: blog.name,
@@ -51,14 +50,12 @@ export class PostRepository {
             content,
             createdAt: new Date().toISOString()
         }
-        console.log(newPost)
         return newPost
     }
 
     static async deletePost(id: string) {
         const index = await postCollection.deleteOne({_id: new ObjectId(id)})
-        console.log(index)
-        return true
+        return !!index;
     }
 
 

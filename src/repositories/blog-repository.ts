@@ -1,7 +1,5 @@
 import {ObjectId} from 'mongodb';
 import {blogCollection} from '../db/db';
-import {isNumber} from "node:util";
-import {isNumberObject} from "node:util/types";
 
 export class BlogRepository {
     static async getBlogById(id: string) {
