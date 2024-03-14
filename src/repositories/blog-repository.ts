@@ -11,14 +11,14 @@ export class BlogRepository {
 
     static async getAllBlogs(pageNumber: number, pageSize: number,sortBy: string, searchNameTerm: string | undefined, sortDirection: 'asc'| 'desc') {
         let skip = (pageNumber - 1) * pageSize
-        const totalCount = await blogCollection.countDocuments({name: {$regex: searchNameTerm? searchNameTerm : ''}})
+        const totalCount = await blogCollection.countDocuments({name: {$regex: searchNameTerm?  new RegExp(searchNameTerm, 'i') : ''}})
         if (skip > totalCount) {
             skip = 0
         }
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc'? 1 : -1
 
-        const blogs = await blogCollection.find({name: {$regex: searchNameTerm? searchNameTerm : ''}}).sort(sortObject).skip(skip).limit(+pageSize).toArray();
+        const blogs = await blogCollection.find({name: {$regex: searchNameTerm? new RegExp(searchNameTerm, 'i') : ''}}).sort(sortObject).skip(skip).limit(+pageSize).toArray();
         return {blogs, totalCount}
     }
 

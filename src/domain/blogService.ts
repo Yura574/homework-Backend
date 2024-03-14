@@ -19,9 +19,9 @@ export class BlogService {
         const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, sortBy, searchNameTerm, sortDirection)
         const pagesCount = Math.ceil(totalCount / pageSize)
         const returnBlog: ReturnViewModelType<BlogItem[]> = {
+            pagesCount,
             page: +pageNumber,
             pageSize: +pageSize,
-            pagesCount,
             totalCount,
             items: blogs.map(b => {
                 return {
@@ -31,7 +31,6 @@ export class BlogService {
                     websiteUrl: b.websiteUrl,
                     isMembership: b.isMembership,
                     createdAt: b.createdAt
-
                 }
             })
         }
