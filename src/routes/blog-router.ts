@@ -38,7 +38,7 @@ export type ParamsType = {
 }
  export type GetPostsType = {
     sortBy: string,
-    sortDirection: string,
+    sortDirection: 'asc' | 'desc',
     pageNumber: number,
     pageSize: number,
     searchNameTerm?: string

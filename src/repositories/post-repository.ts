@@ -4,12 +4,12 @@ import {blogCollection, postCollection} from '../db/db';
 
 
 export class PostRepository {
-    static async getPosts(pageSize:number, pageNumber: number,sortBy: string, sortDirection: 'asc' | 'desc') {
-        const skip = (pageNumber-1)* pageSize
+    static async getPosts(pageSize: number, pageNumber: number, sortBy: string, sortDirection: 'asc' | 'desc') {
+        const skip = (pageNumber - 1) * pageSize
         const totalCount = await postCollection.countDocuments()
         const sortObject: any = {}
-        sortObject[sortBy] = sortDirection === 'asc'? 1 : -1
-        const posts =  await postCollection.find({}).sort(sortObject).skip(skip).limit(pageSize).toArray()
+        sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
+        const posts = await postCollection.find({}).sort(sortObject).skip(skip).limit(pageSize).toArray()
         return {posts, totalCount}
     }
 
@@ -25,13 +25,28 @@ export class PostRepository {
             blogName: post?.blogName
         }
     }
-    static async getAllPostsByBlogId (blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string | undefined) {
+
+    static async getAllPostsByBlogId(blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string, sortBy: string, sortDirection: 'asc' | 'desc') {
         let skip = (pageNumber - 1) * pageSize
-        const totalCount = await postCollection.countDocuments({blogId, title: {$regex: searchNameTerm? searchNameTerm : ''}})
-        const posts =  await postCollection.find({blogId, title: {$regex: searchNameTerm? searchNameTerm : ''}}).sort({createdAt: -1}).skip(skip).limit(+pageSize).toArray()
+
+        const totalCount = await postCollection.countDocuments({
+            blogId,
+            title: {$regex: searchNameTerm ? new RegExp(searchNameTerm, 'i') : ''}
+        })
+        if (skip > totalCount) {
+            skip = 0
+        }
+        const sortObject: any = {}
+        sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
+        console.log(sortObject)
+        const posts = await postCollection.find({
+            blogId,
+            title: {$regex: searchNameTerm ? new RegExp(searchNameTerm, 'i') : ''}
+        })
+            .sort(sortObject).skip(skip).limit(+pageSize).toArray();
         return {posts, totalCount}
 
-}
+    }
 
     //
     static async createPost(data: PostInputModelType) {
@@ -64,7 +79,7 @@ export class PostRepository {
         const post = await postCollection.findOne({_id: new ObjectId(id)})
         if (post) {
             const updatedPost = {
-                $set :{
+                $set: {
                     shortDescription,
                     content,
                     title,

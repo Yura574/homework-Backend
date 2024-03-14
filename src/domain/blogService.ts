@@ -53,27 +53,17 @@ export class BlogService {
 
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm=''} = data
 
-        let direction = sortDirection
-        if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-            direction = 'desc'
-        }
         const {
             posts,
             totalCount
-        } = await PostRepository.getAllPostsByBlogId(blogId, pageNumber, pageSize, searchNameTerm)
+        } = await PostRepository.getAllPostsByBlogId(blogId, pageNumber, pageSize, searchNameTerm, sortBy, sortDirection)
         const pagesCount = Math.ceil(totalCount / pageSize)
-        const items = posts.sort((b1, b2): number => {
-            if (b1[sortBy] > b2[sortBy]) {
-                return direction === 'desc' ? 1 : -1
-            }
-            return 0
-        })
         const returnBlog: ReturnViewModelType<PostViewModelType[]> = {
             page: +pageNumber,
             pageSize: +pageSize,
             pagesCount,
             totalCount,
-            items: items.map(post => {
+            items: posts.map(post => {
                 return {
                     id: post._id.toString(),
                     blogName: post.blogName,
