@@ -36,7 +36,7 @@ export class UserRepository {
         const users = await userCollection.find({
             login: {$regex: searchLoginTerm ? searchLoginTerm : ''},
             email: {$regex: searchEmailTerm ? searchEmailTerm : ''}
-        }).sort(sort).skip(skip).limit(10).toArray()
+        }).sort(sort).skip(skip).limit(+pageSize).toArray()
 
         return {users, totalCount, pagesCount, pageNumber, pageSize}
     }
