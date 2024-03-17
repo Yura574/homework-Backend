@@ -27,15 +27,22 @@ export class UserRepository {
             searchLoginTerm = null,
         } = data
 
-        const totalCount = await userCollection.countDocuments()
+        const totalCount = await userCollection.countDocuments({
+            $or:[
+                {login: {$regex: searchLoginTerm ? new RegExp(searchLoginTerm, 'i') : ''}},
+                {email: {$regex: searchEmailTerm ? new RegExp(searchEmailTerm, 'i') : ''}}
+            ]
+
+        }   )
         const pagesCount = Math.ceil(totalCount / +pageSize)
         const skip = (+pageNumber - 1) * +pageSize
-        console.log('skip', skip)
         let sort: any = {}
         sort[sortBy] = sortDirection === 'asc' ? 1 : -1
         const users = await userCollection.find({
-            login: {$regex: searchLoginTerm ? searchLoginTerm : ''},
-            email: {$regex: searchEmailTerm ? searchEmailTerm : ''}
+            $or:[
+                {login: {$regex: searchLoginTerm ? new RegExp(searchLoginTerm, 'i') : ''}},
+                {email: {$regex: searchEmailTerm ? new RegExp(searchEmailTerm, 'i') : ''}}
+            ]
         }).sort(sort).skip(skip).limit(+pageSize).toArray()
 
         return {users, totalCount, pagesCount, pageNumber, pageSize}
