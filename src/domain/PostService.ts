@@ -22,7 +22,7 @@ export class PostService {
         })
         const pagesCount = Math.ceil(totalCount / +pageSize)
         const returnPosts: ReturnViewModelType<PostItem[]> = {
-            pageNumber: +pageNumber,
+            page: pageNumber.toString(),
             pageSize: +pageSize,
             pagesCount,
             totalCount,

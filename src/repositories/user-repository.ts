@@ -61,10 +61,6 @@ export class UserRepository {
 
     static async deleteUser(id: string) {
         const isDeleted = await userCollection.deleteOne({_id: new ObjectId(id)})
-        if (isDeleted.deletedCount) {
-            return true
-        } else {
-            return false
-        }
+        return !!isDeleted.deletedCount;
     }
 }

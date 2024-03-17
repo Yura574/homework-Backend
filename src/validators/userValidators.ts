@@ -9,7 +9,7 @@ const fields = {
 const fieldLength = {
     loginLength: {
         min: 3,
-        max: 6
+        max: 10
     },
     passwordLength: {
         min: 6,
