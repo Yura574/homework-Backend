@@ -9,7 +9,8 @@
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "sourceMap": true
   },
   "include": [
     "src/**/*"

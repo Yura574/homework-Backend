@@ -9,20 +9,6 @@ export class PostService {
 
         const {posts, totalCount} = await PostRepository.getPosts(+pageSize, +pageNumber, sortBy, sortDirection)
 
-
-        // let direction = sortDirection
-        // if (sortDirection !== 'asc' && sortDirection !== 'desc') {
-        //     direction = 'desc'
-        // }
-        // const sortedItems = posts.sort((b1, b2): number => {
-        //     if (b1[sortBy] < b2[sortBy]) {
-        //         return direction === 'asc' ? -1 : 1
-        //     } else if (b1[sortBy] > b2[sortBy]) {
-        //         return direction === 'asc' ? 1 : -1
-        //     }
-        //     return 0
-        //
-        // })
         const editedPost: PostItem[] = posts.map(post => {
             return {
                 id: post?._id.toString(),
@@ -36,7 +22,7 @@ export class PostService {
         })
         const pagesCount = Math.ceil(totalCount / +pageSize)
         const returnPosts: ReturnViewModelType<PostItem[]> = {
-            page: +pageNumber,
+            pageNumber: +pageNumber,
             pageSize: +pageSize,
             pagesCount,
             totalCount,

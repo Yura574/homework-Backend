@@ -22,3 +22,4 @@ export const database = client.db("backhomework")
 
 export const blogCollection = database.collection('blogs')
 export const postCollection = database.collection('posts')
+export const userCollection = database.collection('users')

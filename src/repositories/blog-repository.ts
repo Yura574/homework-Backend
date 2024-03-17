@@ -34,7 +34,6 @@ export class BlogRepository {
                 websiteUrl
             }
         }
-        console.log(name)
         return await blogCollection.updateOne(filter, update)
     }
 

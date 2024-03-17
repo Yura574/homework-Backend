@@ -1,8 +1,8 @@
 export type ReturnViewModelType<Items> = {
     pagesCount: number,
-    page: number,
-    pageSize: number,
     totalCount: number,
+    pageNumber: string,
+    pageSize: number,
     items: Items
 }
 export type BlogItem = {

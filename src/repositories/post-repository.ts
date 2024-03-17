@@ -2,7 +2,7 @@ import {PostInputModelType, PostViewModelType} from '../models/blogModels';
 import {ObjectId} from 'mongodb';
 import {blogCollection, postCollection} from '../db/db';
 
-
+ 
 export class PostRepository {
     static async getPosts(pageSize: number, pageNumber: number, sortBy: string, sortDirection: 'asc' | 'desc') {
         const skip = (pageNumber - 1) * pageSize
@@ -38,19 +38,18 @@ export class PostRepository {
         }
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
-        console.log(sortObject)
         const posts = await postCollection.find({
             blogId,
             title: {$regex: searchNameTerm ? new RegExp(searchNameTerm, 'i') : ''}
         })
             .sort(sortObject).skip(skip).limit(+pageSize).toArray();
         return {posts, totalCount}
-
     }
 
     //
     static async createPost(data: PostInputModelType) {
         const blog = await blogCollection.findOne({_id: new ObjectId(data.blogId)})
+        //если блог не найден, пост нельзя создать
         if (!blog) {
             return false
         }

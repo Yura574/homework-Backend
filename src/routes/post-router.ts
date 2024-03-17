@@ -27,11 +27,10 @@ export type QueryType = {
     sortBy: string
     sortDirection: 'asc' | 'desc'
 }
-type ResponsePostType<R> = Response<R>
+export type ResponsePostType<R> = Response<R>
 
 
 postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModelType<PostItem[]>>) => {
-    console.log(123)
     const posts: ReturnViewModelType<PostItem[]> = await PostService.getPosts(req.query)
 
     res.send(posts)
@@ -98,20 +97,9 @@ postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Re
 })
 
 postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
-    // const result = validationResult(req)
-    // const errors = ValidateError(result)
-    // if (errors) {
-    //     if (errors.errorsMessages[0].field === 'id') {
-    //         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
-    //         return;
-    //     }
-    //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
-    //     return;
-    // }
     const isError = ValidateError(req, res)
-    if (isError) {
-        return
-    }
+    //если есть ошибка, validateError возвращает клиенту ошибку
+    if (isError) return
 
     const updatedPost = await PostRepository.updatePost(req.params.id, req.body)
     if (!updatedPost) {
