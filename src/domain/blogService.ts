@@ -19,7 +19,7 @@ export class BlogService {
         const pagesCount = Math.ceil(totalCount / pageSize)
         const returnBlog: ReturnViewModelType<BlogItem[]> = {
             pagesCount,
-            page: pageNumber.toString(),
+            page: +pageNumber,
             pageSize: +pageSize,
             totalCount,
             items: blogs.map(b => {
@@ -59,7 +59,7 @@ export class BlogService {
         } = await PostRepository.getAllPostsByBlogId(blogId, pageNumber, pageSize, searchNameTerm, sortBy, sortDirection)
         const pagesCount = Math.ceil(totalCount / pageSize)
         const returnBlog: ReturnViewModelType<PostViewModelType[]> = {
-            page: pageNumber.toString(),
+            page: +pageNumber,
             pageSize: +pageSize,
             pagesCount,
             totalCount,

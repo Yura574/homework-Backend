@@ -20,7 +20,7 @@ userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuer
     // const pagesCount = Math.ceil(totalCount / +pageSize)
     console.log(users.length)
     const returnUsers: ReturnViewModelType<UserItemType[]> = {
-        page: pageNumber,
+        page: +pageNumber,
         pageSize: +pageSize,
         totalCount,
         pagesCount,
