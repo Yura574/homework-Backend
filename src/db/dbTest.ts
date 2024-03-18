@@ -5,17 +5,17 @@ dotenv.config()
 
 
 export const urlMongo = process.env.MONGO_URL || 'mongodb://0.0.0.0:27017'
-export const client = new MongoClient(urlMongo);
-export async function runDB() {
+export const clientTest = new MongoClient(urlMongo);
+export async function runDBTest() {
     try {
-        await client.connect();
-        console.log("Successfully connected to Atlas");
+        await clientTest.connect();
+        console.log("Successfully connected dbTest to Atlas");
     } catch (err) {
         console.log(err);
     }
 
 }
-export const database = client.db("backhomework")
+export const database = clientTest.db("backForTest")
 
 export const blogCollection = database.collection('blogs')
 export const postCollection = database.collection('posts')

@@ -1,24 +1,22 @@
-import express, {Response, Request} from "express";
+import express, {Response} from "express";
 import {authMiddleware} from "../middleware/auth/auth-middleware";
-import {ParamsType, RequestType, RequestWithQuery, ResponseType} from "./blog-router";
-import {userValidation} from "../validators/userValidators";
+import {ParamsType, RequestType, ResponseType} from "./blog-router";
+import {userValidation, validateId} from "../validators/userValidators";
 import {CreateUserBodyType, ReturnsUserType} from "./types/usersTypes";
 import {ValidateError} from "../utils/validateError";
 import {UserRepository} from "../repositories/user-repository";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
-import {GetUsersQuery, UserItemType,} from "../models/userModels";
+import {GetUsersQuery, UserItemType, UserViewModel,} from "../models/userModels";
 import {ReturnViewModelType} from "../models/blogModels";
 import {ResponsePostType} from "./post-router";
-import {UserService} from "../domain/userService";
+import {userCollection} from "../db/db";
+import {ObjectId} from "mongodb";
 
 export const userRouter = express.Router()
 
 
 userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuery>, res: ResponsePostType<ReturnViewModelType<UserItemType[]>>) => {
-
     const {totalCount, users, pagesCount, pageSize, pageNumber} = await UserRepository.getAllUsers(req.query)
-    // const pagesCount = Math.ceil(totalCount / +pageSize)
-    console.log(users.length)
     const returnUsers: ReturnViewModelType<UserItemType[]> = {
         page: +pageNumber,
         pageSize: +pageSize,
@@ -35,6 +33,29 @@ userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuer
 
     }
     res.send(returnUsers)
+
+})
+userRouter.get('/:id', validateId, async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<UserViewModel>) => {
+    const isError = ValidateError(req, res)
+    if (isError) {
+        return
+    }
+    const response = await userCollection.findOne({_id: new ObjectId(req.params.id)})
+    if (response) {
+        const user: UserViewModel = {
+            id: response?._id.toString(),
+            login: response.login,
+            email: response.email,
+            createdAt: response.createdAt
+        }
+        res.status(HTTP_STATUSES.OK_200).send(user)
+        return
+
+    }
+    res.sendStatus(500)
+    return
+
+
 
 })
 
@@ -60,8 +81,9 @@ userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{
 
 })
 
-userRouter.delete('/:id', authMiddleware, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
-
+userRouter.delete('/:id', authMiddleware,validateId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
+const isError = ValidateError(req,res)
+    if(isError) return
     const isDeleted = await UserRepository.deleteUser(req.params.id)
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)

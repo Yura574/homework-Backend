@@ -35,7 +35,6 @@ app.delete(routerPaths.deleteAllData, async (req: Request, res: Response) => {
         // Удалить все документы из коллекции
         await database.collection(collectionName).deleteMany({});
 
-        console.log(`Collection ${collectionName} cleared.`);
     }
     res.sendStatus(204)
     return

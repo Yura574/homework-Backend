@@ -1,18 +1,23 @@
 import request from 'supertest';
 import {app, routerPaths} from '../src/settings';
 import {PostInputModelType, PostViewModelType} from '../src/models/blogModels';
-import {blogsTestManager} from '../src/utils/blogsTestManager';
-import {postsTestManager} from '../src/utils/postsTestManager';
+import {blogsTestManager} from '../src/utils/testManagers/blogsTestManager';
+import {postsTestManager} from '../src/utils/testManagers/postsTestManager';
 import {authMiddleware} from '../src/middleware/auth/auth-middleware';
 import {HTTP_STATUSES} from '../src/utils/httpStatuses';
+import {clientTest} from "../src/db/dbTest";
 
 
 describe('test for posts', () => {
-    beforeAll(async () => {
-        await request(app)
-            .delete(routerPaths.deleteAllData)
-    })
+    beforeEach(async () => {
+        await clientTest.connect()
 
+        await request(app)
+            .delete('/testing/all-data')
+    })
+    afterAll(async () => {
+        await clientTest.close();
+    });
     it('post should be create', async () => {
         const {newBlog} = await blogsTestManager.createBlog()
         await postsTestManager.createPost(newBlog.id, newBlog.name)
@@ -47,13 +52,15 @@ describe('test for posts', () => {
     it('get post by id', async () => {
         const {newBlog} = await blogsTestManager.createBlog()
         const {post} = await postsTestManager.createPost(newBlog.id, newBlog.name)
+        if (post.id) {
+            await postsTestManager.getPostById(post.id)
+        }
 
-        await postsTestManager.getPostById(post.id)
     })
     it('post should be deleted', async () => {
         const {newBlog} = await blogsTestManager.createBlog()
         const {post} = await postsTestManager.createPost(newBlog.id, newBlog.name)
-        await postsTestManager.deletePost(post.id)
+        post.id && await postsTestManager.deletePost(post.id)
     })
     it(`post shouldn't be deleted`, async () => {
         await postsTestManager.deletePost('23', HTTP_STATUSES.NOT_FOUND_404)
@@ -69,8 +76,8 @@ describe('test for posts', () => {
             shortDescription: '123',
             blogId: newBlog.id
         }
-        await postsTestManager.updatedPost(post.id, updatedData)
-        const updatedPost: PostViewModelType = await postsTestManager.getPostById(post.id)
+        post.id &&    await postsTestManager.updatedPost(post.id, updatedData)
+        const updatedPost: PostViewModelType =post.id &&  await postsTestManager.getPostById(post.id)
         expect(updatedPost).toEqual({
             id: post.id,
             blogId: newBlog.id,
@@ -94,7 +101,7 @@ describe('test for posts', () => {
             .auth('admin', 'qwerty', {type: 'basic'})
             .send(updatedData)
             .expect(HTTP_STATUSES.BAD_REQUEST_400, {
-                errorsMessages: [ { field: 'title', message: 'title is required' },
+                errorsMessages: [{field: 'title', message: 'title is required'},
                 ]
             })
 

@@ -1,7 +1,7 @@
 import request from 'supertest';
-import {app, routerPaths} from '../settings';
-import {BlogInputModelType} from '../models/blogModels';
-import {HTTP_STATUSES, HttpStatusType} from './httpStatuses';
+import {app, routerPaths} from '../../settings';
+import {BlogInputModelType} from '../../models/blogModels';
+import {HTTP_STATUSES, HttpStatusType} from '../httpStatuses';
 
 
 const data: BlogInputModelType = {

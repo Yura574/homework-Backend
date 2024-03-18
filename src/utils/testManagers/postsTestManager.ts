@@ -1,7 +1,7 @@
-import {PostInputModelType, PostViewModelType} from '../models/blogModels';
+import {PostInputModelType, PostViewModelType} from '../../models/blogModels';
 import request from 'supertest';
-import {app, routerPaths} from '../settings';
-import {HTTP_STATUSES, HttpStatusType} from './httpStatuses';
+import {app, routerPaths} from '../../settings';
+import {HTTP_STATUSES, HttpStatusType} from '../httpStatuses';
 
 
 export const postsTestManager = {

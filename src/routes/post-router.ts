@@ -31,6 +31,7 @@ export type ResponsePostType<R> = Response<R>
 
 
 postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModelType<PostItem[]>>) => {
+    console.log('posts')
     const posts: ReturnViewModelType<PostItem[]> = await PostService.getPosts(req.query)
 
     res.send(posts)

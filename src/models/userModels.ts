@@ -19,3 +19,16 @@ export type UserItemType ={
     email: string,
     createdAt: string
 }
+
+export type UserInputModel = {
+    login: string
+    password: string
+    email: string
+}
+
+export type UserViewModel = {
+    id: string
+    login: string
+    createdAt: string
+    email: string
+}
