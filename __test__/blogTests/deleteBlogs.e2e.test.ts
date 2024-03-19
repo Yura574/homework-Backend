@@ -12,17 +12,17 @@ describe('tests for /blogs', () => {
     });
 
 
-    describe('delete blog', () => {
+    describe('delete blog specified by id', () => {
+
         it('blog should be deleted', async () => {
-            const newBlog = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog()
+            if (newBlog) {
+                await blogsTestManager.deleteBlog(newBlog.id)
 
-            await blogsTestManager.deleteBlog(newBlog.id)
-
-            await blogsTestManager.getBlogById(newBlog.id, HTTP_STATUSES.NOT_FOUND_404)
+                await blogsTestManager.getBlogById(newBlog.id, HTTP_STATUSES.NOT_FOUND_404)
+            }
         })
-    })
 
-    describe('should`t be deleted', () => {
         it(`blog shouldn't be deleted`, async () => {
             await blogsTestManager.deleteBlog('23', HTTP_STATUSES.NOT_FOUND_404)
         })

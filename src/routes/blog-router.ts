@@ -7,9 +7,9 @@ import {ValidateError} from '../utils/validateError';
 import {BlogService} from '../domain/blogService';
 import {validationResult} from 'express-validator';
 import {postValidation} from '../validators/post-validators';
-import {BlogViewModel} from "../models/blogModels";
+import {BlogPostInputModel, BlogViewModel} from "../models/blogModels";
 import {ReturnViewModelType} from "../models/commonModels";
-import {PostInputModel} from "../models/postModels";
+import {validateId} from "../validators/userValidators";
 
 export const blogRouter = express.Router()
 
@@ -81,7 +81,7 @@ blogRouter.get('/:id', findBlog, async (req: RequestWithParams<ParamsType>, res:
 
 })
 
-blogRouter.get('/:id/posts', findBlog, async (
+blogRouter.get('/:id/posts',  findBlog, async (
     req: RequestWithParamsAndQuery<ParamsType, GetPostsType>,
     res: Response) => {
 
@@ -105,7 +105,7 @@ blogRouter.get('/:id/posts', findBlog, async (
 
 
 })
-blogRouter.post('/:id/posts', authMiddleware, postValidation(), async (req: RequestType<ParamsType, PostInputModel, {}>, res: Response) => {
+blogRouter.post('/:id/posts', authMiddleware, validateId, postValidation(), async (req: RequestType<ParamsType, BlogPostInputModel, {}>, res: Response) => {
 
     const isError = ValidateError(req, res)
     if (isError) {

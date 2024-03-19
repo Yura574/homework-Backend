@@ -11,25 +11,25 @@ export const findPost = param('id').custom(async (id) => {
     return true
 }).withMessage({field: 'id', message: 'post not found'})
 
-const titleValidator = body('title').trim()
+const titleValidator = body('title')
     .notEmpty().withMessage({field: 'title', message: 'title is required'})
     .isString().withMessage({field: 'title', message: 'title should be string'})
-    .isLength({min: 1, max: 30}).withMessage({field: 'title', message: 'max length 30 symbols'})
+    .isLength({min: 1, max: 30}).withMessage({field: 'title', message: 'max length title 30 symbols'})
 
-const shortDescriptionValidator = body('shortDescription').trim()
+const shortDescriptionValidator = body('shortDescription')
     .notEmpty().withMessage({field: 'shortDescription', message: 'shortDescription is required'})
     .isString().withMessage({field: 'shortDescription', message: 'shortDescription should be string'})
-    .isLength({min: 1, max: 100}).withMessage({field: 'shortDescription', message: 'max length 100 symbols'})
+    .isLength({min: 1, max: 100}).withMessage({field: 'shortDescription', message: 'max length shortDescription 100 symbols'})
 
 
-const contentValidator = body('content').trim()
+const contentValidator = body('content')
     .notEmpty().withMessage({field: 'content', message: 'content is required'})
     .isString().withMessage({field: 'content', message: 'content should be string'})
-    .isLength({min: 1, max: 1000}).withMessage({field: 'content', message: 'max length 1000 symbols'})
-export const blogIdValidator = body('blogId').trim()
+    .isLength({min: 1, max: 1000}).withMessage({field: 'content', message: 'max length content 1000 symbols'})
+export const blogIdValidator = body('blogId')
     .notEmpty().withMessage({field: 'blogId', message: 'blogId is required'})
     .isString().withMessage({field: 'blogId', message: 'blogId should be string'})
-    // .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
+    .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
     .custom(async (value) => {
 
         const blog = await blogCollection.findOne({_id: new ObjectId(value)})

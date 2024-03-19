@@ -35,7 +35,7 @@ userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuer
     res.send(returnUsers)
 
 })
-userRouter.get('/:id', validateId, async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<UserViewModel>) => {
+userRouter.get('/:id', authMiddleware, validateId, async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<UserViewModel>) => {
     const isError = ValidateError(req, res)
     if (isError) {
         return

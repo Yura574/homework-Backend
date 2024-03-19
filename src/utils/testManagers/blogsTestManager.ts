@@ -1,22 +1,35 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../settings';
 import {HTTP_STATUSES, HttpStatusType} from '../httpStatuses';
-import {BlogInputModel} from "../../models/blogModels";
+import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../../models/blogModels";
 
 
-const data: BlogInputModel = {
-    name: 'new blog',
-    description: 'it the best blog',
-    websiteUrl: 'https://example.com/'
-}
+// const data: BlogInputModel = {
+//     name: 'new blog',
+//     description: 'it the best blog',
+//     websiteUrl: 'https://example.com/'
+// }
 export const blogsTestManager = {
-    async createBlog( statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
+
+    async getAllBlogs(statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
+        const res = await request(app)
+            .get(routerPaths.blogs)
+            .expect(statusCode)
+        return res.body
+    },
+
+    async createBlog(statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201, blogName?: string) {
+        const data: BlogInputModel = {
+            name: blogName? blogName :'new blog',
+            description: 'it the best blog',
+            websiteUrl: 'https://example.com/'
+        }
         const res = await request(app)
             .post(routerPaths.blogs)
             .auth('admin', 'qwerty')
             .send(data)
             .expect(statusCode)
-        let newBlog
+        let newBlog: BlogViewModel | null = null
         if (statusCode === HTTP_STATUSES.CREATED_201) {
             newBlog = res.body
             expect(newBlog).toEqual({
@@ -28,40 +41,57 @@ export const blogsTestManager = {
                 isMemberShip: false
             })
         }
-        return  newBlog
+        return {newBlog, data}
     },
 
     async getBlogById(id: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
         const res = await request(app)
             .get(`${routerPaths.blogs}/${id}`)
             .expect(statusCode)
-        const blog = res.body
-        return {res, blog}
+        return res.body
     },
 
     async deleteBlog(id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
-        await request(app)
+      const res =  await request(app)
             .delete(`${routerPaths.blogs}/${id}`)
             .auth('admin', 'qwerty')
             .expect(statusCode)
 
+        return res.status
     },
 
     async updateBlog(id: string, updateData: BlogInputModel, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
-    await request(app)
-        .put(`${routerPaths.blogs}/${id}`)
-        .auth('admin', 'qwerty', {type: 'basic'})
-        .send(updateData)
-        .expect(statusCode)
+        const res = await request(app)
+            .put(`${routerPaths.blogs}/${id}`)
+            .auth('admin', 'qwerty',)
+            .send(updateData)
+            .expect(statusCode)
 
-        const {blog} = await this.getBlogById(id)
-        expect(blog).toEqual({
-            id: expect.any(String),
-            name: 'lololo',
-            description: 'new des',
-            websiteUrl: blog.websiteUrl,
-            createdAt: expect.any(String),
-            isMemberShip: false
-        })
+        return res.status
+    },
+
+    async getPostsByBlogId(blogId: string, params?: string) {
+        const res = await request(app)
+            .get(`${routerPaths.blogs}/${blogId}/posts?${params}`)
+            .expect(HTTP_STATUSES.OK_200)
+        return res.body
+    },
+
+    async createPost(data: BlogPostInputModel, blogId: string, blogName: string, statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
+
+        const newPost = {
+            title: data.title,
+            content: data.content,
+            blogId,
+            shortDescription: data.shortDescription,
+            blogName,
+            createdAt: new Date().toISOString(),
+        }
+        const res = await request(app)
+            .post(`${routerPaths.blogs}/${blogId}/posts`)
+            .auth('admin', 'qwerty')
+            .send(newPost)
+            .expect(statusCode)
+        return res.body
     }
 }

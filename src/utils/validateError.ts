@@ -1,13 +1,14 @@
 import {validationResult} from 'express-validator';
 import {HTTP_STATUSES} from './httpStatuses';
 import {Request, Response} from 'express';
+import {ErrorResultModel} from "../models/commonModels";
 
 
 export const ValidateError = (req: Request, res: Response) => {
 
     const result = validationResult(req)
     if (!result.isEmpty()) {
-        const errors = {
+        const errors: ErrorResultModel = {
             errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
         }
         if (errors.errorsMessages[0].field === 'id') {

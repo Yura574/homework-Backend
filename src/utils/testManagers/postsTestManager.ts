@@ -5,9 +5,9 @@ import {PostInputModel, PostViewModel} from "../../models/postModels";
 
 
 export const postsTestManager = {
-    async createPost(blogId: string, blogName: string) {
+    async createPost(blogId: string, blogName: string, title? : string) {
         const data: PostInputModel = {
-            title: "new post",
+            title: title? title :"new post",
             content: "lololo",
             shortDescription: 'lalala',
             blogId

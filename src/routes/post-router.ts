@@ -6,7 +6,8 @@ import {blogIdValidator, findPost, postValidation} from '../validators/post-vali
 import {ValidateError} from '../utils/validateError';
 import {PostService} from '../domain/PostService';
 import {ReturnViewModelType} from "../models/commonModels";
-import {PostViewModel} from "../models/postModels";
+import {PostInputModel, PostViewModel} from "../models/postModels";
+import {RequestType} from "./blog-router";
 
 
 export const postRouter = express.Router()
@@ -45,7 +46,7 @@ postRouter.get('/:id', findPost, async (req: Request, res: Response) => {
     res.send(post)
 })
 
-postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
+postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (req: RequestType<{}, PostInputModel, {}>, res: Response) => {
 
     const isError = ValidateError(req, res)
     if (isError) {

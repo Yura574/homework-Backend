@@ -1,12 +1,13 @@
 import {BlogRepository} from '../repositories/blog-repository';
 import {
+    BlogPostInputModel,
     BlogViewModel
 } from '../models/blogModels';
 import {PostRepository} from '../repositories/post-repository';
 import {GetBlogsType, GetPostsType} from '../routes/blog-router';
 import {postCollection} from '../db/db';
 import {ReturnViewModelType} from "../models/commonModels";
-import {PostInputModel, PostViewModel} from "../models/postModels";
+import { PostViewModel} from "../models/postModels";
 
 
 export class BlogService {
@@ -78,7 +79,7 @@ export class BlogService {
         return returnBlog
     }
 
-    static async createPostForBlog(blogId: string, data: PostInputModel) {
+    static async createPostForBlog(blogId: string, data: BlogPostInputModel) {
         const {content, shortDescription, title} = data
         const newPost = await PostRepository.createPost({blogId, title, shortDescription, content})
         if (newPost) {
