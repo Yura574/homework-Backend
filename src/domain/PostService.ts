@@ -1,6 +1,7 @@
 import {PostRepository} from '../repositories/post-repository';
-import {PostItem, ReturnViewModelType} from '../models/blogModels';
 import {QueryType} from '../routes/post-router';
+import {PostViewModel} from "../models/postModels";
+import {ReturnViewModelType} from "../models/commonModels";
 
 
 export class PostService {
@@ -9,7 +10,7 @@ export class PostService {
 
         const {posts, totalCount} = await PostRepository.getPosts(+pageSize, +pageNumber, sortBy, sortDirection)
 
-        const editedPost: PostItem[] = posts.map(post => {
+        const editedPost: PostViewModel[] = posts.map(post => {
             return {
                 id: post?._id.toString(),
                 blogId: post?.blogId,
@@ -21,7 +22,7 @@ export class PostService {
             }
         })
         const pagesCount = Math.ceil(totalCount / +pageSize)
-        const returnPosts: ReturnViewModelType<PostItem[]> = {
+        const returnPosts: ReturnViewModelType<PostViewModel[]> = {
             page: +pageNumber,
             pageSize: +pageSize,
             pagesCount,

@@ -1,5 +1,5 @@
 import {HTTP_STATUSES, HttpStatusType} from "../httpStatuses";
-import {UserInputModel, UserItemType, UserViewModel} from "../../models/userModels";
+import {UserInputModel} from "../../models/userModels";
 import request from "supertest";
 import {app, routerPaths} from "../../settings";
 

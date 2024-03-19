@@ -1,8 +1,8 @@
-import {PostInputModelType, PostViewModelType} from '../models/blogModels';
 import {ObjectId} from 'mongodb';
 import {blogCollection, postCollection} from '../db/db';
+import {PostInputModel, PostViewModel} from "../models/postModels";
 
- 
+
 export class PostRepository {
     static async getPosts(pageSize: number, pageNumber: number, sortBy: string, sortDirection: 'asc' | 'desc') {
         const skip = (pageNumber - 1) * pageSize
@@ -47,24 +47,41 @@ export class PostRepository {
     }
 
     //
-    static async createPost(data: PostInputModelType) {
+    static async createPost(data: PostInputModel) {
+
+        const {blogId, content, shortDescription, title} = data
         const blog = await blogCollection.findOne({_id: new ObjectId(data.blogId)})
         //если блог не найден, пост нельзя создать
         if (!blog) {
             return false
         }
-
-
-        const {blogId, title, shortDescription, content} = data
-        const newPost: PostViewModelType = {
-            blogId,
-            blogName: blog.name,
+        const newPost = {
             title,
-            shortDescription,
             content,
-            createdAt: new Date().toISOString()
+            blogId,
+            shortDescription,
+            blogName: blog.name,
+            createdAt: new Date().toISOString(),
+
         }
-        return newPost
+        const {insertedId} = await postCollection.insertOne(newPost)
+        const post = await postCollection.findOne({_id: insertedId})
+        if (post) {
+            const newPost: PostViewModel = {
+                id: post._id.toString(),
+                title: post.title,
+                content: post.content,
+                shortDescription: post.shortDescription,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+            }
+            return newPost
+        }
+
+        return false
+
+
     }
 
     static async deletePost(id: string) {
@@ -73,7 +90,7 @@ export class PostRepository {
     }
 
 
-    static async updatePost(id: string, data: PostInputModelType) {
+    static async updatePost(id: string, data: PostInputModel) {
         const {title, shortDescription, content} = data
         const post = await postCollection.findOne({_id: new ObjectId(id)})
         if (post) {

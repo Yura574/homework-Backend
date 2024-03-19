@@ -1,12 +1,12 @@
-import {PostInputModelType, PostViewModelType} from '../../models/blogModels';
 import request from 'supertest';
 import {app, routerPaths} from '../../settings';
 import {HTTP_STATUSES, HttpStatusType} from '../httpStatuses';
+import {PostInputModel, PostViewModel} from "../../models/postModels";
 
 
 export const postsTestManager = {
     async createPost(blogId: string, blogName: string) {
-        const data: PostInputModelType = {
+        const data: PostInputModel = {
             title: "new post",
             content: "lololo",
             shortDescription: 'lalala',
@@ -14,9 +14,10 @@ export const postsTestManager = {
         }
         const res = await request(app)
             .post(`${routerPaths.posts}`)
-            .auth('admin', 'qwerty', {type: 'basic'})
+            .auth('admin', 'qwerty')
             .send(data)
             .expect(HTTP_STATUSES.CREATED_201)
+
         expect(res.body).toEqual({
             id: expect.any(String),
             title: data.title,
@@ -24,13 +25,14 @@ export const postsTestManager = {
             content: data.content,
             blogId,
             blogName,
+            createdAt: expect.any(String)
         })
-        const post: PostViewModelType = res.body
+        const post: PostViewModel = res.body
         return {res, post}
     },
 
     async getPostById(id: string) {
-      const res=   await request(app)
+        const res = await request(app)
             .get(`${routerPaths.posts}/${id}`)
             .expect(200)
         return res.body
@@ -43,7 +45,7 @@ export const postsTestManager = {
             .expect(statusCode)
     },
 
-    async updatedPost(id: string, data: PostInputModelType) {
+    async updatedPost(id: string, data: PostInputModel) {
 
         await request(app)
             .put(`${routerPaths.posts}/${id}`)

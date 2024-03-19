@@ -4,23 +4,16 @@ import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
 import {ValidateError} from '../utils/validateError';
-import {postCollection} from '../db/db';
-import {PostItem, ReturnViewModelType} from '../models/blogModels';
 import {PostService} from '../domain/PostService';
+import {ReturnViewModelType} from "../models/commonModels";
+import {PostViewModel} from "../models/postModels";
 
 
 export const postRouter = express.Router()
 
 type RequestPostType<P, B, Q> = Request<P, {}, B, Q>
-type ParamsType = {
-    id: string
-}
-type BodyType = {
-    blogId: string
-    title: string
-    shortDescription: string
-    content: string
-}
+
+
 export type QueryType = {
     pageNumber: string
     pageSize: string
@@ -30,10 +23,10 @@ export type QueryType = {
 export type ResponsePostType<R> = Response<R>
 
 
-postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModelType<PostItem[]>>) => {
-    console.log('posts')
-    const posts: ReturnViewModelType<PostItem[]> = await PostService.getPosts(req.query)
+postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModelType<PostViewModel[]>>) => {
 
+    const posts: ReturnViewModelType<PostViewModel[]> = await PostService.getPosts(req.query)
+    console.log('posts', posts)
     res.send(posts)
 })
 
@@ -61,18 +54,7 @@ postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (r
     const data = req.body
     const newPost = await PostRepository.createPost(data)
     if (newPost) {
-        const createdPost = await postCollection.insertOne(newPost)
-        const post = await postCollection.findOne({_id: createdPost.insertedId})
-        const returnPost = {
-            id: post?._id,
-            blogId: post?.blogId,
-            title: post?.title,
-            blogName: post?.blogName,
-            content: post?.content,
-            shortDescription: post?.shortDescription,
-            createdAt: post?.createdAt
-        }
-        res.status(HTTP_STATUSES.CREATED_201).send(returnPost)
+        res.status(HTTP_STATUSES.CREATED_201).send(newPost)
         return
     }
     res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')

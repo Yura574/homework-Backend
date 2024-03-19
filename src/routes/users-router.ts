@@ -7,10 +7,10 @@ import {ValidateError} from "../utils/validateError";
 import {UserRepository} from "../repositories/user-repository";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
 import {GetUsersQuery, UserItemType, UserViewModel,} from "../models/userModels";
-import {ReturnViewModelType} from "../models/blogModels";
 import {ResponsePostType} from "./post-router";
 import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
+import {ReturnViewModelType} from "../models/commonModels";
 
 export const userRouter = express.Router()
 

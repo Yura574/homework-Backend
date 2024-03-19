@@ -1,14 +1,12 @@
 import {BlogRepository} from '../repositories/blog-repository';
 import {
-    BlogItem,
-
-    PostInputType,
-    PostViewModelType,
-    ReturnViewModelType,
+    BlogViewModel
 } from '../models/blogModels';
 import {PostRepository} from '../repositories/post-repository';
 import {GetBlogsType, GetPostsType} from '../routes/blog-router';
 import {postCollection} from '../db/db';
+import {ReturnViewModelType} from "../models/commonModels";
+import {PostInputModel, PostViewModel} from "../models/postModels";
 
 
 export class BlogService {
@@ -17,7 +15,7 @@ export class BlogService {
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm} = data
         const {blogs, totalCount} = await BlogRepository.getAllBlogs(pageNumber, pageSize, sortBy, searchNameTerm, sortDirection)
         const pagesCount = Math.ceil(totalCount / pageSize)
-        const returnBlog: ReturnViewModelType<BlogItem[]> = {
+        const returnBlog: ReturnViewModelType<BlogViewModel[]> = {
             pagesCount,
             page: +pageNumber,
             pageSize: +pageSize,
@@ -28,7 +26,7 @@ export class BlogService {
                     name: b.name,
                     description: b.description,
                     websiteUrl: b.websiteUrl,
-                    isMembership: b.isMembership,
+                    isMemberShip: b.isMembership,
                     createdAt: b.createdAt
                 }
             })
@@ -38,10 +36,10 @@ export class BlogService {
 
     static async getBlogById(id: string) {
         const blog = await BlogRepository.getBlogById(id)
-        const returnBlog: BlogItem = {
+        const returnBlog: BlogViewModel = {
             id: blog!._id.toString(),
             createdAt: blog?.createdAt,
-            isMembership: blog?.isMembership,
+            isMemberShip: blog?.isMembership,
             websiteUrl: blog?.websiteUrl,
             name: blog?.name,
             description: blog?.description
@@ -58,7 +56,7 @@ export class BlogService {
             totalCount
         } = await PostRepository.getAllPostsByBlogId(blogId, pageNumber, pageSize, searchNameTerm, sortBy, sortDirection)
         const pagesCount = Math.ceil(totalCount / pageSize)
-        const returnBlog: ReturnViewModelType<PostViewModelType[]> = {
+        const returnBlog: ReturnViewModelType<PostViewModel[]> = {
             page: +pageNumber,
             pageSize: +pageSize,
             pagesCount,
@@ -80,7 +78,7 @@ export class BlogService {
         return returnBlog
     }
 
-    static async createPostForBlog(blogId: string, data: PostInputType) {
+    static async createPostForBlog(blogId: string, data: PostInputModel) {
         const {content, shortDescription, title} = data
         const newPost = await PostRepository.createPost({blogId, title, shortDescription, content})
         if (newPost) {

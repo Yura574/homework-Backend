@@ -3,12 +3,13 @@ import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
-import {BlogItem, PostInputType, ReturnViewModelType} from '../models/blogModels';
-import {blogCollection} from '../db/db';
 import {ValidateError} from '../utils/validateError';
 import {BlogService} from '../domain/blogService';
 import {validationResult} from 'express-validator';
 import {postValidation} from '../validators/post-validators';
+import {BlogViewModel} from "../models/blogModels";
+import {ReturnViewModelType} from "../models/commonModels";
+import {PostInputModel} from "../models/postModels";
 
 export const blogRouter = express.Router()
 
@@ -51,30 +52,11 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
     }
 
 
-    const {name, description, websiteUrl} = req.body
-    const newBlog = {
-        name,
-        description,
-        websiteUrl,
-        isMembership: false,
-        createdAt: new Date().toISOString()
-    }
-
-
-    const createdBlog = await blogCollection.insertOne(newBlog)
-    const blog = await blogCollection.findOne({_id: createdBlog.insertedId})
-    const returnBlog: BlogItem = {
-        id: blog!._id.toString(),
-        name,
-        description,
-        websiteUrl,
-        isMembership: blog?.isMembership,
-        createdAt: blog?.createdAt,
-    }
+    const returnBlog = await BlogRepository.createBlog(req.body)
     res.status(HTTP_STATUSES.CREATED_201).send(returnBlog)
     return;
 })
-blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: ResponseType<ReturnViewModelType<BlogItem[]>>) => {
+blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: ResponseType<ReturnViewModelType<BlogViewModel[]>>) => {
     const blogs = await BlogService.getBlogs(req.query)
 
     res.status(HTTP_STATUSES.OK_200).send(blogs)
@@ -123,7 +105,7 @@ blogRouter.get('/:id/posts', findBlog, async (
 
 
 })
-blogRouter.post('/:id/posts', authMiddleware, postValidation(), async (req: RequestType<ParamsType, PostInputType, {}>, res: Response) => {
+blogRouter.post('/:id/posts', authMiddleware, postValidation(), async (req: RequestType<ParamsType, PostInputModel, {}>, res: Response) => {
 
     const isError = ValidateError(req, res)
     if (isError) {

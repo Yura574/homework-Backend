@@ -1,5 +1,6 @@
 import {ObjectId} from 'mongodb';
 import {blogCollection} from '../db/db';
+import {BlogInputModel, BlogViewModel} from "../models/blogModels";
 
 export class BlogRepository {
     static async getBlogById(id: string) {
@@ -18,6 +19,28 @@ export class BlogRepository {
 
         const blogs = await blogCollection.find({name: {$regex: searchNameTerm ? new RegExp(searchNameTerm, 'i') : ''}}).sort(sortObject).skip(skip).limit(+pageSize).toArray();
         return {blogs, totalCount}
+    }
+
+   static async createBlog(data: BlogInputModel) {
+        const {name, description, websiteUrl} = data
+        const newBlog = {
+            name,
+            description,
+            websiteUrl,
+            isMembership: false,
+            createdAt: new Date().toISOString()
+        }
+        const createdBlog = await blogCollection.insertOne(newBlog)
+        const blog = await blogCollection.findOne({_id: createdBlog.insertedId})
+        const returnBlog: BlogViewModel = {
+            id: blog!._id.toString(),
+            name,
+            description,
+            websiteUrl,
+            isMemberShip: blog?.isMembership,
+            createdAt: blog?.createdAt,
+        }
+        return returnBlog
     }
 
     static async deleteBlog(id: string) {

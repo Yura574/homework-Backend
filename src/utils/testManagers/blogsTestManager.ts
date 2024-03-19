@@ -1,10 +1,10 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../settings';
-import {BlogInputModelType} from '../../models/blogModels';
 import {HTTP_STATUSES, HttpStatusType} from '../httpStatuses';
+import {BlogInputModel} from "../../models/blogModels";
 
 
-const data: BlogInputModelType = {
+const data: BlogInputModel = {
     name: 'new blog',
     description: 'it the best blog',
     websiteUrl: 'https://example.com/'
@@ -13,8 +13,9 @@ export const blogsTestManager = {
     async createBlog( statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
         const res = await request(app)
             .post(routerPaths.blogs)
-            .auth('admin', 'qwerty', {type: 'basic'})
+            .auth('admin', 'qwerty')
             .send(data)
+            .expect(statusCode)
         let newBlog
         if (statusCode === HTTP_STATUSES.CREATED_201) {
             newBlog = res.body
@@ -22,10 +23,12 @@ export const blogsTestManager = {
                 id: expect.any(String),
                 name: data.name,
                 description: data.description,
-                websiteUrl: data.websiteUrl
+                websiteUrl: data.websiteUrl,
+                createdAt: expect.any(String),
+                isMemberShip: false
             })
         }
-        return {res, newBlog}
+        return  newBlog
     },
 
     async getBlogById(id: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
@@ -44,7 +47,7 @@ export const blogsTestManager = {
 
     },
 
-    async updateBlog(id: string, updateData: BlogInputModelType, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
+    async updateBlog(id: string, updateData: BlogInputModel, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
     await request(app)
         .put(`${routerPaths.blogs}/${id}`)
         .auth('admin', 'qwerty', {type: 'basic'})
@@ -56,7 +59,9 @@ export const blogsTestManager = {
             id: expect.any(String),
             name: 'lololo',
             description: 'new des',
-            websiteUrl: blog.websiteUrl
+            websiteUrl: blog.websiteUrl,
+            createdAt: expect.any(String),
+            isMemberShip: false
         })
     }
 }
