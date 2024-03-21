@@ -17,6 +17,8 @@ export async function runDBTest() {
 }
 export const database = clientTest.db("backForTest")
 
-export const blogCollection = database.collection('blogs')
-export const postCollection = database.collection('posts')
-export const userCollection = database.collection('users')
+export const blogCollectionTest = database.collection('blogs')
+export const postCollectionTest = database.collection('posts')
+export const userCollectionTest = database.collection('users')
+
+export const commentCollectionTest = database.collection('comments')

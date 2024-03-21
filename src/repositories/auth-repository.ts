@@ -1,19 +1,26 @@
-import {AuthModelType} from "../models/authModel";
 import bcrypt from "bcrypt";
 import {UserRepository} from "./user-repository";
+import {LoginInputModel} from "../models/authModel";
+import jwt from "jsonwebtoken";
 
 
 export class AuthRepository{
-    static async auth (data: AuthModelType){
+    static async login (data: LoginInputModel){
         const {loginOrEmail, password} = data
-        const user = await UserRepository.foundUser(loginOrEmail)
-        if(!user){
+        const findUser = await UserRepository.foundUser(loginOrEmail)
+        if(!findUser){
             return false
         }
-        // console.log(user)
-        const isCompare =await bcrypt.compare(password, user.password)
-        console.log('compare', isCompare)
-        return isCompare;
+
+        const isCompare =await bcrypt.compare(password, findUser.password)
+        if(isCompare){
+            const payload = {
+                userId: findUser._id.toString(),
+            }
+            return  jwt.sign(payload, 'SECRET', {expiresIn: '1h'})
+
+        }
+        return false;
 
     }
 }

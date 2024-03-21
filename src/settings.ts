@@ -14,6 +14,7 @@ export const routerPaths = {
     users: '/users',
     blogs: '/blogs',
     posts: '/posts',
+    comments:'/comments',
     deleteAllData: '/testing/all-data'
 }
 export const app = express()

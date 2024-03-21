@@ -1,32 +1,28 @@
 import {NextFunction, Request, Response} from 'express';
+import jwt from "jsonwebtoken";
+import {ObjectId} from "mongodb";
 
 const login1 = 'admin'
 const password1 = 'qwerty'
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    if (req.headers['authorization'] !== "Basic YWRtaW46cXdlcnR5") {
+    if (!req.headers['authorization']) {
         res.sendStatus(401)
         return
     }
 
-    // OR
     const auth = req.headers['authorization']
+    const token = auth.split(' ')[1]
 
-    if (!auth) {
+
+    try {
+        const dataToken: any = jwt.verify(token, "SECRET")
+        req.user!.userId = new ObjectId(dataToken.userId)
+        next()
+
+    } catch (e) {
+
         res.sendStatus(401)
-        return
-    }
-    const [basic, token] = auth.split(' ')
-    if (basic !== "Basic") {
-        res.sendStatus(401)
-        return
     }
 
-    const decodedToken = Buffer.from(token, 'base64').toString()
-    const [login, password] = decodedToken.split(':')
-    if (login !== login1 || password !== password1) {
-        res.sendStatus(401)
-        return;
-
-    }
     return next()
 }

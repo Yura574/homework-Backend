@@ -24,6 +24,7 @@ export const UsersTestManager = {
     async getUserById(id: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
         await request(app)
             .get(`${routerPaths.users}/${id}`)
+            .auth('admin', 'qwerty')
             .expect(statusCode)
     },
 

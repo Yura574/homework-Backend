@@ -3,19 +3,22 @@ import {userCollection} from "../db/db";
 import {CreateUserBodyType, NewUserType} from "../routes/types/usersTypes";
 import bcrypt from 'bcrypt'
 import {ObjectId} from "mongodb";
+import jwt from 'jsonwebtoken'
 
 export class UserRepository {
-    static async foundUser (loginOrEmail: string){
-        const userLogin = await userCollection.findOne({login: {$regex: loginOrEmail}})
-        if(userLogin){
-           return userLogin
-        }
-        const userEmail = await userCollection.findOne({email: {$regex: loginOrEmail}})
-        if(userEmail){
-            return userEmail
+    static async foundUser(loginOrEmail: string) {
+        const userLogin = await userCollection.findOne({
+            $or: [
+                {login: {$regex: loginOrEmail}},
+                {email: {$regex: loginOrEmail}}
+            ]
+        })
+        if (userLogin) {
+            return userLogin
         }
         return false
     }
+
     static async getAllUsers(data: GetUsersQuery) {
 
         const {
@@ -28,18 +31,18 @@ export class UserRepository {
         } = data
 
         const totalCount = await userCollection.countDocuments({
-            $or:[
+            $or: [
                 {login: {$regex: searchLoginTerm ? new RegExp(searchLoginTerm, 'i') : ''}},
                 {email: {$regex: searchEmailTerm ? new RegExp(searchEmailTerm, 'i') : ''}}
             ]
 
-        }   )
+        })
         const pagesCount = Math.ceil(totalCount / +pageSize)
         const skip = (+pageNumber - 1) * +pageSize
         let sort: any = {}
         sort[sortBy] = sortDirection === 'asc' ? 1 : -1
         const users = await userCollection.find({
-            $or:[
+            $or: [
                 {login: {$regex: searchLoginTerm ? new RegExp(searchLoginTerm, 'i') : ''}},
                 {email: {$regex: searchEmailTerm ? new RegExp(searchEmailTerm, 'i') : ''}}
             ]
