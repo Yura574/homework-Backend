@@ -1,6 +1,6 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../../src/utils/testManagers/blogsTestManager';
+import {blogsTestManager} from '../1_testManagers/blogsTestManager';
 import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
 import {clientTest} from "../../src/db/dbTest";
 import {BlogInputModel, BlogViewModel} from "../../src/models/blogModels";

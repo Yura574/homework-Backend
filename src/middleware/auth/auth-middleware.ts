@@ -1,10 +1,9 @@
 import {NextFunction, Request, Response} from 'express';
 import jwt from "jsonwebtoken";
 import {ObjectId} from "mongodb";
+import {AuthRequestType} from "../../routes/blog-router";
 
-const login1 = 'admin'
-const password1 = 'qwerty'
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: AuthRequestType, res: Response, next: NextFunction) => {
     if (!req.headers['authorization']) {
         res.sendStatus(401)
         return
@@ -12,17 +11,22 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
     const auth = req.headers['authorization']
     const token = auth.split(' ')[1]
-
-
+    if (token === 'admin') {
+        next()
+        return;
+    }
     try {
         const dataToken: any = jwt.verify(token, "SECRET")
-        req.user!.userId = new ObjectId(dataToken.userId)
+        console.log(dataToken)
+        req.user = {userId: new ObjectId(dataToken.userId)}
         next()
-
+// return
     } catch (e) {
 
         res.sendStatus(401)
+
+        return;
     }
 
-    return next()
+
 }

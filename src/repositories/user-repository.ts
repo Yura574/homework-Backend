@@ -1,28 +1,53 @@
-import {GetUsersQuery} from "../models/userModels";
+import {GetUsersQuery, UserCreateModel, UserModel, UserUpdateModel} from "../models/userModels";
 import {userCollection} from "../db/db";
 import {CreateUserBodyType, NewUserType} from "../routes/types/usersTypes";
 import bcrypt from 'bcrypt'
 import {ObjectId} from "mongodb";
-import jwt from 'jsonwebtoken'
+import {ObjectResult, ResultStatus} from "../utils/objectResult";
+import {HTTP_STATUSES} from "../utils/httpStatuses";
+import {ConfirmEmailQuery} from "../models/authModel";
 
 export class UserRepository {
-    static async foundUser(loginOrEmail: string) {
-        const userLogin = await userCollection.findOne({
+    static async findUser(loginOrEmail: string) {
+        return await userCollection.findOne({
             $or: [
                 {login: {$regex: loginOrEmail}},
                 {email: {$regex: loginOrEmail}}
             ]
         })
+
+    }
+
+    static async uniqueUser(email: string, login: string) {
+        const userLogin = await userCollection.findOne({
+            login: {$regex: login}
+        })
         if (userLogin) {
-            return userLogin
+            const result: ObjectResult<boolean> = {
+                status: HTTP_STATUSES.BAD_REQUEST_400,
+                errorMessage: 'login already exist'
+            }
+            return result
         }
-        return false
+        const userEmail = await userCollection.findOne({
+            email: {$regex: email}
+        })
+        if (userEmail) {
+            const result: ObjectResult<boolean> = {
+                status: HTTP_STATUSES.BAD_REQUEST_400,
+                errorMessage: 'email already exist'
+            }
+            return result
+        }
+
+        return null
     }
 
     static async getAllUsers(data: GetUsersQuery) {
 
         const {
-            pageSize = 10,
+            pageSize
+                = 10,
             pageNumber = '1',
             sortBy = 'createdAt',
             sortDirection = 'desc',
@@ -51,22 +76,19 @@ export class UserRepository {
         return {users, totalCount, pagesCount, pageNumber, pageSize}
     }
 
+    static async createUser(user: UserCreateModel) {
 
-    static async createUser(body: CreateUserBodyType) {
-        const {login, email, password} = body
-
-        const hashPassword = await bcrypt.hash(password, 10)
-
-        const newUser: NewUserType = {
-            email,
-            login,
-            password: hashPassword,
-            createdAt: new Date().toISOString()
-        }
-
-        const createdUser = await userCollection.insertOne(newUser)
+        const createdUser = await userCollection.insertOne(user)
         return await userCollection.findOne({_id: createdUser.insertedId})
 
+    }
+
+    static async getUserById(userId: ObjectId) {
+        return await userCollection.findOne({_id: userId})
+    }
+
+    static async updateUser(data: UserModel) {
+        await userCollection.replaceOne({_id: data.id},  data)
     }
 
     static async deleteUser(id: string) {

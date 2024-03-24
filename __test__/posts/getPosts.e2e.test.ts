@@ -1,23 +1,30 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../../src/utils/testManagers/blogsTestManager';
-import {postsTestManager} from '../../src/utils/testManagers/postsTestManager';
+import {blogsTestManager} from '../1_testManagers/blogsTestManager';
+import {postsTestManager} from '../1_testManagers/postsTestManager';
 import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
-import {clientTest} from "../../src/db/dbTest";
 import {PostViewModel} from "../../src/models/postModels";
+import {MongoMemoryServer} from "mongodb-memory-server";
+import {appConfig} from "../../src/appConfig";
+import {db} from "../../src/db/db";
 
 
 describe('test for posts', () => {
+    beforeAll(async ()=> {
+        const mongoServer = await  MongoMemoryServer.create()
+        appConfig.MONGO_URL = mongoServer.getUri()
+        await db.run()
+    })
     beforeEach(async () => {
-        await clientTest.connect()
 
         await request(app)
             .delete('/testing/all-data')
     })
     afterAll(async () => {
-        await clientTest.close();
+        await db.client.close();
     });
-    describe('returns comments for specified post', async () => {
+
+    it('returns comments for specified post', async () => {
         const {newBlog} = await blogsTestManager.createBlog()
         if (newBlog) {
             const post = await postsTestManager.createPost(newBlog.id, newBlog.name)

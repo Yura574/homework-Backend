@@ -10,6 +10,8 @@ import {postValidation} from '../validators/post-validators';
 import {BlogPostInputModel, BlogViewModel} from "../models/blogModels";
 import {ReturnViewModelType} from "../models/commonModels";
 import {validateId} from "../validators/userValidators";
+import {ObjectId} from "mongodb";
+import {EmailService} from "../service/EmailService";
 
 export const blogRouter = express.Router()
 
@@ -19,6 +21,9 @@ type RequestWithParams<P> = Request<P, {}, {}, {}>
 export type RequestWithQuery<Q> = Request<{}, {}, {}, Q>
 export type RequestWithParamsAndQuery<P, Q> = Request<P, {}, {}, Q>
 export type RequestType<P, B, Q> = Request<P, {}, B, Q>
+export interface AuthRequestType extends Request {
+    user?: { userId: ObjectId }
+}
 
 export type ResponseType<R> = Response<R>
 
@@ -58,6 +63,7 @@ blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBo
 })
 blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: ResponseType<ReturnViewModelType<BlogViewModel[]>>) => {
     const blogs = await BlogService.getBlogs(req.query)
+
 
     res.status(HTTP_STATUSES.OK_200).send(blogs)
     return

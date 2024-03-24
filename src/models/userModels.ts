@@ -1,3 +1,5 @@
+import {ObjectId} from "mongodb";
+
 export type CreateUserModel = {
     userName: string
 }
@@ -31,4 +33,32 @@ export type UserViewModel = {
     login: string
     createdAt: string
     email: string
+}
+export type UserModel = {
+    id: ObjectId,
+    email: string,
+    login: string,
+    password: string,
+    createdAt: Date,
+    emailConfirmation: {
+        confirmationCode: string,
+        expirationDate: Date
+        isConfirm: boolean
+    }
+}
+
+export type UserCreateModel ={
+    email: string,
+    login: string,
+    password: string,
+    createdAt: Date,
+    emailConfirmation: {
+        confirmationCode: string,
+        expirationDate: Date
+        isConfirm: boolean
+    }
+}
+
+export type UserUpdateModel = {
+    isConfirm: boolean
 }

@@ -1,7 +1,7 @@
 import request from 'supertest';
-import {app, routerPaths} from '../../settings';
-import {HTTP_STATUSES, HttpStatusType} from '../httpStatuses';
-import {PostInputModel, PostViewModel} from "../../models/postModels";
+import {app, routerPaths} from '../../src/settings';
+import {HTTP_STATUSES, HttpStatusType} from '../../src/utils/httpStatuses';
+import {PostInputModel, PostViewModel} from "../../src/models/postModels";
 
 
 export const postsTestManager = {
@@ -14,7 +14,7 @@ export const postsTestManager = {
         }
         const res = await request(app)
             .post(`${routerPaths.posts}`)
-            .auth('admin', 'qwerty')
+            .auth('admin', {type: 'bearer'})
             .send(data)
             .expect(HTTP_STATUSES.CREATED_201)
 
@@ -41,7 +41,7 @@ export const postsTestManager = {
     async deletePost(id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
         await request(app)
             .delete(`${routerPaths.posts}/${id}`)
-            .auth('admin', 'qwerty', {type: 'basic'})
+            .auth('admin', {type: 'bearer'})
             .expect(statusCode)
     },
 
@@ -49,7 +49,7 @@ export const postsTestManager = {
 
         await request(app)
             .put(`${routerPaths.posts}/${id}`)
-            .auth('admin', 'qwerty')
+            .auth('admin', {type: 'bearer'})
             .send(data)
             .expect(204)
 

@@ -1,6 +1,6 @@
 import request from 'supertest'
 import {app, routerPaths} from '../../src/settings';
-import {UsersTestManager} from "../../src/utils/testManagers/usersTestManager";
+import {UsersTestManager} from "../1_testManagers/usersTestManager";
 import {UserInputModel, UserItemType} from "../../src/models/userModels";
 import {HTTP_STATUSES} from "../../src/utils/httpStatuses";
 import {clientTest} from "../../src/db/dbTest";

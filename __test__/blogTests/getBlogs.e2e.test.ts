@@ -1,22 +1,29 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../src/settings';
-import {clientTest} from "../../src/db/dbTest";
 import {HTTP_STATUSES} from "../../src/utils/httpStatuses";
-import {blogsTestManager} from "../../src/utils/testManagers/blogsTestManager";
-import {postsTestManager} from "../../src/utils/testManagers/postsTestManager";
+import {blogsTestManager} from "../1_testManagers/blogsTestManager";
+import {postsTestManager} from "../1_testManagers/postsTestManager";
 import {BlogViewModel} from "../../src/models/blogModels";
 import {PostViewModel} from "../../src/models/postModels";
 import {ReturnViewModelType} from "../../src/models/commonModels";
+import {appConfig} from "../../src/appConfig";
+import {MongoMemoryServer} from "mongodb-memory-server";
+import {db} from "../../src/db/db";
 
 
 describe('tests for /blogs', () => {
-    beforeAll(async () => {
-        await clientTest.connect()
+    beforeAll(async ()=> {
+        const mongoServer = await  MongoMemoryServer.create()
+        appConfig.MONGO_URL = mongoServer.getUri()
+        await db.run()
+    })
+    beforeEach(async () => {
+
         await request(app)
             .delete('/testing/all-data')
     })
     afterAll(async () => {
-        await clientTest.close();
+        await db.client.close();
     });
 
     describe('returns blogs with paging', () => {

@@ -11,6 +11,7 @@ import {ResponsePostType} from "./post-router";
 import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {ReturnViewModelType} from "../models/commonModels";
+import {UserService} from "../service/UserService";
 
 export const userRouter = express.Router()
 
@@ -59,21 +60,16 @@ userRouter.get('/:id', authMiddleware, validateId, async (req: RequestType<Param
 
 })
 
-userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{}, CreateUserBodyType, {}>, res: ResponseType<{}>) => {
+userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{}, CreateUserBodyType, {}>, res: ResponseType<ReturnsUserType>) => {
     const isError = ValidateError(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку,
     if (isError) return
-
-    const newUser = await UserRepository.createUser(req.body)
+const newUser = await UserService.createUser(req.body, res)
+    // const newUser = await UserRepository.createUser(req.body)
 
     if (newUser) {
-        const user: ReturnsUserType = {
-            id: newUser._id.toString(),
-            createdAt: newUser.createdAt,
-            login: newUser.login,
-            email: newUser.email
-        }
-        res.status(HTTP_STATUSES.CREATED_201).send(user)
+
+        res.status(HTTP_STATUSES.CREATED_201).send(newUser)
         return
     }
 

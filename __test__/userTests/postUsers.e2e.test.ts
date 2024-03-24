@@ -1,19 +1,27 @@
 import request from 'supertest'
 import {app, routerPaths} from '../../src/settings';
-import {UsersTestManager} from "../../src/utils/testManagers/usersTestManager";
+import {UsersTestManager} from "../1_testManagers/usersTestManager";
 import {UserInputModel, UserItemType} from "../../src/models/userModels";
-import {clientTest} from "../../src/db/dbTest";
+import {MongoMemoryServer} from "mongodb-memory-server";
+import {appConfig} from "../../src/appConfig";
+import {db} from "../../src/db/db";
 
 
 describe('tests for /users', () => {
+    beforeAll(async ()=> {
+        const mongoServer = await  MongoMemoryServer.create()
+        appConfig.MONGO_URL = mongoServer.getUri()
+        await db.run()
+    })
     beforeEach(async () => {
+
         await request(app)
             .delete('/testing/all-data')
     })
-
     afterAll(async () => {
-        await clientTest.close();
+        await db.client.close();
     });
+
 
 
     it('should create new user', async () => {

@@ -1,7 +1,7 @@
 import request from "supertest";
-import {app, routerPaths} from "../../settings";
-import {CommentInputModel} from "../../models/commentModel";
-import {HTTP_STATUSES, HttpStatusType} from "../httpStatuses";
+import {app, routerPaths} from "../../src/settings";
+import {CommentInputModel} from "../../src/models/commentModel";
+import {HTTP_STATUSES, HttpStatusType} from "../../src/utils/httpStatuses";
 
 
 export const commentsTestManager = {

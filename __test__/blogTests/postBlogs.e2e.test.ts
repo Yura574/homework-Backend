@@ -1,23 +1,32 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../../src/utils/testManagers/blogsTestManager';
-import {clientTest} from "../../src/db/dbTest";
+import {blogsTestManager} from '../1_testManagers/blogsTestManager';
 import {HTTP_STATUSES} from "../../src/utils/httpStatuses";
 import {PostViewModel} from "../../src/models/postModels";
 import {BlogPostInputModel} from "../../src/models/blogModels";
+import {MongoMemoryServer} from "mongodb-memory-server";
+import {appConfig} from "../../src/appConfig";
+import {db} from "../../src/db/db";
 
 const dataBlogPost: BlogPostInputModel = {
     title: 'blogPostInput',
-    shortDescription: 'lololo',
+    shortDescription: 'description',
     content: '1234'
 }
 describe('tests for /blogs', () => {
     beforeAll(async () => {
-        await clientTest.connect()
+        const mongoServer = await MongoMemoryServer.create()
+        appConfig.MONGO_URL = mongoServer.getUri()
+        await db.run()
+    })
+    beforeEach(async () => {
+        await request(app)
+            .delete('/testing/all-data')
     })
     afterAll(async () => {
-        await clientTest.close();
+        await db.client.close();
     });
+
 
     describe('create new blog', () => {
         it('should create new blogs', async () => {
@@ -52,7 +61,7 @@ describe('tests for /blogs', () => {
         it('all fields should be string', async () => {
             const res = await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', 'qwerty')
+                .auth('admin', {type: 'bearer'})
                 .send({
                     name: 43,
                     description: true,
@@ -81,7 +90,7 @@ describe('tests for /blogs', () => {
         it('all fields is required', async () => {
             await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', 'qwerty')
+                .auth('admin', {type: 'bearer'})
                 .send({
                     name: null,
                     description: null,
@@ -109,7 +118,7 @@ describe('tests for /blogs', () => {
         it('max length fields', async () => {
             await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', 'qwerty')
+                .auth('admin', {type: 'bearer'})
                 .send({
                     name: 'qwertyuiopqwerasdsfqwertyuiopqwerasdsf',
                     description: 'description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description ',
@@ -138,7 +147,7 @@ describe('tests for /blogs', () => {
         it('websiteUrl should be correct pattern', async () => {
             await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', 'qwerty')
+                .auth('admin', {type: 'bearer'})
                 .send({name: 'new blog', description: 'true', websiteUrl: "https://examp"})
                 .expect(HTTP_STATUSES.BAD_REQUEST_400, {
                     errorsMessages: [
@@ -275,7 +284,7 @@ describe('tests for /blogs', () => {
                     title: 'titleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwertytitleqwerty',
                     content: 'qweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasdqweqsaadsdasdasdasd',
                     blogId: newBlog.id,
-                    shortDescription: 'asasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiuasasas123dashashduashdiu',
+                    shortDescription: 'FailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescriptionFailDescription',
                     blogName: newBlog.name,
                     createdAt: new Date().toISOString(),
                 }

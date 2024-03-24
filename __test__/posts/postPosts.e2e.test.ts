@@ -1,11 +1,11 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../../src/utils/testManagers/blogsTestManager';
-import {postsTestManager} from '../../src/utils/testManagers/postsTestManager';
+import {blogsTestManager} from '../1_testManagers/blogsTestManager';
+import {postsTestManager} from '../1_testManagers/postsTestManager';
 import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
 import {clientTest} from "../../src/db/dbTest";
 import {PostViewModel} from "../../src/models/postModels";
-import {commentsTestManager} from "../../src/utils/testManagers/commentsTestManager";
+import {commentsTestManager} from "../1_testManagers/commentsTestManager";
 import {CommentInputModel} from "../../src/models/commentModel";
 
 

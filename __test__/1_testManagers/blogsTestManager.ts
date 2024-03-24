@@ -1,7 +1,7 @@
 import request from 'supertest';
-import {app, routerPaths} from '../../settings';
-import {HTTP_STATUSES, HttpStatusType} from '../httpStatuses';
-import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../../models/blogModels";
+import {app, routerPaths} from '../../src/settings';
+import {HTTP_STATUSES, HttpStatusType} from '../../src/utils/httpStatuses';
+import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../../src/models/blogModels";
 
 
 // const data: BlogInputModel = {
@@ -26,7 +26,7 @@ export const blogsTestManager = {
         }
         const res = await request(app)
             .post(routerPaths.blogs)
-            .auth('admin', 'qwerty')
+            .auth('admin', {type: 'bearer'})
             .send(data)
             .expect(statusCode)
         let newBlog: BlogViewModel | null = null
@@ -54,7 +54,7 @@ export const blogsTestManager = {
     async deleteBlog(id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
       const res =  await request(app)
             .delete(`${routerPaths.blogs}/${id}`)
-            .auth('admin', 'qwerty')
+          .auth('admin', {type: 'bearer'})
             .expect(statusCode)
 
         return res.status
@@ -63,7 +63,7 @@ export const blogsTestManager = {
     async updateBlog(id: string, updateData: BlogInputModel, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
         const res = await request(app)
             .put(`${routerPaths.blogs}/${id}`)
-            .auth('admin', 'qwerty',)
+            .auth('admin', {type: 'bearer'})
             .send(updateData)
             .expect(statusCode)
 
@@ -89,7 +89,7 @@ export const blogsTestManager = {
         }
         const res = await request(app)
             .post(`${routerPaths.blogs}/${blogId}/posts`)
-            .auth('admin', 'qwerty')
+            .auth('admin', {type: 'bearer'})
             .send(newPost)
             .expect(statusCode)
         return res.body

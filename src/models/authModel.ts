@@ -1,6 +1,10 @@
 
 
 
+export type ConfirmEmailQuery = {
+  email: string
+    code: string
+}
 
 export type LoginInputModel = {
     loginOrEmail: string,

@@ -1,7 +1,7 @@
-import {HTTP_STATUSES, HttpStatusType} from "../httpStatuses";
-import {UserInputModel} from "../../models/userModels";
+import {HTTP_STATUSES, HttpStatusType} from "../../src/utils/httpStatuses";
+import {UserInputModel} from "../../src/models/userModels";
 import request from "supertest";
-import {app, routerPaths} from "../../settings";
+import {app, routerPaths} from "../../src/settings";
 
 
 export const UsersTestManager = {
@@ -15,10 +15,11 @@ export const UsersTestManager = {
         expect(res.body).toEqual({
             page: 1,
             pageSize: 10,
-            totalCount: 0,
-            pagesCount: 0,
-            items: []
+            totalCount: 1,
+            pagesCount: 1,
+            items: expect.any(Array)
         })
+        return res.body
     },
 
     async getUserById(id: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
@@ -32,7 +33,7 @@ export const UsersTestManager = {
 
         const res = await request(app)
             .post(`${routerPaths.users}`)
-            .auth('admin', 'qwerty')
+            .auth('admin', {type:'bearer'})
             .send(data)
             .expect(statusCode)
 
@@ -49,15 +50,11 @@ export const UsersTestManager = {
         }
         return {createdUser}
     },
-    async createTestUser( statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
-        const data: UserInputModel = {
-            email: 'yura574@gmail.com',
-            login: 'yura',
-            password: '123456'
-        }
+    async createTestUser( data: UserInputModel,statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
+
         const res = await request(app)
             .post(`${routerPaths.users}`)
-            .auth('admin', 'qwerty')
+            .auth('admin', {type:'bearer'})
             .send(data)
             .expect(statusCode)
 
