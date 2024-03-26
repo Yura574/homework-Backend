@@ -1,6 +1,7 @@
 import {ObjectId} from 'mongodb';
 import {blogCollection} from '../db/db';
 import {BlogInputModel, BlogViewModel} from "../models/blogModels";
+import {ObjectResult, ResultStatus} from "../utils/objectResult";
 
 export class BlogRepository {
     static async getBlogById(id: string) {
@@ -21,7 +22,7 @@ export class BlogRepository {
         return {blogs, totalCount}
     }
 
-   static async createBlog(data: BlogInputModel) {
+   static async createBlog(data: BlogInputModel): Promise<ObjectResult<BlogViewModel | null>> {
         const {name, description, websiteUrl} = data
         const newBlog = {
             name,
@@ -30,17 +31,30 @@ export class BlogRepository {
             isMembership: false,
             createdAt: new Date().toISOString()
         }
-        const createdBlog = await blogCollection.insertOne(newBlog)
-        const blog = await blogCollection.findOne({_id: createdBlog.insertedId})
-        const returnBlog: BlogViewModel = {
-            id: blog!._id.toString(),
-            name,
-            description,
-            websiteUrl,
-            isMemberShip: blog?.isMembership,
-            createdAt: blog?.createdAt,
+
+        try {
+            const createdBlog = await blogCollection.insertOne(newBlog)
+            const blog = await blogCollection.findOne({_id: createdBlog.insertedId})
+            const returnBlog: BlogViewModel = {
+                id: blog!._id.toString(),
+                name,
+                description,
+                websiteUrl,
+                isMemberShip: blog?.isMembership,
+                createdAt: blog?.createdAt,
+            }
+            return {
+                status: ResultStatus.Created,
+                data: returnBlog
+            }
+        } catch (err) {
+            return {
+                status: ResultStatus.SomethingWasWrong,
+                errorMessage: 'Something was wrong',
+                data: null
+            }
         }
-        return returnBlog
+
     }
 
     static async deleteBlog(id: string) {

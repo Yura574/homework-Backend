@@ -1,63 +1,93 @@
 import {UserInputModel, UserModel} from "../models/userModels";
 import {UserRepository} from "../repositories/user-repository";
-import {ObjectResult} from "../utils/objectResult";
+import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {newUser} from "../utils/newUser";
 import {EmailService} from "./EmailService";
-import {HTTP_STATUSES} from "../utils/httpStatuses";
+import {v4} from "uuid";
 
 
 export class AuthService {
-    static async registration(data: UserInputModel) {
+    static async registration(data: UserInputModel): Promise<ObjectResult<string | null>> {
 
         const {email, login, password} = data
-        const isUserExist: ObjectResult<boolean> | null = await UserRepository.uniqueUser(email, login)
+        const isUserExist = await UserRepository.uniqueUser(email, login)
         if (isUserExist) {
-            return isUserExist
+            const user = await UserRepository.findUser(email)
+            //Пользователь уже зарегестрирован, но не подтвердил почту, высылаем код подтверждения еще раз
+            if (user?.emailConfirmation.isConfirm === false && email === email && user?.login === login) {
+                await EmailService.sendEmail(user.email, user.emailConfirmation.confirmationCode)
+                return {
+                    status: ResultStatus.Success,
+                    data: 'User already register, confirm code sent to email'
+                }
+            }
+            return {
+                status: ResultStatus.BadRequest,
+                errorMessage: isUserExist.errorMessage,
+                data: null
+            }
         }
 
         const user = await newUser(email, login, password)
 
         try {
             const createdUser = await UserRepository.createUser(user)
-            console.log(createdUser)
             if (createdUser) {
                 await EmailService.sendEmail(createdUser.email, createdUser.emailConfirmation.confirmationCode)
+                return {
+                    status: ResultStatus.Created,
+                    data: null
+                }
             }
-        } catch (err) {
-            console.log(err)
-
+            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+        } catch (e) {
+            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
         }
 
-        return
+
     }
 
-    static async confirmEmail(email: string, code: string) {
+    static async confirmEmail(email: string, code: string): Promise<ObjectResult<string | null>> {
         const user = await UserRepository.findUser(email)
-        if(user?.ememailConfirmation.isConfirm){
-            return {status: HTTP_STATUSES.BAD_REQUEST_400, errorMessage: 'email already confirmed'} as ObjectResult<{}>
+        if (!user) return {status: ResultStatus.BadRequest, errorMessage: 'User not found', data: null}
+        if (user?.emailConfirmation.isConfirm) {
+            return {status: ResultStatus.BadRequest, errorMessage: 'email already confirmed', data: null}
         }
 
-        if (user) {
-                if (user.emailConfirmation.confirmationCode === code &&
-                    user.emailConfirmation.expirationDate > new Date()) {
-                    const updateUser: UserModel = {
-                        id: user._id,
-                        email: user.email,
-                        login: user.login,
-                        createdAt: user.createdAt,
-                        password: user.password,
-                        emailConfirmation: {
-                            confirmationCode: user.ememailConfirmation.confirmationCode,
-                            isConfirm: true,
-                            expirationDate: user.ememailConfirmation.expirationDate
-                        }
-                    }
-
-                    await UserRepository.updateUser(updateUser)
-                    return {status: HTTP_STATUSES.OK_200, data: 'code confirmed successful'} as ObjectResult<string>
+        if (user.emailConfirmation.confirmationCode === code &&
+            user.emailConfirmation.expirationDate > new Date()) {
+            const updateUser: UserModel = {
+                id: user._id,
+                email: user.email,
+                login: user.login,
+                createdAt: user.createdAt,
+                password: user.password,
+                emailConfirmation: {
+                    confirmationCode: user.emailConfirmation.confirmationCode,
+                    isConfirm: true,
+                    expirationDate: user.emailConfirmation.expirationDate
                 }
-            return {status: HTTP_STATUSES.BAD_REQUEST_400, errorMessage: 'confirmation code invalid'}as ObjectResult<{}>
+            }
+            try {
+                await UserRepository.updateUser(updateUser)
+            } catch (e) {
+                return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+            }
+
+            // return {, data: 'code confirmed successful'}
+            return {status: ResultStatus.Success, data: 'Code confirmed successful'}
         }
-        return {status: HTTP_STATUSES.NOT_FOUND_404, errorMessage: 'user not found'} as ObjectResult<{}>
+        return {status: ResultStatus.BadRequest, errorMessage: 'Confirm code invalid', data: null}
+    }
+
+    static async resendingEmail(email: string): Promise<ObjectResult<null>> {
+        const user = await UserRepository.findUser(email)
+        if (!user) return {status: ResultStatus.BadRequest, errorMessage: 'User with this email not found', data: null}
+        if(user.emailConfirmation.isConfirm === true){
+            return {status: ResultStatus.BadRequest, errorMessage: 'Email already confirmed', data: null}
+        }
+        const confirmCode = v4()
+        await EmailService.sendEmail(email, confirmCode)
+        return {status: ResultStatus.Success, data: null}
     }
 }

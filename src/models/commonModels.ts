@@ -1,4 +1,4 @@
-export type ReturnViewModelType<Items> = {
+export type ReturnViewModel<Items> = {
     pagesCount: number,
     totalCount: number,
     page: number,

@@ -17,3 +17,11 @@ export type PostViewModel = {
     blogName: string
     createdAt?: string
 }
+export type NewPostModel = {
+    title: string,
+    content: string,
+    blogId: string,
+    shortDescription: string,
+    blogName: string,
+    createdAt: string,
+}

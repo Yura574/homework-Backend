@@ -1,6 +1,6 @@
 import {ObjectId} from 'mongodb';
-import {blogCollection, postCollection} from '../db/db';
-import {PostInputModel, PostViewModel} from "../models/postModels";
+import { postCollection} from '../db/db';
+import {NewPostModel, PostInputModel, PostViewModel} from "../models/postModels";
 
 
 export class PostRepository {
@@ -47,23 +47,7 @@ export class PostRepository {
     }
 
     //
-    static async createPost(data: PostInputModel) {
-
-        const {blogId, content, shortDescription, title} = data
-        const blog = await blogCollection.findOne({_id: new ObjectId(data.blogId)})
-        //если блог не найден, пост нельзя создать
-        if (!blog) {
-            return false
-        }
-        const newPost = {
-            title,
-            content,
-            blogId,
-            shortDescription,
-            blogName: blog.name,
-            createdAt: new Date().toISOString(),
-
-        }
+    static async createPost(newPost: NewPostModel) {
         const {insertedId} = await postCollection.insertOne(newPost)
         const post = await postCollection.findOne({_id: insertedId})
         if (post) {

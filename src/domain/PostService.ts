@@ -1,7 +1,10 @@
 import {PostRepository} from '../repositories/post-repository';
 import {QueryType} from '../routes/post-router';
-import {PostViewModel} from "../models/postModels";
-import {ReturnViewModelType} from "../models/commonModels";
+import {NewPostModel, PostInputModel, PostViewModel} from "../models/postModels";
+import {ReturnViewModel} from "../models/commonModels";
+import {blogCollection} from "../db/db";
+import {ObjectId} from "mongodb";
+import {ObjectResult, ResultStatus} from "../utils/objectResult";
 
 
 export class PostService {
@@ -22,7 +25,7 @@ export class PostService {
             }
         })
         const pagesCount = Math.ceil(totalCount / +pageSize)
-        const returnPosts: ReturnViewModelType<PostViewModel[]> = {
+        const returnPosts: ReturnViewModel<PostViewModel[]> = {
             page: +pageNumber,
             pageSize: +pageSize,
             pagesCount,
@@ -31,5 +34,36 @@ export class PostService {
         }
         return returnPosts
     }
+
+    static async createPost(data: PostInputModel): Promise<ObjectResult<PostViewModel | null>> {
+
+        const {blogId, content, shortDescription, title} = data
+        const blog = await blogCollection.findOne({_id: new ObjectId(data.blogId)})
+        //если блог не найден, пост нельзя создать
+        if (!blog) {
+            return {status: ResultStatus.BadRequest, errorMessage: 'Blog bot found', data: null}
+        }
+        const newPost: NewPostModel = {
+            title,
+            content,
+            blogId,
+            shortDescription,
+            blogName: blog.name,
+            createdAt: new Date().toISOString(),
+        }
+        const createdPost = await PostRepository.createPost(newPost)
+        if (!createdPost) return {
+            status: ResultStatus.SomethingWasWrong,
+            errorMessage: "Something was wrong",
+            data: null
+        }
+
+        return { status: ResultStatus.Created, data: createdPost}
+    }
+
+
+
+
+
 
 }

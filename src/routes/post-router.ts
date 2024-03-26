@@ -5,7 +5,7 @@ import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
 import {ValidateError} from '../utils/validateError';
 import {PostService} from '../domain/PostService';
-import {ReturnViewModelType} from "../models/commonModels";
+import {ReturnViewModel} from "../models/commonModels";
 import {PostInputModel, PostViewModel} from "../models/postModels";
 import {RequestType} from "./blog-router";
 
@@ -24,9 +24,9 @@ export type QueryType = {
 export type ResponsePostType<R> = Response<R>
 
 
-postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModelType<PostViewModel[]>>) => {
+postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModel<PostViewModel[]>>) => {
 
-    const posts: ReturnViewModelType<PostViewModel[]> = await PostService.getPosts(req.query)
+    const posts: ReturnViewModel<PostViewModel[]> = await PostService.getPosts(req.query)
     console.log('posts', posts)
     res.send(posts)
 })
@@ -53,7 +53,7 @@ postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (r
         return
     }
     const data = req.body
-    const newPost = await PostRepository.createPost(data)
+    const newPost = await PostService.createPost(data)
     if (newPost) {
         res.status(HTTP_STATUSES.CREATED_201).send(newPost)
         return

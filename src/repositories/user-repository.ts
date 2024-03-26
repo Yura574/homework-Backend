@@ -1,11 +1,6 @@
-import {GetUsersQuery, UserCreateModel, UserModel, UserUpdateModel} from "../models/userModels";
+import {GetUsersQuery, UserCreateModel, UserModel} from "../models/userModels";
 import {userCollection} from "../db/db";
-import {CreateUserBodyType, NewUserType} from "../routes/types/usersTypes";
-import bcrypt from 'bcrypt'
 import {ObjectId} from "mongodb";
-import {ObjectResult, ResultStatus} from "../utils/objectResult";
-import {HTTP_STATUSES} from "../utils/httpStatuses";
-import {ConfirmEmailQuery} from "../models/authModel";
 
 export class UserRepository {
     static async findUser(loginOrEmail: string) {
@@ -19,26 +14,12 @@ export class UserRepository {
     }
 
     static async uniqueUser(email: string, login: string) {
-        const userLogin = await userCollection.findOne({
-            login: {$regex: login}
-        })
-        if (userLogin) {
-            const result: ObjectResult<boolean> = {
-                status: HTTP_STATUSES.BAD_REQUEST_400,
-                errorMessage: 'login already exist'
-            }
-            return result
-        }
-        const userEmail = await userCollection.findOne({
-            email: {$regex: email}
-        })
-        if (userEmail) {
-            const result: ObjectResult<boolean> = {
-                status: HTTP_STATUSES.BAD_REQUEST_400,
-                errorMessage: 'email already exist'
-            }
-            return result
-        }
+
+        const userEmail = await userCollection.findOne({email: {$regex: email}})
+        if (userEmail) return {errorMessage: 'email already exist'}
+
+        const userLogin = await userCollection.findOne({login: {$regex: login}})
+        if (userLogin) return {errorMessage: 'login already exist'}
 
         return null
     }
@@ -88,7 +69,7 @@ export class UserRepository {
     }
 
     static async updateUser(data: UserModel) {
-        await userCollection.replaceOne({_id: data.id},  data)
+        await userCollection.replaceOne({_id: data.id}, data)
     }
 
     static async deleteUser(id: string) {

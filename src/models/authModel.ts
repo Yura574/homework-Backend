@@ -1,9 +1,13 @@
-
-
-
 export type ConfirmEmailQuery = {
-  email: string
+    email: string
     code: string
+}
+export type ResendingEmailBody = {
+    email: string
+}
+
+export type LoginResponse = {
+    accessToken: String
 }
 
 export type LoginInputModel = {

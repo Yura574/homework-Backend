@@ -1,6 +1,5 @@
 import {body, param} from "express-validator";
 import {userCollection} from "../db/db";
-import {ObjectId} from "mongodb";
 
 const fields = {
     login: 'login',
@@ -21,11 +20,11 @@ const fieldLength = {
 const {email, password, login} = fields
 const {passwordLength, loginLength} = fieldLength
 
-export const validateId = param('id').trim()
+export const validateId = param('id')
     .isLength({min: 24, max: 24}).withMessage({field: 'id', message: 'incorrect id'})
 
 
-const loginValidator = body(login).trim()
+const loginValidator = body(login)
     .notEmpty().withMessage({field: login, message: `${login} is required`})
     .isString().withMessage({field: login, message: `${login} should be string`})
     .isLength({min: loginLength.min, max: loginLength.max}).withMessage({
@@ -41,7 +40,7 @@ const loginValidator = body(login).trim()
         return true
     }).withMessage({field: login, message: `${login} already exist`})
 
-const passwordValidator = body(password).trim()
+const passwordValidator = body(password)
     .notEmpty().withMessage({field: password, message: `${password} is required`})
     .isString().withMessage({field: password, message: `${password}  should be string`})
     .isLength({min: passwordLength.min, max: passwordLength.max}).withMessage({
@@ -49,10 +48,10 @@ const passwordValidator = body(password).trim()
         message: `min length ${passwordLength.min} symbols, max length ${passwordLength.max} symbols`
     })
 
-const emailValidator = body(email).trim()
+export const emailValidator = body(email)
     .notEmpty().withMessage({field: email, message: `${email}  is required`})
     .isString().withMessage({field: email, message: `${email}  should be string`})
-    .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/).withMessage({field: email, message: `${email} incorrect`})
+    .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/).withMessage({field: email, message: `${email} incorrect`})
     .custom(async (email: string) => {
         const isLogin = await userCollection.findOne({email})
         if (isLogin) {

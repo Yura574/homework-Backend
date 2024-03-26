@@ -10,20 +10,21 @@ import {GetUsersQuery, UserItemType, UserViewModel,} from "../models/userModels"
 import {ResponsePostType} from "./post-router";
 import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
-import {ReturnViewModelType} from "../models/commonModels";
+import {ReturnViewModel} from "../models/commonModels";
 import {UserService} from "../service/UserService";
 
 export const userRouter = express.Router()
 
 
-userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuery>, res: ResponsePostType<ReturnViewModelType<UserItemType[]>>) => {
+userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuery>, res: ResponsePostType<ReturnViewModel<UserItemType[]>>) => {
     const {totalCount, users, pagesCount, pageSize, pageNumber} = await UserRepository.getAllUsers(req.query)
-    const returnUsers: ReturnViewModelType<UserItemType[]> = {
+    const returnUsers: ReturnViewModel<UserItemType[]> = {
         page: +pageNumber,
         pageSize: +pageSize,
         totalCount,
         pagesCount,
         items: users.map(user => {
+            console.log(user)
             return {
                 id: user._id.toString(),
                 email: user.email,

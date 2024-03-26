@@ -5,7 +5,7 @@ import {blogsTestManager} from "../1_testManagers/blogsTestManager";
 import {postsTestManager} from "../1_testManagers/postsTestManager";
 import {BlogViewModel} from "../../src/models/blogModels";
 import {PostViewModel} from "../../src/models/postModels";
-import {ReturnViewModelType} from "../../src/models/commonModels";
+import {ReturnViewModel} from "../../src/models/commonModels";
 import {appConfig} from "../../src/appConfig";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {db} from "../../src/db/db";
@@ -29,7 +29,7 @@ describe('tests for /blogs', () => {
     describe('returns blogs with paging', () => {
         it('returns empty array blogs with paging', async () => {
 
-            const blogs: ReturnViewModelType<BlogViewModel[]> = await blogsTestManager.getAllBlogs()
+            const blogs: ReturnViewModel<BlogViewModel[]> = await blogsTestManager.getAllBlogs()
 
             expect(blogs).toEqual({
                 pagesCount: 0,
@@ -46,7 +46,7 @@ describe('tests for /blogs', () => {
             for (let i = 0; i < 5; i++) {
                 await blogsTestManager.createBlog(HTTP_STATUSES.CREATED_201, 'blog' + i)
             }
-            const blogs: ReturnViewModelType<BlogViewModel[]> = await blogsTestManager.getAllBlogs()
+            const blogs: ReturnViewModel<BlogViewModel[]> = await blogsTestManager.getAllBlogs()
 
 
             expect(blogs.items.length).toBe(5)
@@ -87,7 +87,7 @@ describe('tests for /blogs', () => {
                 for (let i = 0; i < 5; i++) {
                     await postsTestManager.createPost(newBlog.id, newBlog.name, 'title' + i)
                 }
-                const posts: ReturnViewModelType<PostViewModel[]> = await blogsTestManager.getPostsByBlogId(newBlog.id)
+                const posts: ReturnViewModel<PostViewModel[]> = await blogsTestManager.getPostsByBlogId(newBlog.id)
                 expect(posts.items.length).toBe(5)
             }
 
@@ -100,7 +100,7 @@ describe('tests for /blogs', () => {
                     await postsTestManager.createPost(newBlog.id, newBlog.name, 'title' + i)
                 }
                 const params = 'pageNumber=2&pageSize=2&'
-                const posts: ReturnViewModelType<PostViewModel[]> = await blogsTestManager.getPostsByBlogId(newBlog.id, params)
+                const posts: ReturnViewModel<PostViewModel[]> = await blogsTestManager.getPostsByBlogId(newBlog.id, params)
                 expect(posts.items.length).toBe(2)
                 expect(posts).toEqual({
                     page: 2,

@@ -11,4 +11,4 @@ const password = body('password')
     .isString().withMessage({field: 'password', message: `password should be string`})
 
 
-export const authValidator = ()=> [loginOrEmail, password]
+export const loginValidator = ()=> [loginOrEmail, password]

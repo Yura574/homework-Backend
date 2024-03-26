@@ -1,15 +1,16 @@
-import {HttpStatusType} from "./httpStatuses";
-
-export type ObjectResult<T> = {
-    status: HttpStatusType
+export type ObjectResult<T = null> = {
+    status: ResultStatus
     errorMessage?: string
-    data?: T
+    data: T
 }
 
 export enum ResultStatus {
     Success = 'success',
+    Created = 'created',
+    NoContent = 'no content',
     NotFound = 'not found',
     Forbidden = 'forbidden',
     BadRequest = 'bad request',
-    Unauthorized = 'unauthorized'
+    Unauthorized = 'unauthorized',
+    SomethingWasWrong = 'something was wrong'
 }
