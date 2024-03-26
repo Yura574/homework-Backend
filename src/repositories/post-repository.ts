@@ -46,7 +46,6 @@ export class PostRepository {
         return {posts, totalCount}
     }
 
-    //
     static async createPost(newPost: NewPostModel) {
         const {insertedId} = await postCollection.insertOne(newPost)
         const post = await postCollection.findOne({_id: insertedId})

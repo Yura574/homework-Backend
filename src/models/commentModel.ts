@@ -11,5 +11,5 @@ export type CommentViewModel = {
         userLogin: string
     },
     createdAt: string
-
 }
+

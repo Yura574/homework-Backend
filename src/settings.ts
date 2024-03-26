@@ -5,10 +5,10 @@ import dotenv from 'dotenv';
 import {database} from './db/db';
 import {authRouter} from "./routes/auth-router";
 import {userRouter} from "./routes/users-router";
+import {commentsRouter} from "./routes/comment-router";
 
 dotenv.config()
 
-const a = 2
 export const routerPaths = {
     auth: '/auth',
     users: '/users',
@@ -25,6 +25,7 @@ app.use(routerPaths.auth, authRouter)
 app.use(routerPaths.users, userRouter)
 app.use(routerPaths.blogs, blogRouter)
 app.use(routerPaths.posts, postRouter)
+app.use(routerPaths.comments, commentsRouter)
 
 
 app.delete(routerPaths.deleteAllData, async (req: Request, res: Response) => {

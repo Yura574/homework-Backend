@@ -56,6 +56,7 @@ export class AuthService {
 
         if (user.emailConfirmation.confirmationCode === code &&
             user.emailConfirmation.expirationDate > new Date()) {
+            //устанавливаем свойсво isConfirm true, и заменяем весь объект в бд
             const updateUser: UserModel = {
                 id: user._id,
                 email: user.email,
@@ -74,7 +75,6 @@ export class AuthService {
                 return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
             }
 
-            // return {, data: 'code confirmed successful'}
             return {status: ResultStatus.Success, data: 'Code confirmed successful'}
         }
         return {status: ResultStatus.BadRequest, errorMessage: 'Confirm code invalid', data: null}
