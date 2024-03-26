@@ -1,18 +1,19 @@
 import {UserInputModel} from "../models/userModels";
 import {Response} from 'express'
-import {ObjectResult} from "../utils/objectResult";
+import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {UserRepository} from "../repositories/user-repository";
 import {newUser} from "../utils/newUser";
 import {ReturnsUserType} from "../routes/types/usersTypes";
+import {HTTP_STATUSES} from "../utils/httpStatuses";
 
 
 export class UserService {
     static async createUser(data: UserInputModel, res: Response) {
         const {email, login, password} = data
-        const isUserExist: ObjectResult<boolean> | null = await UserRepository.uniqueUser(email, login)
+        const isUserExist = await UserRepository.uniqueUser(email, login)
 
         if (isUserExist) {
-            res.status(isUserExist.status).send(isUserExist.errorMessage)
+            res.status(HTTP_STATUSES.BAD_REQUEST_400).send(isUserExist.errorMessage)
             return
         }
 

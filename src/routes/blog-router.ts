@@ -4,7 +4,7 @@ import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
 import {ValidateError} from '../utils/validateError';
-import {BlogService} from '../domain/blogService';
+import {BlogService} from '../service/BlogService';
 import {postValidation} from '../validators/post-validators';
 import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../models/blogModels";
 import {ReturnViewModel} from "../models/commonModels";

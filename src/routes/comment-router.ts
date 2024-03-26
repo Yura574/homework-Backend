@@ -14,7 +14,7 @@ export const commentsRouter = express.Router()
 
 
 commentsRouter.get('/:id', async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<CommentViewModel | null>) => {
-    const result = await CommentService.getComment(req.params.id)
+    const result = await CommentService.getCommentById(req.params.id)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })

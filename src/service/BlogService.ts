@@ -87,20 +87,6 @@ export class BlogService {
     static async createPostForBlog(blogId: string, data: BlogPostInputModel): Promise<ObjectResult<PostViewModel | null>> {
         const blog = await BlogRepository.getBlogById(blogId)
         if (!blog) return {status: ResultStatus.BadRequest, errorMessage: "Blog not found", data: null}
-        // const newPost = await PostRepository.createPost({blogId, title, shortDescription, content})
-        // if (newPost) {
-        //     const createdPost = await postCollection.insertOne(newPost)
-        //     const post = await postCollection.findOne({_id: createdPost.insertedId})
-        //     return {
-        //         id: post?._id.toString(),
-        //         blogId: post?.blogId,
-        //         title: post?.title,
-        //         blogName: post?.blogName,
-        //         content: post?.content,
-        //         shortDescription: post?.shortDescription,
-        //         createdAt: post?.createdAt
-        //     }
-        // }
         return await PostService.createPost({blogId, ...data})
     }
 
@@ -119,7 +105,7 @@ export class BlogService {
 
     static async deleteBlog(blogId: string): Promise<ObjectResult> {
         const blog = await BlogRepository.getBlogById(blogId)
-        if (!blog)return {status: ResultStatus.BadRequest, errorMessage: 'Blog not found', data: null}
+        if (!blog) return {status: ResultStatus.BadRequest, errorMessage: 'Blog not found', data: null}
         try {
             await BlogRepository.deleteBlog(blogId)
             return {status: ResultStatus.NoContent, data: null}

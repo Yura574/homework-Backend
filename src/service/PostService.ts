@@ -5,6 +5,8 @@ import {ReturnViewModel} from "../models/commonModels";
 import {blogCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
+import {CommentViewModel} from "../models/commentModel";
+import {CommentService} from "./CommentService";
 
 
 export class PostService {
@@ -58,12 +60,14 @@ export class PostService {
             data: null
         }
 
-        return { status: ResultStatus.Created, data: createdPost}
+        return {status: ResultStatus.Created, data: createdPost}
     }
 
+    static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]> | null>> {
+        const result = await CommentService.getCommentsByPostId(postId, dataQuery)
 
-
-
+        return {status: ResultStatus.Success, data: result.data}
+    }
 
 
 }

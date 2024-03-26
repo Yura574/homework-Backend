@@ -4,10 +4,14 @@ import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
 import {ValidateError} from '../utils/validateError';
-import {PostService} from '../domain/PostService';
+import {PostService} from '../service/PostService';
 import {ReturnViewModel} from "../models/commonModels";
 import {PostInputModel, PostViewModel} from "../models/postModels";
-import {RequestType} from "./blog-router";
+import {ParamsType, RequestType, ResponseType} from "./blog-router";
+import {CommentInputModel, CommentViewModel} from "../models/commentModel";
+import {CommentService} from "../service/CommentService";
+import {ResultStatus} from "../utils/objectResult";
+import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 
 
 export const postRouter = express.Router()
@@ -92,4 +96,18 @@ postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation
     }
     res.sendStatus(204)
     return
+})
+
+//for comments
+
+postRouter.get('/:id/comments', async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]>>)=> {
+    const result = await PostService.getCommentsForPost(req.params.id, req.query)
+// return{}
+})
+postRouter.post('/:id/comments', async (req: RequestType<ParamsType, CommentInputModel, {}>, res: ResponseType<CommentViewModel | null>)=> {
+    const userId = req.user?.userId.toString()
+    if(!userId)return res.status(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    const result =  await CommentService.createComment(req.body, req.params.id, userId)
+    if(result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
+    return handleErrorObjectResult(result, res)
 })
