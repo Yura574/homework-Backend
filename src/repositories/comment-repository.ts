@@ -10,7 +10,11 @@ export class CommentRepository {
         const totalCount = await commentCollection.countDocuments()
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
-        const comments = await commentCollection.find({_id: new ObjectId(postId)}).sort(sortObject).skip(skip).limit(pageSize).toArray()
+        console.log(postId)
+        const comments = await commentCollection.find({postId}).sort(sortObject).skip(skip).limit(pageSize).toArray()
+        const comments1 = await commentCollection.find().toArray()
+        console.log(comments)
+        console.log(comments1)
         return {comments, totalCount}
     }
 
@@ -24,6 +28,7 @@ export class CommentRepository {
     }
 
     static async deleteComment(id: string) {
+        console.log(id)
         return await commentCollection.deleteOne({_id: new ObjectId(id)})
     }
 

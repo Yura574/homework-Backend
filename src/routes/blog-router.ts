@@ -21,11 +21,8 @@ type RequestWithBody<B> = Request<{}, {}, B, {}>
 type RequestWithParams<P> = Request<P, {}, {}, {}>
 export type RequestWithQuery<Q> = Request<{}, {}, {}, Q>
 export type RequestWithParamsAndQuery<P, Q> = Request<P, {}, {}, Q>
-export type RequestType<P, B, Q> = Request<P, {}, B, Q> & {user?: { userId: ObjectId }}
+export type RequestType<P, B, Q> = Request<P, {}, B, Q> & {user?: { userId: ObjectId, userLogin: string }}
 
-export interface AuthRequestType extends Request {
-    user?: { userId: ObjectId }
-}
 
 export type ResponseType<R> = Response<R>
 
@@ -97,13 +94,13 @@ blogRouter.post('/:id/posts', authMiddleware, validateId, postValidation(), asyn
     if (result.status === ResultStatus.Created) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
     return handleErrorObjectResult(result, res)
 })
-blogRouter.delete('/:id', authMiddleware,  async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<ObjectResult>) => {
+blogRouter.delete('/:id', authMiddleware,  async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
     const isError = ValidateError(req, res)
     if (isError) return
 
     const result: ObjectResult = await BlogService.deleteBlog(req.params.id)
-
-    if(result.status === ResultStatus.NoContent) return res.status(HTTP_STATUSES.NO_CONTENT_204)
+    console.log(result.status === ResultStatus.NoContent)
+    if(result.status === ResultStatus.NoContent) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return  handleErrorObjectResult(result, res)
 
 

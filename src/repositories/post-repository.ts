@@ -1,6 +1,7 @@
 import {ObjectId} from 'mongodb';
-import { postCollection} from '../db/db';
+import {postCollection} from '../db/db';
 import {NewPostModel, PostInputModel, PostViewModel} from "../models/postModels";
+import {ObjectResult, ResultStatus} from "../utils/objectResult";
 
 
 export class PostRepository {
@@ -13,10 +14,11 @@ export class PostRepository {
         return {posts, totalCount}
     }
 
-    static async getPostById(id: string) {
+    static async getPostById(id: string): Promise<ObjectResult<PostViewModel | null>> {
         const post = await postCollection.findOne({_id: new ObjectId(id)})
-        return {
-            id: post?._id,
+        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+       const foundPost: PostViewModel =  {
+            id: post?._id.toString(),
             blogId: post?.blogId,
             title: post?.title,
             shortDescription: post?.shortDescription,
@@ -24,6 +26,7 @@ export class PostRepository {
             createdAt: post?.createdAt,
             blogName: post?.blogName
         }
+        return {status: ResultStatus.Success, data: foundPost}
     }
 
     static async getAllPostsByBlogId(blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string, sortBy: string, sortDirection: 'asc' | 'desc') {
@@ -75,8 +78,6 @@ export class PostRepository {
 
     static async updatePost(id: string, data: PostInputModel) {
         const {title, shortDescription, content} = data
-        const post = await postCollection.findOne({_id: new ObjectId(id)})
-        if (post) {
             const updatedPost = {
                 $set: {
                     shortDescription,
@@ -85,9 +86,6 @@ export class PostRepository {
                 }
 
             }
-            await postCollection.updateOne({_id: new ObjectId(id)}, updatedPost)
-            return true
-        }
-        return false
+            return await postCollection.updateOne({_id: new ObjectId(id)}, updatedPost)
     }
 }

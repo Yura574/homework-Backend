@@ -10,7 +10,7 @@ import {CommentService} from "./CommentService";
 
 
 export class PostService {
-    static async getPosts(dataQuery: QueryType) {
+    static async getPosts(dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<PostViewModel[]>>> {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
 
         const {posts, totalCount} = await PostRepository.getPosts(+pageSize, +pageNumber, sortBy, sortDirection)
@@ -34,7 +34,7 @@ export class PostService {
             totalCount,
             items: editedPost
         }
-        return returnPosts
+        return {status: ResultStatus.Success, data: returnPosts}
     }
 
     static async createPost(data: PostInputModel): Promise<ObjectResult<PostViewModel | null>> {
@@ -63,11 +63,36 @@ export class PostService {
         return {status: ResultStatus.Created, data: createdPost}
     }
 
-    static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]> | null>> {
+    static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>>> {
         const result = await CommentService.getCommentsByPostId(postId, dataQuery)
 
         return {status: ResultStatus.Success, data: result.data}
     }
 
+    static async updatePost(postId: string, data: PostInputModel): Promise<ObjectResult> {
+        const post = await PostRepository.getPostById(postId)
+        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+        try {
+            await PostRepository.updatePost(postId, data)
+            return {status: ResultStatus.NoContent, data: null}
+        } catch (err) {
+            console.warn(err)
+            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+        }
 
+    }
+
+    static async deletePost(postId: string): Promise<ObjectResult>{
+        const post = await PostRepository.getPostById(postId)
+        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+
+    try {
+        await PostRepository.deletePost(postId)
+        return {status: ResultStatus.NoContent, data: null}
+    } catch (err) {
+        console.warn(err)
+        return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+
+    }
+    }
 }

@@ -10,7 +10,7 @@ export class AuthRepository {
         const {loginOrEmail, password} = data
         const findUser = await UserRepository.findUser(loginOrEmail)
         if (!findUser) {
-            return {status: ResultStatus.BadRequest, errorMessage: 'User or password incorrect', data: null}
+            return {status: ResultStatus.Unauthorized, errorMessage: 'User or password incorrect', data: null}
         }
 
         const isCompare = await bcrypt.compare(password, findUser.password)

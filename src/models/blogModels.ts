@@ -5,7 +5,7 @@ export type BlogViewModel = {
     description: string,
     websiteUrl: string,
     createdAt: string,
-    isMemberShip: boolean
+    isMembership: boolean
 }
 
 export type BlogInputModel = {
@@ -18,4 +18,12 @@ export type BlogPostInputModel = {
     title: string,
     shortDescription: string,
     content: string
+}
+
+export type NewBlogModel = {
+    name: string,
+    description: string,
+    websiteUrl: string,
+    createdAt: string,
+    isMembership: boolean
 }

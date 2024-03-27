@@ -28,7 +28,7 @@ export class BlogService {
                     name: b.name,
                     description: b.description,
                     websiteUrl: b.websiteUrl,
-                    isMemberShip: b.isMembership,
+                    isMembership: b.isMembership,
                     createdAt: b.createdAt
                 }
             })
@@ -44,7 +44,7 @@ export class BlogService {
         const returnBlog: BlogViewModel = {
             id: blog!._id.toString(),
             createdAt: blog?.createdAt,
-            isMemberShip: blog?.isMembership,
+            isMembership: blog?.isMembership,
             websiteUrl: blog?.websiteUrl,
             name: blog?.name,
             description: blog?.description
@@ -56,7 +56,7 @@ export class BlogService {
 
         const {sortBy = 'createdAt', sortDirection = 'desc', pageNumber = 1, pageSize = 10, searchNameTerm = ''} = data
         const blog = await BlogRepository.getBlogById(blogId)
-        if (!blog) return {status: ResultStatus.BadRequest, errorMessage: 'Blog nor found', data: null}
+        if (!blog) return {status: ResultStatus.NotFound, errorMessage: 'Blog nor found', data: null}
         const {
             posts,
             totalCount
@@ -86,14 +86,14 @@ export class BlogService {
 
     static async createPostForBlog(blogId: string, data: BlogPostInputModel): Promise<ObjectResult<PostViewModel | null>> {
         const blog = await BlogRepository.getBlogById(blogId)
-        if (!blog) return {status: ResultStatus.BadRequest, errorMessage: "Blog not found", data: null}
+        if (!blog) return {status: ResultStatus.NotFound, errorMessage: "Blog not found", data: null}
         return await PostService.createPost({blogId, ...data})
     }
 
     static async updateBlog(blogId: string, name: string, description: string, websiteUrl: string): Promise<ObjectResult> {
         const blog = await BlogService.getBlogById(blogId)
         if (!blog) {
-            return {status: ResultStatus.BadRequest, errorMessage: 'Blog not found', data: null}
+            return {status: ResultStatus.NotFound, errorMessage: 'Blog not found', data: null}
         }
         try {
             await BlogRepository.updateBlog(blogId, name, description, websiteUrl)
@@ -105,9 +105,10 @@ export class BlogService {
 
     static async deleteBlog(blogId: string): Promise<ObjectResult> {
         const blog = await BlogRepository.getBlogById(blogId)
-        if (!blog) return {status: ResultStatus.BadRequest, errorMessage: 'Blog not found', data: null}
+
+        if (!blog) return {status: ResultStatus.NotFound, errorMessage: 'Blog not found', data: null}
         try {
-            await BlogRepository.deleteBlog(blogId)
+        const res =     await BlogRepository.deleteBlog(blogId)
             return {status: ResultStatus.NoContent, data: null}
         } catch (err) {
             return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}

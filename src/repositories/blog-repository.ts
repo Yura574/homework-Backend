@@ -1,6 +1,6 @@
 import {ObjectId} from 'mongodb';
 import {blogCollection} from '../db/db';
-import {BlogInputModel, BlogViewModel} from "../models/blogModels";
+import {BlogInputModel, BlogViewModel, NewBlogModel} from "../models/blogModels";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 
 export class BlogRepository {
@@ -24,7 +24,7 @@ export class BlogRepository {
 
    static async createBlog(data: BlogInputModel): Promise<ObjectResult<BlogViewModel | null>> {
         const {name, description, websiteUrl} = data
-        const newBlog = {
+        const newBlog: NewBlogModel  = {
             name,
             description,
             websiteUrl,
@@ -40,7 +40,7 @@ export class BlogRepository {
                 name,
                 description,
                 websiteUrl,
-                isMemberShip: blog?.isMembership,
+                isMembership: blog?.isMembership,
                 createdAt: blog?.createdAt,
             }
             return {
@@ -58,6 +58,7 @@ export class BlogRepository {
     }
 
     static async deleteBlog(id: string) {
+        console.log(id)
         return await blogCollection.deleteOne({_id: new ObjectId(id)})
 
     }

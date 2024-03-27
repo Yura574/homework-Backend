@@ -6,10 +6,11 @@ import {PostRepository} from "../repositories/post-repository";
 import {UserRepository} from "../repositories/user-repository";
 import {ObjectId} from "mongodb";
 import {ReturnViewModel} from "../models/commonModels";
+import {AuthService} from "./AuthService";
 
 export class CommentService {
 
-    static async getCommentsByPostId(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]> | null>> {
+    static async getCommentsByPostId(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]> >> {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
 
         const {
@@ -17,7 +18,10 @@ export class CommentService {
             totalCount
         } = await CommentRepository.getCommentsByPostId(postId, +pageSize, +pageNumber, sortBy, sortDirection)
 
-        const pagesCount = totalCount/ +pageSize
+        const pagesCount = Math.ceil(totalCount / +pageSize)
+        console.log(comments)
+        console.log(pageSize)
+        console.log(pagesCount)
         const returnComments: ReturnViewModel<CommentViewModel[]> = {
             pagesCount,
             page: +pageNumber,
@@ -51,19 +55,21 @@ export class CommentService {
             content: findComment.content,
             createdAt: findComment.createdAt,
             commentatorInfo: {
-                userId: findComment.cocommentatorInfo.userId,
-                userLogin: findComment.cocommentatorInfo.userLogin,
+                userId: findComment.commentatorInfo.userId,
+                userLogin: findComment.commentatorInfo.userLogin,
             }
         }
         return {status: ResultStatus.Success, data: comment}
     }
 
     static async createComment(data: CommentInputModel, postId: string, userId: string): Promise<ObjectResult<CommentViewModel | null>> {
+
         const post = await PostRepository.getPostById(postId)
+        console.log(post)
         if (!post) return {status: ResultStatus.BadRequest, errorMessage: 'Post not found', data: null}
         const user = await UserRepository.getUserById(new ObjectId(userId))
         if (!user) return {status: ResultStatus.BadRequest, errorMessage: 'User not found', data: null}
-
+// const me = AuthService.
         const newComment: NewCommentModel = {
             content: data.content,
             postId,
@@ -98,9 +104,10 @@ export class CommentService {
         if (!findComment) {
             return {status: ResultStatus.NotFound, errorMessage: 'Comment not found', data: null}
         }
-        if (findComment.commentatorInfo.userId !== userId) {
+        if (findComment.commentatorInfo.userId!== userId) {
             return {status: ResultStatus.Forbidden, errorMessage: 'It isn`t your comment', data: null}
         }
+
         try {
             await CommentRepository.deleteComment(id)
             return {status: ResultStatus.NoContent, data: null}

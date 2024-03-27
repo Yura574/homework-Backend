@@ -23,7 +23,7 @@ commentsRouter.delete('/:id', authMiddleware, async (req: RequestType<ParamsType
     const userId = req.user?.userId
     if (!userId) return res.status(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await CommentService.deleteComment(req.params.id, userId.toString())
-    if (result.status === ResultStatus.NoContent) return res.status(HTTP_STATUSES.NO_CONTENT_204)
+    if (result.status === ResultStatus.NoContent) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 })
 
@@ -33,6 +33,6 @@ commentsRouter.put('/:id', authMiddleware, commentValidators(), async (req: Requ
     const userId = req.user?.userId.toString()
     if (!userId) return res.status(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await CommentService.updateComment(req.params.id, req.body, userId)
-    if (result.status === ResultStatus.NoContent) return res.status(HTTP_STATUSES.NO_CONTENT_204)
+    if (result.status === ResultStatus.NoContent) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 })
