@@ -24,7 +24,6 @@ userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuer
         totalCount,
         pagesCount,
         items: users.map(user => {
-            console.log(user)
             return {
                 id: user._id.toString(),
                 email: user.email,

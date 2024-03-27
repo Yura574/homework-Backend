@@ -1,6 +1,6 @@
 import express, {Response} from "express";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
-import {AuthRequestType, RequestType, ResponseType} from "./blog-router";
+import { RequestType, ResponseType} from "./blog-router";
 import {AuthRepository} from "../repositories/auth-repository";
 import {loginValidator} from "../validators/authValidators";
 import {ConfirmEmailQuery, LoginInputModel, LoginResponse, ResendingEmailBody} from "../models/authModel";
@@ -54,7 +54,7 @@ authRouter.post('/registration-email-resending', emailValidator, async (req: Req
     if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 })
-authRouter.get('/me', authMiddleware, async (req: AuthRequestType, res: Response) => {
+authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: Response) => {
     //userId получаем из accessToken
     if (req.user?.userId) {
         const user = await UserRepository.getUserById(req.user.userId)
@@ -63,12 +63,12 @@ authRouter.get('/me', authMiddleware, async (req: AuthRequestType, res: Response
             login: user?.login,
             userId: user?._id.toString()
         }
-        res.send(userData)
-        return
+        return res.send(userData)
+
     }
     // // const userData = await UserRepository.getUserById(req.user!.userId)
     // // res.sendStatus(HTTP_STATUSES.OK_200)
     // return
 
-    res.send('sd')
+    return res.send('sd')
 })
