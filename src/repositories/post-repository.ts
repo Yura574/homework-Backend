@@ -1,7 +1,6 @@
 import {ObjectId} from 'mongodb';
 import {postCollection} from '../db/db';
 import {NewPostModel, PostInputModel, PostViewModel} from "../models/postModels";
-import {ObjectResult, ResultStatus} from "../utils/objectResult";
 
 
 export class PostRepository {
@@ -14,8 +13,17 @@ export class PostRepository {
         return {posts, totalCount}
     }
 
-    static async getPostById(id: string) {
-        return await postCollection.findOne({_id: new ObjectId(id)})
+    static async getPostById(id: string): Promise<PostViewModel> {
+        const post = await postCollection.findOne({_id: new ObjectId(id)})
+        return {
+            id: post!._id.toString(),
+            title: post?.title,
+            shortDescription: post?.shortDescription,
+            content: post?.content,
+            createdAt: post?.createdAt,
+            blogId: post?.blogId,
+            blogName: post?.blogName
+        }
     }
 
     static async getAllPostsByBlogId(blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string, sortBy: string, sortDirection: 'asc' | 'desc') {
@@ -41,21 +49,16 @@ export class PostRepository {
     static async createPost(newPost: NewPostModel) {
         const {insertedId} = await postCollection.insertOne(newPost)
         const post = await postCollection.findOne({_id: insertedId})
-        if (post) {
-            const newPost: PostViewModel = {
-                id: post._id.toString(),
-                title: post.title,
-                content: post.content,
-                shortDescription: post.shortDescription,
-                blogId: post.blogId,
-                blogName: post.blogName,
-                createdAt: post.createdAt,
-            }
-            return newPost
+        const returnPost: PostViewModel = {
+            id: post!._id.toString(),
+            title: post?.title,
+            content: post?.content,
+            shortDescription: post?.shortDescription,
+            blogId: post?.blogId,
+            blogName: post?.blogName,
+            createdAt: post?.createdAt,
         }
-
-        return false
-
+        return returnPost
 
     }
 
@@ -67,14 +70,14 @@ export class PostRepository {
 
     static async updatePost(id: string, data: PostInputModel) {
         const {title, shortDescription, content} = data
-            const updatedPost = {
-                $set: {
-                    shortDescription,
-                    content,
-                    title,
-                }
-
+        const updatedPost = {
+            $set: {
+                shortDescription,
+                content,
+                title,
             }
-            return await postCollection.updateOne({_id: new ObjectId(id)}, updatedPost)
+
+        }
+        return await postCollection.updateOne({_id: new ObjectId(id)}, updatedPost)
     }
 }

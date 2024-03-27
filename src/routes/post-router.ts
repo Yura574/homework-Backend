@@ -42,7 +42,7 @@ postRouter.get('/:id', findPost, async (req: RequestType<ParamsType, {}, {}>, re
         return
     }
     const id = req.params.id
-    const result = await PostRepository.getPostById(id)
+    const result = await PostService.getPostById(id)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })

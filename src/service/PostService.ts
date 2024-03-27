@@ -2,11 +2,10 @@ import {PostRepository} from '../repositories/post-repository';
 import {QueryType} from '../routes/post-router';
 import {NewPostModel, PostInputModel, PostViewModel} from "../models/postModels";
 import {ReturnViewModel} from "../models/commonModels";
-import {blogCollection} from "../db/db";
-import {ObjectId} from "mongodb";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {CommentViewModel} from "../models/commentModel";
 import {CommentService} from "./CommentService";
+import {BlogRepository} from "../repositories/blog-repository";
 
 
 export class PostService {
@@ -37,10 +36,15 @@ export class PostService {
         return {status: ResultStatus.Success, data: returnPosts}
     }
 
+    static async getPostById(id: string):Promise<ObjectResult<PostViewModel | null>>{
+        const post = await PostRepository.getPostById(id)
+        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+        return {status: ResultStatus.Success, data: post}
+    }
     static async createPost(data: PostInputModel): Promise<ObjectResult<PostViewModel | null>> {
 
         const {blogId, content, shortDescription, title} = data
-        const blog = await blogCollection.findOne({_id: new ObjectId(data.blogId)})
+        const blog = await BlogRepository.getBlogById(data.blogId)
         //если блог не найден, пост нельзя создать
         if (!blog) {
             return {status: ResultStatus.BadRequest, errorMessage: 'Blog bot found', data: null}
@@ -53,14 +57,16 @@ export class PostService {
             blogName: blog.name,
             createdAt: new Date().toISOString(),
         }
-        const createdPost = await PostRepository.createPost(newPost)
-        if (!createdPost) return {
-            status: ResultStatus.SomethingWasWrong,
-            errorMessage: "Something was wrong",
-            data: null
+        try {
+            const createdPost = await PostRepository.createPost(newPost)
+            return {status: ResultStatus.Created, data: createdPost}
+        }
+        catch (err){
+            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong',data: null}
         }
 
-        return {status: ResultStatus.Created, data: createdPost}
+
+
     }
 
     static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>>> {

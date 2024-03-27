@@ -90,7 +90,7 @@ blogRouter.post('/:id/posts', authMiddleware, validateId, postValidation(), asyn
     const isError = ValidateError(req, res)
     if (isError) return
     const result = await BlogService.createPostForBlog(req.params.id, req.body)
-
+    console.log(result)
     if (result.status === ResultStatus.Created) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
     return handleErrorObjectResult(result, res)
 })
