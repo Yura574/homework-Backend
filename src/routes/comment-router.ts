@@ -20,6 +20,7 @@ commentsRouter.get('/:id', async (req: RequestType<ParamsType, {}, {}>, res: Res
 })
 
 commentsRouter.delete('/:id', authMiddleware, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
+    console.log(req.params.id)
     const userId = req.user?.userId
     if (!userId) return res.status(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await CommentService.deleteComment(req.params.id, userId.toString())

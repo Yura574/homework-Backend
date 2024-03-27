@@ -98,7 +98,8 @@ postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation
 
 postRouter.get('/:id/comments',  async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]>>) => {
     const result = await PostService.getCommentsForPost(req.params.id, req.query)
-return res.status(HTTP_STATUSES.OK_200).send(result.data)
+if(result.status=== ResultStatus.Success) return  res.status(HTTP_STATUSES.OK_200).send(result.data)
+    return handleErrorObjectResult(result, res)
 })
 postRouter.post('/:id/comments', authMiddleware, commentValidators(), async (req: RequestType<ParamsType, CommentInputModel, {}>, res: ResponseType<CommentViewModel | null>) => {
     const isError = ValidateError(req, res)

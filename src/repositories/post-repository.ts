@@ -13,16 +13,17 @@ export class PostRepository {
         return {posts, totalCount}
     }
 
-    static async getPostById(id: string): Promise<PostViewModel> {
+    static async getPostById(id: string): Promise<PostViewModel | null> {
         const post = await postCollection.findOne({_id: new ObjectId(id)})
+        if(!post) return null
         return {
-            id: post!._id.toString(),
-            title: post?.title,
-            shortDescription: post?.shortDescription,
-            content: post?.content,
-            createdAt: post?.createdAt,
-            blogId: post?.blogId,
-            blogName: post?.blogName
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            createdAt: post.createdAt,
+            blogId: post.blogId,
+            blogName: post.blogName
         }
     }
 

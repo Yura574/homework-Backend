@@ -69,7 +69,9 @@ export class PostService {
 
     }
 
-    static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>>> {
+    static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>| null>> {
+        const post = await PostRepository.getPostById(postId)
+        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
         const result = await CommentService.getCommentsByPostId(postId, dataQuery)
 
         return {status: ResultStatus.Success, data: result.data}
