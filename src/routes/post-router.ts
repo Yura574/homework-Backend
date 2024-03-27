@@ -96,7 +96,7 @@ postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation
 
 //for comments
 
-postRouter.get('/:id/comments', authMiddleware, async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]>>) => {
+postRouter.get('/:id/comments',  async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]>>) => {
     const result = await PostService.getCommentsForPost(req.params.id, req.query)
 return res.status(HTTP_STATUSES.OK_200).send(result.data)
 })

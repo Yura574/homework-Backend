@@ -47,7 +47,7 @@ export class CommentService {
     static async getCommentById(id: string): Promise<ObjectResult<CommentViewModel | null>> {
         const findComment = await CommentRepository.getCommentById(id)
         if (!findComment) {
-            return {status: ResultStatus.BadRequest, errorMessage: 'Comment not found', data: null}
+            return {status: ResultStatus.NotFound, errorMessage: 'Comment not found', data: null}
         }
         const comment: CommentViewModel = {
             id: findComment._id.toString(),

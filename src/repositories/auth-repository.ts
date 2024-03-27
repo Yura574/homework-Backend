@@ -24,7 +24,7 @@ export class AuthRepository {
             }
 
         }
-        return {status: ResultStatus.BadRequest, errorMessage: 'User or password incorrect', data: null}
+        return {status: ResultStatus.Unauthorized, errorMessage: 'User or password incorrect', data: null}
 
     }
 }

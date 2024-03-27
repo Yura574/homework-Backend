@@ -23,6 +23,7 @@ authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInp
     }
     const result = await AuthRepository.login(req.body)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
+    console.log(result)
     return handleErrorObjectResult(result, res)
 })
 
