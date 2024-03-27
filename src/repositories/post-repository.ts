@@ -14,19 +14,8 @@ export class PostRepository {
         return {posts, totalCount}
     }
 
-    static async getPostById(id: string): Promise<ObjectResult<PostViewModel | null>> {
-        const post = await postCollection.findOne({_id: new ObjectId(id)})
-        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
-       const foundPost: PostViewModel =  {
-            id: post?._id.toString(),
-            blogId: post?.blogId,
-            title: post?.title,
-            shortDescription: post?.shortDescription,
-            content: post?.content,
-            createdAt: post?.createdAt,
-            blogName: post?.blogName
-        }
-        return {status: ResultStatus.Success, data: foundPost}
+    static async getPostById(id: string) {
+        return await postCollection.findOne({_id: new ObjectId(id)})
     }
 
     static async getAllPostsByBlogId(blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string, sortBy: string, sortDirection: 'asc' | 'desc') {

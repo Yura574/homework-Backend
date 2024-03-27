@@ -51,7 +51,7 @@ export class CommentService {
         }
         const comment: CommentViewModel = {
             id: findComment._id.toString(),
-            postId: findComment.postId,
+            // postId: findComment.postId,
             content: findComment.content,
             createdAt: findComment.createdAt,
             commentatorInfo: {
@@ -66,9 +66,9 @@ export class CommentService {
 
         const post = await PostRepository.getPostById(postId)
         console.log(post)
-        if (!post) return {status: ResultStatus.BadRequest, errorMessage: 'Post not found', data: null}
+        if (!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
         const user = await UserRepository.getUserById(new ObjectId(userId))
-        if (!user) return {status: ResultStatus.BadRequest, errorMessage: 'User not found', data: null}
+        if (!user) return {status: ResultStatus.NoContent, errorMessage: 'User not found', data: null}
 // const me = AuthService.
         const newComment: NewCommentModel = {
             content: data.content,
@@ -83,7 +83,7 @@ export class CommentService {
             const comment = await CommentRepository.createComment(newComment)
             const createdComment: CommentViewModel = {
                 id: comment!._id.toString(),
-                postId: postId,
+                // postId: postId,
                 content: comment?.content,
                 createdAt: comment?.createdAt,
                 commentatorInfo: {

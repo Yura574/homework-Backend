@@ -6,7 +6,7 @@ export type CommentInputModel = {
 export type CommentViewModel = {
     id: string
     content: string
-    postId: string
+    // postId: string
     commentatorInfo: {
         userId: string
         userLogin: string

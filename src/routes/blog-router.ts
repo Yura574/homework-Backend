@@ -114,7 +114,7 @@ blogRouter.put('/:id', authMiddleware, blogValidators(), async (req: RequestType
 
     const result: ObjectResult = await BlogService.updateBlog(id, name, description, websiteUrl)
 
-    if (result.status === ResultStatus.NoContent) return res.status(HTTP_STATUSES.NO_CONTENT_204)
+    if (result.status === ResultStatus.NoContent) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 })
 

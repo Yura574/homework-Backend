@@ -91,7 +91,8 @@ export class BlogService {
     }
 
     static async updateBlog(blogId: string, name: string, description: string, websiteUrl: string): Promise<ObjectResult> {
-        const blog = await BlogService.getBlogById(blogId)
+
+        const blog = await BlogRepository.getBlogById(blogId)
         if (!blog) {
             return {status: ResultStatus.NotFound, errorMessage: 'Blog not found', data: null}
         }
