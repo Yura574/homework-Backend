@@ -19,9 +19,7 @@ export class CommentService {
         } = await CommentRepository.getCommentsByPostId(postId, +pageSize, +pageNumber, sortBy, sortDirection)
 
         const pagesCount = Math.ceil(totalCount / +pageSize)
-        console.log(comments)
-        console.log(pageSize)
-        console.log(pagesCount)
+
         const returnComments: ReturnViewModel<CommentViewModel[]> = {
             pagesCount,
             page: +pageNumber,
@@ -30,7 +28,7 @@ export class CommentService {
             items: comments.map((comment) => {
                 return {
                     id: comment._id.toString(),
-                    postId: comment.postId,
+                    // postId: comment.postId,
                     content: comment.content,
                     createdAt: comment.createdAt,
                     commentatorInfo: {
