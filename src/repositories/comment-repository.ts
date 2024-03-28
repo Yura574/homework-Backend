@@ -1,4 +1,4 @@
-import {commentCollection, postCollection, userCollection} from "../db/db";
+import {commentCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {NewCommentModel} from "../models/commentModel";
 
@@ -7,14 +7,11 @@ export class CommentRepository {
 
     static async getCommentsByPostId(postId: string, pageSize: number, pageNumber: number, sortBy: string, sortDirection: 'asc' | 'desc') {
         const skip = (pageNumber - 1) * pageSize
-        const totalCount = await commentCollection.countDocuments()
+        const totalCount = await commentCollection.countDocuments({postId})
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
-        console.log(postId)
         const comments = await commentCollection.find({postId}).sort(sortObject).skip(skip).limit(pageSize).toArray()
-        const comments1 = await commentCollection.find().toArray()
-        console.log(comments)
-        console.log(comments1)
+        console.log(comments, totalCount)
         return {comments, totalCount}
     }
 

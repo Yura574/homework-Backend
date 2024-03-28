@@ -6,7 +6,6 @@ import {PostRepository} from "../repositories/post-repository";
 import {UserRepository} from "../repositories/user-repository";
 import {ObjectId} from "mongodb";
 import {ReturnViewModel} from "../models/commonModels";
-import {AuthService} from "./AuthService";
 
 export class CommentService {
 

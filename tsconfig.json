@@ -19,7 +19,4 @@
     "node_modules",
     "**/*.test.ts"
   ],
-
-  "files": ["index.d.ts"]
-
 }
