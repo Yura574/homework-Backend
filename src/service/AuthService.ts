@@ -9,11 +9,9 @@ import {validateError} from "../utils/validateError";
 
 export class AuthService {
     static async registration(data: UserInputModel): Promise<ObjectResult<string | null>> {
-        console.log(123)
         const {email, login, password} = data
         const error = await UserRepository.uniqueUser(email, login)
-        console.log(error)
-        if (error) {
+        if (error.length > 0) {
             const user = await UserRepository.findUser(email)
             //Пользователь уже зарегестрирован, но не подтвердил почту, высылаем код подтверждения еще раз
             if (user?.emailConfirmation.isConfirm === false && email === email && user?.login === login) {
@@ -25,7 +23,7 @@ export class AuthService {
             }
             return {
                 status: ResultStatus.BadRequest,
-                errorsMessages: validateError([error]),
+                errorsMessages: validateError(error),
                 data: null
             }
         }
@@ -50,14 +48,26 @@ export class AuthService {
     }
 
     static async confirmEmail(code: string): Promise<ObjectResult<string | null>> {
-        console.log(code)
         const [confirmCode, email] = code.split('_')
-        console.log(confirmCode)
         console.log(email)
+        if (!email || !confirmCode) return {
+            status: ResultStatus.BadRequest,
+            errorsMessages: validateError([{field: 'code', message: 'Confirm code invalid'}]),
+            data: null
+        }
         const user = await UserRepository.findUser(email)
-        if (!user) return {status: ResultStatus.BadRequest, errorsMessages: 'User not found', data: null}
+        console.log(user)
+        if (!user) return {
+            status: ResultStatus.BadRequest,
+            errorsMessages: validateError([{field: 'email', message: 'User not found'}]),
+            data: null
+        }
         if (user?.emailConfirmation.isConfirm) {
-            return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field:'email', message: 'User not found'}]), data: null}
+            return {
+                status: ResultStatus.BadRequest,
+                errorsMessages: validateError([{field: 'code', message: 'Code already confirmed'}]),
+                data: null
+            }
         }
 
         if (user.emailConfirmation.confirmationCode === confirmCode &&
@@ -83,14 +93,26 @@ export class AuthService {
 
             return {status: ResultStatus.Success, data: 'Code confirmed successful'}
         }
-        return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field:'code', message: 'Confirm code invalid'}]), data: null}
+        return {
+            status: ResultStatus.BadRequest,
+            errorsMessages: validateError([{field: 'code', message: 'Confirm code invalid'}]),
+            data: null
+        }
     }
 
     static async resendingEmail(email: string): Promise<ObjectResult<null>> {
         const user = await UserRepository.findUser(email)
-        if (!user) return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field: 'email', message:'User with this email not found'}]), data: null}
-        if(user.emailConfirmation.isConfirm === true){
-            return {status: ResultStatus.BadRequest, errorsMessages: validateError( [{field: 'email', message:'Email already confirmed'}]), data: null}
+        if (!user) return {
+            status: ResultStatus.BadRequest,
+            errorsMessages: validateError([{field: 'email', message: 'User with this email not found'}]),
+            data: null
+        }
+        if (user.emailConfirmation.isConfirm === true) {
+            return {
+                status: ResultStatus.BadRequest,
+                errorsMessages: validateError([{field: 'email', message: 'Email already confirmed'}]),
+                data: null
+            }
         }
         const confirmCode = v4()
         await EmailService.sendEmail(email, confirmCode)

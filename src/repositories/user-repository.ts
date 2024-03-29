@@ -1,6 +1,7 @@
 import {GetUsersQuery, UserCreateModel, UserModel} from "../models/userModels";
 import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
+import {ErrorsType, ErrorType} from "../utils/objectResult";
 
 export class UserRepository {
     static async findUser(loginOrEmail: string) {
@@ -13,15 +14,20 @@ export class UserRepository {
 
     }
 
-    static async uniqueUser(email: string, login: string) {
+    static async uniqueUser(email: string, login: string): Promise<ErrorType[]> {
 
+        const errors: ErrorType[]= []
         const userEmail = await userCollection.findOne({email: {$regex: email}})
-        if (userEmail) return {field: 'email', message: 'email already exist'}
+        if (userEmail)  {
+            errors.push({field: 'email', message: 'email already exist'})
+        }
 
         const userLogin = await userCollection.findOne({login: {$regex: login}})
-        if (userLogin) return {field: 'email', message: 'email already exist'}
+        if (userLogin) {
+            errors.push({field: 'login', message: 'login already exist'})
+        }
 
-        return null
+        return errors
     }
 
     static async getAllUsers(data: GetUsersQuery) {
