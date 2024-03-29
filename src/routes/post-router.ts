@@ -57,17 +57,9 @@ postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (r
     const result = await PostService.createPost(data)
     if (result.status === ResultStatus.Created) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
     return handleErrorObjectResult(result, res)
-    // if (newPost) {
-    //     res.status(HTTP_STATUSES.CREATED_201).send(newPost)
-    //     return
-    // }
-    // res.status(HTTP_STATUSES.NOT_FOUND_404).send('blog not found')
-    // return;
-
 })
 
 postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
-
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
@@ -96,17 +88,16 @@ postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation
 
 //for comments
 
-postRouter.get('/:id/comments',  async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]>| null>) => {
+postRouter.get('/:id/comments', async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]> | null>) => {
     const result = await PostService.getCommentsForPost(req.params.id, req.query)
-    console.log(result.data)
-if(result.status=== ResultStatus.Success) return  res.status(HTTP_STATUSES.OK_200).send(result.data)
+    if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
 postRouter.post('/:id/comments', authMiddleware, commentValidators(), async (req: RequestType<ParamsType, CommentInputModel, {}>, res: ResponseType<CommentViewModel | null>) => {
     const isError = ValidateErrorRequest(req, res)
-    if(isError) return
+    if (isError) return
     const userId = req.user?.userId.toString()
-    if (!userId) return res.status(HTTP_STATUSES.NOT_FOUND_404)
+    if (!userId) return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
     const result = await CommentService.createComment(req.body, req.params.id, userId)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
     return handleErrorObjectResult(result, res)

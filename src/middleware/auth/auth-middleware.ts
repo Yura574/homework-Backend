@@ -38,24 +38,14 @@ import {RequestType} from "../../routes/blog-router";
 const login1 = 'admin'
 const password1 = 'qwerty'
 export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next: NextFunction) => {
-    // if (req.headers['authorization'] !== "Basic YWRtaW46cXdlcnR5") {
-    //     res.sendStatus(401)
-    //     return
-    // }
-
-    // OR
     const auth = req.headers['authorization']
 
-    if (!auth) {
-        res.sendStatus(401)
-        return
-    }
+    if (!auth) return res.sendStatus(401)
+
     const [type, token] = auth.split(' ')
-    console.log(token)
-    if (type !== "Basic" && type !== 'Bearer') {
-        res.sendStatus(401)
-        return
-    }
+
+    if (type !== "Basic" && type !== 'Bearer') return res.sendStatus(401)
+
     if (type === 'Bearer') {
         try {
             const dataToken: any = jwt.verify(token, "SECRET")
@@ -63,12 +53,12 @@ export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next
                 userId: new ObjectId(dataToken.userId),
                 userLogin: dataToken.userLogin
             }
-            next()
-            return
+            return next()
+
         } catch (err) {
             console.warn(err)
-            res.sendStatus(401)
-            return;
+            return res.sendStatus(401)
+
         }
 
     }

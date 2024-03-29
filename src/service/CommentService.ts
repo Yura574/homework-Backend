@@ -96,8 +96,8 @@ export class CommentService {
         }
     }
 
-    static async deleteComment(id: string, userId: string): Promise<ObjectResult> {
-        const findComment = await CommentRepository.getCommentById(id)
+    static async deleteComment(commentId: string, userId: string): Promise<ObjectResult> {
+        const findComment = await CommentRepository.getCommentById(commentId)
         if (!findComment) {
             return {status: ResultStatus.NotFound, errorsMessages: 'Comment not found', data: null}
         }
@@ -106,7 +106,7 @@ export class CommentService {
         }
 
         try {
-            await CommentRepository.deleteComment(id)
+            await CommentRepository.deleteComment(commentId)
             return {status: ResultStatus.NoContent, data: null}
         } catch (err) {
             console.warn(err)
