@@ -16,10 +16,10 @@ export class UserRepository {
     static async uniqueUser(email: string, login: string) {
 
         const userEmail = await userCollection.findOne({email: {$regex: email}})
-        if (userEmail) return {errorMessage: 'email already exist'}
+        if (userEmail) return {field: 'email', message: 'email already exist'}
 
         const userLogin = await userCollection.findOne({login: {$regex: login}})
-        if (userLogin) return {errorMessage: 'login already exist'}
+        if (userLogin) return {field: 'email', message: 'email already exist'}
 
         return null
     }

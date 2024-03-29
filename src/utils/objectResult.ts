@@ -1,6 +1,6 @@
 export type ObjectResult<T = null> = {
     status: ResultStatus
-    errorMessage?: string | [{field: string, message: string}]
+    errorsMessages?: [{field: string, message: string}] | string
     data: T
 }
 

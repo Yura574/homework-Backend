@@ -44,7 +44,7 @@ export class CommentService {
     static async getCommentById(id: string): Promise<ObjectResult<CommentViewModel | null>> {
         const findComment = await CommentRepository.getCommentById(id)
         if (!findComment) {
-            return {status: ResultStatus.NotFound, errorMessage: 'Comment not found', data: null}
+            return {status: ResultStatus.NotFound, errorsMessages: 'Comment not found', data: null}
         }
         const comment: CommentViewModel = {
             id: findComment._id.toString(),
@@ -63,9 +63,9 @@ export class CommentService {
 
         const post = await PostRepository.getPostById(postId)
         console.log(post)
-        if (!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+        if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         const user = await UserRepository.getUserById(new ObjectId(userId))
-        if (!user) return {status: ResultStatus.NoContent, errorMessage: 'User not found', data: null}
+        if (!user) return {status: ResultStatus.NoContent, errorsMessages: 'User not found', data: null}
 // const me = AuthService.
         const newComment: NewCommentModel = {
             content: data.content,
@@ -92,17 +92,17 @@ export class CommentService {
             }
             return {status: ResultStatus.Success, data: createdComment}
         } catch (err) {
-            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
         }
     }
 
     static async deleteComment(id: string, userId: string): Promise<ObjectResult> {
         const findComment = await CommentRepository.getCommentById(id)
         if (!findComment) {
-            return {status: ResultStatus.NotFound, errorMessage: 'Comment not found', data: null}
+            return {status: ResultStatus.NotFound, errorsMessages: 'Comment not found', data: null}
         }
         if (findComment.commentatorInfo.userId!== userId) {
-            return {status: ResultStatus.Forbidden, errorMessage: 'It isn`t your comment', data: null}
+            return {status: ResultStatus.Forbidden, errorsMessages: 'It isn`t your comment', data: null}
         }
 
         try {
@@ -110,24 +110,24 @@ export class CommentService {
             return {status: ResultStatus.NoContent, data: null}
         } catch (err) {
             console.warn(err)
-            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
         }
     }
 
     static async updateComment(id: string, data: CommentInputModel, userId: string): Promise<ObjectResult> {
         const findComment = await CommentRepository.getCommentById(id)
         if (!findComment) {
-            return {status: ResultStatus.NotFound, errorMessage: 'Comment not found', data: null}
+            return {status: ResultStatus.NotFound, errorsMessages: 'Comment not found', data: null}
         }
         if (findComment.commentatorInfo.userId !== userId) {
-            return {status: ResultStatus.Forbidden, errorMessage: 'It isn`t your comment', data: null}
+            return {status: ResultStatus.Forbidden, errorsMessages: 'It isn`t your comment', data: null}
         }
         try {
             await CommentRepository.updateComment(data.content, id)
             return {status: ResultStatus.NoContent, data: null}
         } catch (err) {
             console.warn(err)
-            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
         }
 
     }

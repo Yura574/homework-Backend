@@ -38,7 +38,7 @@ export class PostService {
 
     static async getPostById(id: string):Promise<ObjectResult<PostViewModel | null>>{
         const post = await PostRepository.getPostById(id)
-        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+        if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         return {status: ResultStatus.Success, data: post}
     }
     static async createPost(data: PostInputModel): Promise<ObjectResult<PostViewModel | null>> {
@@ -47,7 +47,7 @@ export class PostService {
         const blog = await BlogRepository.getBlogById(data.blogId)
         //если блог не найден, пост нельзя создать
         if (!blog) {
-            return {status: ResultStatus.BadRequest, errorMessage: 'Blog bot found', data: null}
+            return {status: ResultStatus.BadRequest, errorsMessages: 'Blog bot found', data: null}
         }
         const newPost: NewPostModel = {
             title,
@@ -62,7 +62,7 @@ export class PostService {
             return {status: ResultStatus.Created, data: createdPost}
         }
         catch (err){
-            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong',data: null}
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong',data: null}
         }
 
 
@@ -71,7 +71,7 @@ export class PostService {
 
     static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>| null>> {
         const post = await PostRepository.getPostById(postId)
-        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+        if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         const result = await CommentService.getCommentsByPostId(postId, dataQuery)
 
         return {status: ResultStatus.Success, data: result.data}
@@ -79,27 +79,27 @@ export class PostService {
 
     static async updatePost(postId: string, data: PostInputModel): Promise<ObjectResult> {
         const post = await PostRepository.getPostById(postId)
-        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+        if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         try {
             await PostRepository.updatePost(postId, data)
             return {status: ResultStatus.NoContent, data: null}
         } catch (err) {
             console.warn(err)
-            return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
         }
 
     }
 
     static async deletePost(postId: string): Promise<ObjectResult>{
         const post = await PostRepository.getPostById(postId)
-        if(!post) return {status: ResultStatus.NotFound, errorMessage: 'Post not found', data: null}
+        if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
 
     try {
         await PostRepository.deletePost(postId)
         return {status: ResultStatus.NoContent, data: null}
     } catch (err) {
         console.warn(err)
-        return {status: ResultStatus.SomethingWasWrong, errorMessage: 'Something was wrong', data: null}
+        return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
 
     }
     }

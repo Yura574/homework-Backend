@@ -10,11 +10,11 @@ export class AuthRepository {
         const {loginOrEmail, password} = data
         const findUser = await UserRepository.findUser(loginOrEmail)
         if (!findUser) {
-            return {status: ResultStatus.Unauthorized, errorMessage: 'User or password incorrect', data: null}
+            return {status: ResultStatus.Unauthorized, errorsMessages: 'User or password incorrect', data: null}
         }
         console.log(findUser)
         if (!findUser.emailConfirmation.isConfirm) {
-    return {status: ResultStatus.Forbidden, errorMessage: 'Confirmed our email', data: null}
+    return {status: ResultStatus.Forbidden, errorsMessages: 'Confirmed our email', data: null}
         }
         const isCompare = await bcrypt.compare(password, findUser.password)
         if (isCompare) {
@@ -27,7 +27,7 @@ export class AuthRepository {
             }
 
         }
-        return {status: ResultStatus.Unauthorized, errorMessage: 'User or password incorrect', data: null}
+        return {status: ResultStatus.Unauthorized, errorsMessages: 'User or password incorrect', data: null}
 
     }
 }

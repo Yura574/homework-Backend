@@ -50,7 +50,7 @@ export class BlogRepository {
         } catch (err) {
             return {
                 status: ResultStatus.SomethingWasWrong,
-                errorMessage: 'Something was wrong',
+                errorsMessages: 'Something was wrong',
                 data: null
             }
         }
