@@ -1,40 +1,82 @@
-import {UserInputModel} from "../models/userModels";
-import {Response} from 'express'
+import {UserInputModel, UserModel, UserUpdateModel} from "../models/userModels";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {UserRepository} from "../repositories/user-repository";
 import {newUser} from "../utils/newUser";
 import {ReturnsUserType} from "../routes/types/usersTypes";
-import {HTTP_STATUSES} from "../utils/httpStatuses";
+import {validateError} from "../utils/validateError";
 
 
 export class UserService {
-    static async createUser(data: UserInputModel, res: Response) {
+    static async createUser(data: UserInputModel): Promise<ObjectResult<ReturnsUserType | null>> {
         const {email, login, password} = data
-        const isUserExist = await UserRepository.uniqueUser(email, login)
+        const errors = await UserRepository.uniqueUser(email, login)
 
-        if (isUserExist) {
-            res.status(HTTP_STATUSES.BAD_REQUEST_400).send(isUserExist.errorMessage)
-            return
+        if (errors) {
+            return {status: ResultStatus.BadRequest, errorsMessages: validateError(errors), data: null}
         }
 
         const user = await newUser(email, login, password, true)
         try {
             const createdUser = await UserRepository.createUser(user)
-            console.log(createdUser)
-            if (createdUser) {
-                const returnUser: ReturnsUserType = {
-                    id: createdUser._id.toString(),
-                    createdAt: createdUser.createdAt,
-                    login: createdUser.login,
-                    email: createdUser.email
+            if (!createdUser) {
+                return {
+                    status: ResultStatus.SomethingWasWrong,
+                    errorsMessages: validateError([{field: '', message: 'Something was wrong'}]),
+                    data: null
                 }
-                return returnUser
             }
+            const returnUser: ReturnsUserType = {
+                id: createdUser._id.toString(),
+                createdAt: createdUser.createdAt,
+                login: createdUser.login,
+                email: createdUser.email
+            }
+            return {status: ResultStatus.Success, data: returnUser}
+
         } catch (err) {
             console.log(err)
+            return {
+                status: ResultStatus.SomethingWasWrong,
+                errorsMessages: validateError([{field: '', message: 'Something was wrong'}]),
+                data: null
+            }
         }
-        return null
 
     }
 
+
+    static async updateUser(userEmail: string, data: UserUpdateModel): Promise<ObjectResult> {
+        const {
+            email,
+            isConfirm,
+            confirmationCode,
+            login,
+            password,
+            expirationDate,
+        } = data
+        const user = await UserRepository.findUser(userEmail)
+        if (!user) return {
+            status: ResultStatus.BadRequest,
+            errorsMessages: validateError([{field: 'email', message: 'User not found'}]),
+            data: null
+        }
+        const updateUser: UserModel = {
+            id: user._id,
+            email: email ? email : user.email,
+            login: login ? login : user.login,
+            createdAt: user.createdAt,
+            password: password? password :user.password,
+            emailConfirmation: {
+                confirmationCode: confirmationCode? confirmationCode :user.emailConfirmation.confirmationCode,
+                isConfirm: isConfirm? isConfirm: user.emailConfirmation.isConfirm,
+                expirationDate: expirationDate? expirationDate :user.emailConfirmation.expirationDate
+            }
+        }
+        try {
+            await UserRepository.updateUser(updateUser)
+            return {status: ResultStatus.Success, data: null}
+        } catch (e) {
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
+        }
+    }
 }

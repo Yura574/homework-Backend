@@ -60,5 +60,10 @@ export type UserCreateModel ={
 }
 
 export type UserUpdateModel = {
-    isConfirm: boolean
+    email?: string,
+    login?: string,
+    password?: string,
+    isConfirm?: boolean
+    confirmationCode?: string,
+    expirationDate?: Date
 }

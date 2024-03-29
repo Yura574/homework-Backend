@@ -12,6 +12,8 @@ import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {ReturnViewModel} from "../models/commonModels";
 import {UserService} from "../service/UserService";
+import {ResultStatus} from "../utils/objectResult";
+import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 
 export const userRouter = express.Router()
 
@@ -60,21 +62,15 @@ userRouter.get('/:id', authMiddleware, validateId, async (req: RequestType<Param
 
 })
 
-userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{}, CreateUserBodyType, {}>, res: ResponseType<ReturnsUserType>) => {
+userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{}, CreateUserBodyType, {}>, res: ResponseType<ReturnsUserType | null>) => {
     const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку,
     if (isError) return
-const newUser = await UserService.createUser(req.body, res)
+const result = await UserService.createUser(req.body)
     // const newUser = await UserRepository.createUser(req.body)
 
-    if (newUser) {
-
-        res.status(HTTP_STATUSES.CREATED_201).send(newUser)
-        return
-    }
-
-    res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
-
+ if(result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
+return handleErrorObjectResult(result, res)
 })
 
 userRouter.delete('/:id', authMiddleware,validateId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {

@@ -14,7 +14,6 @@ const transporter = nodemailer.createTransport({
 
 export class EmailService {
     static async sendEmail(email: string, confirmCode: string) {
-        console.log(email, confirmCode)
         try {
             const code = confirmCode + '_' + email
             await transporter.sendMail({
