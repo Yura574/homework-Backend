@@ -2,8 +2,14 @@ import express, {Response} from "express";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
 import {RequestType, ResponseType} from "./blog-router";
 import {AuthRepository} from "../repositories/auth-repository";
-import {loginValidator} from "../validators/authValidators";
-import {ConfirmEmailQuery, LoginInputModel, LoginResponse, ResendingEmailBody} from "../models/authModel";
+import {confirmationCode, loginValidator} from "../validators/authValidators";
+import {
+    ConfirmEmailQuery,
+    LoginInputModel,
+    LoginResponse,
+    RegistrationConfirmationCodeModel,
+    ResendingEmailBody
+} from "../models/authModel";
 import {authMiddleware} from "../middleware/auth/auth-middleware";
 import {ValidateError} from "../utils/validateError";
 import {UserInputModel} from "../models/userModels";
@@ -37,12 +43,21 @@ authRouter.post('/registration', userValidation(), async (req: RequestType<{}, U
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
+authRouter.post('/registration-confirmation', confirmationCode, async (req: RequestType<{}, RegistrationConfirmationCodeModel, {}>, res: Response) => {
+    const isError = ValidateError(req, res)
+    if (isError) return
+
+    const result: ObjectResult<string | null> = await AuthService.confirmEmail(req.body.code)
+
+    if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    return handleErrorObjectResult(result, res)
+})
 
 authRouter.get('/confirm-email', async (req: RequestType<{}, {}, ConfirmEmailQuery>, res: Response) => {
 
-    const {code, email} = req.query
+    const {code} = req.query
 
-    const result: ObjectResult<string | null> = await AuthService.confirmEmail(email, code)
+    const result: ObjectResult<string | null> = await AuthService.confirmEmail( code)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })

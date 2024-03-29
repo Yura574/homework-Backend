@@ -8,9 +8,10 @@ import {v4} from "uuid";
 
 export class AuthService {
     static async registration(data: UserInputModel): Promise<ObjectResult<string | null>> {
-
+        console.log(123)
         const {email, login, password} = data
         const isUserExist = await UserRepository.uniqueUser(email, login)
+        console.log(isUserExist)
         if (isUserExist) {
             const user = await UserRepository.findUser(email)
             //Пользователь уже зарегестрирован, но не подтвердил почту, высылаем код подтверждения еще раз
@@ -18,7 +19,7 @@ export class AuthService {
                 await EmailService.sendEmail(user.email, user.emailConfirmation.confirmationCode)
                 return {
                     status: ResultStatus.Success,
-                    data: 'User already register, confirm code sent to email'
+                    data: 'User registered, confirm code sent to email'
                 }
             }
             return {
@@ -47,14 +48,18 @@ export class AuthService {
 
     }
 
-    static async confirmEmail(email: string, code: string): Promise<ObjectResult<string | null>> {
+    static async confirmEmail(code: string): Promise<ObjectResult<string | null>> {
+        console.log(code)
+        const [confirmCode, email] = code.split('_')
+        console.log(confirmCode)
+        console.log(email)
         const user = await UserRepository.findUser(email)
         if (!user) return {status: ResultStatus.BadRequest, errorMessage: 'User not found', data: null}
         if (user?.emailConfirmation.isConfirm) {
             return {status: ResultStatus.BadRequest, errorMessage: 'email already confirmed', data: null}
         }
 
-        if (user.emailConfirmation.confirmationCode === code &&
+        if (user.emailConfirmation.confirmationCode === confirmCode &&
             user.emailConfirmation.expirationDate > new Date()) {
             //устанавливаем свойсво isConfirm true, и заменяем весь объект в бд
             const updateUser: UserModel = {
@@ -77,7 +82,7 @@ export class AuthService {
 
             return {status: ResultStatus.Success, data: 'Code confirmed successful'}
         }
-        return {status: ResultStatus.BadRequest, errorMessage: 'Confirm code invalid', data: null}
+        return {status: ResultStatus.BadRequest, errorMessage: [{field:'code', message: 'Confirm code invalid'}], data: null}
     }
 
     static async resendingEmail(email: string): Promise<ObjectResult<null>> {

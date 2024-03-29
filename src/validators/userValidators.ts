@@ -32,13 +32,13 @@ const loginValidator = body(login)
         message: `min length ${loginLength.min} symbols, max length ${loginLength.max} symbols`
     })
     .matches(/^[a-zA-Z0-9_-]*$/).withMessage({field: login, message: `${login} incorrect`})
-    .custom(async (login: string) => {
-        const isLogin = await userCollection.findOne({login})
-        if (isLogin) {
-            throw new Error()
-        }
-        return true
-    }).withMessage({field: login, message: `${login} already exist`})
+    // .custom(async (login: string) => {
+    //     const isLogin = await userCollection.findOne({login})
+    //     if (isLogin) {
+    //         throw new Error()
+    //     }
+    //     return true
+    // }).withMessage({field: login, message: `${login} already exist`})
 
 const passwordValidator = body(password)
     .notEmpty().withMessage({field: password, message: `${password} is required`})
@@ -52,12 +52,12 @@ export const emailValidator = body(email)
     .notEmpty().withMessage({field: email, message: `${email}  is required`})
     .isString().withMessage({field: email, message: `${email}  should be string`})
     .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/).withMessage({field: email, message: `${email} incorrect`})
-    .custom(async (email: string) => {
-        const isLogin = await userCollection.findOne({email})
-        if (isLogin) {
-            throw new Error()
-        }
-        return true
-    }).withMessage({field: email, message: `${email} already exist`})
+    // .custom(async (email: string) => {
+    //     const isLogin = await userCollection.findOne({email})
+    //     if (isLogin) {
+    //         throw new Error()
+    //     }
+    //     return true
+    // }).withMessage({field: email, message: `${email} already exist`})
 
 export const userValidation = () => [loginValidator, passwordValidator, emailValidator]

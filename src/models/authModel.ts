@@ -5,6 +5,9 @@ export type ConfirmEmailQuery = {
 export type ResendingEmailBody = {
     email: string
 }
+export type RegistrationConfirmationCodeModel = {
+    code: string
+}
 
 export type LoginResponse = {
     accessToken: String

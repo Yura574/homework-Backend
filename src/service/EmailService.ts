@@ -16,6 +16,7 @@ export class EmailService {
     static async sendEmail(email: string, confirmCode: string) {
         console.log(email, confirmCode)
         try {
+            const code = confirmCode + '_' + email
             await transporter.sendMail({
                 from: process.env.SMTP_EMAIL,
                 to: email,
@@ -23,7 +24,9 @@ export class EmailService {
                 text: 'this is text',
                 html: `<h1>Thank for your registration</h1>
                         <p>To finish registration please follow the link below:
-                             <a href='http://localhost:5000/auth/confirm-email?code=${confirmCode}&email=${email}'>complete registration</a>
+                             <a href='http://localhost:5000/auth/confirm-email?code=${code}'>complete registration</a>
+                             <div>Our code ${code}
+                             </div>
                            </p>`
             })
 

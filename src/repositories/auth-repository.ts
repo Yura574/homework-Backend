@@ -12,13 +12,16 @@ export class AuthRepository {
         if (!findUser) {
             return {status: ResultStatus.Unauthorized, errorMessage: 'User or password incorrect', data: null}
         }
-
+        console.log(findUser)
+        if (!findUser.emailConfirmation.isConfirm) {
+    return {status: ResultStatus.Forbidden, errorMessage: 'Confirmed our email', data: null}
+        }
         const isCompare = await bcrypt.compare(password, findUser.password)
         if (isCompare) {
             const payload = {userId: findUser._id.toString(),}
             return {
                 status: ResultStatus.Success,
-                data:{
+                data: {
                     accessToken: jwt.sign(payload, 'SECRET', {expiresIn: '1h'})
                 }
             }
