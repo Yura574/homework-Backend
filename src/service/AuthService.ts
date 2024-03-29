@@ -4,6 +4,7 @@ import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {newUser} from "../utils/newUser";
 import {EmailService} from "./EmailService";
 import {v4} from "uuid";
+import {validateError} from "../utils/validateError";
 
 
 export class AuthService {
@@ -24,7 +25,7 @@ export class AuthService {
             }
             return {
                 status: ResultStatus.BadRequest,
-                errorsMessages: [error],
+                errorsMessages: validateError([error]),
                 data: null
             }
         }
@@ -56,7 +57,7 @@ export class AuthService {
         const user = await UserRepository.findUser(email)
         if (!user) return {status: ResultStatus.BadRequest, errorsMessages: 'User not found', data: null}
         if (user?.emailConfirmation.isConfirm) {
-            return {status: ResultStatus.BadRequest, errorsMessages: [{field:'code', message: 'email already confirmed'}], data: null}
+            return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field:'email', message: 'User not found'}]), data: null}
         }
 
         if (user.emailConfirmation.confirmationCode === confirmCode &&
@@ -82,14 +83,14 @@ export class AuthService {
 
             return {status: ResultStatus.Success, data: 'Code confirmed successful'}
         }
-        return {status: ResultStatus.BadRequest, errorsMessages: [{field:'code', message: 'Confirm code invalid'}], data: null}
+        return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field:'code', message: 'Confirm code invalid'}]), data: null}
     }
 
     static async resendingEmail(email: string): Promise<ObjectResult<null>> {
         const user = await UserRepository.findUser(email)
-        if (!user) return {status: ResultStatus.BadRequest, errorsMessages: [{field: 'email', message:'User with this email not found'}], data: null}
+        if (!user) return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field: 'email', message:'User with this email not found'}]), data: null}
         if(user.emailConfirmation.isConfirm === true){
-            return {status: ResultStatus.BadRequest, errorsMessages:  [{field: 'email', message:'Email already confirmed'}], data: null}
+            return {status: ResultStatus.BadRequest, errorsMessages: validateError( [{field: 'email', message:'Email already confirmed'}]), data: null}
         }
         const confirmCode = v4()
         await EmailService.sendEmail(email, confirmCode)

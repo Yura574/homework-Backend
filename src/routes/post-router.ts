@@ -3,7 +3,7 @@ import {PostRepository} from '../repositories/post-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
-import {ValidateError} from '../utils/validateError';
+import {ValidateErrorRequest} from '../utils/validateErrorRequest';
 import {PostService} from '../service/PostService';
 import {ReturnViewModel} from "../models/commonModels";
 import {PostInputModel, PostViewModel} from "../models/postModels";
@@ -37,7 +37,7 @@ postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: Respons
 
 postRouter.get('/:id', findPost, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
 
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
@@ -49,7 +49,7 @@ postRouter.get('/:id', findPost, async (req: RequestType<ParamsType, {}, {}>, re
 
 postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (req: RequestType<{}, PostInputModel, {}>, res: Response) => {
 
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
@@ -68,7 +68,7 @@ postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (r
 
 postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
 
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
@@ -84,7 +84,7 @@ postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Re
 })
 
 postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку
     if (isError) return
 
@@ -103,7 +103,7 @@ if(result.status=== ResultStatus.Success) return  res.status(HTTP_STATUSES.OK_20
     return handleErrorObjectResult(result, res)
 })
 postRouter.post('/:id/comments', authMiddleware, commentValidators(), async (req: RequestType<ParamsType, CommentInputModel, {}>, res: ResponseType<CommentViewModel | null>) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if(isError) return
     const userId = req.user?.userId.toString()
     if (!userId) return res.status(HTTP_STATUSES.NOT_FOUND_404)

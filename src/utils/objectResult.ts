@@ -1,8 +1,12 @@
 export type ObjectResult<T = null> = {
     status: ResultStatus
-    errorsMessages?: [{field: string, message: string}] | string
+    errorsMessages?: ErrorsType | string
     data: T
 }
+export type ErrorsType = {
+    errorsMessages: ErrorType []
+}
+export type ErrorType = { field: string, message: string }
 
 export enum ResultStatus {
     Success = 'success',

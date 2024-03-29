@@ -11,7 +11,7 @@ import {
     ResendingEmailBody
 } from "../models/authModel";
 import {authMiddleware} from "../middleware/auth/auth-middleware";
-import {ValidateError} from "../utils/validateError";
+import {ValidateErrorRequest} from "../utils/validateErrorRequest";
 import {UserInputModel} from "../models/userModels";
 import {AuthService} from "../service/AuthService";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
@@ -23,7 +23,7 @@ import {UserRepository} from "../repositories/user-repository";
 export const authRouter = express.Router()
 
 authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: ResponseType<LoginResponse | null>) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
@@ -34,7 +34,7 @@ authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInp
 })
 
 authRouter.post('/registration', userValidation(), async (req: RequestType<{}, UserInputModel, {}>, res: Response) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
     const result: ObjectResult<string | null> = await AuthService.registration(req.body)
@@ -44,7 +44,7 @@ authRouter.post('/registration', userValidation(), async (req: RequestType<{}, U
     return handleErrorObjectResult(result, res)
 })
 authRouter.post('/registration-confirmation', confirmationCode, async (req: RequestType<{}, RegistrationConfirmationCodeModel, {}>, res: Response) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
     const result: ObjectResult<string | null> = await AuthService.confirmEmail(req.body.code)
@@ -62,7 +62,7 @@ authRouter.get('/confirm-email', async (req: RequestType<{}, {}, ConfirmEmailQue
     return handleErrorObjectResult(result, res)
 })
 authRouter.post('/registration-email-resending', emailValidator, async (req: RequestType<{}, ResendingEmailBody, {}>, res: Response) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
     const {email} = req.body

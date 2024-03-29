@@ -3,7 +3,7 @@ import {authMiddleware} from "../middleware/auth/auth-middleware";
 import {ParamsType, RequestType, ResponseType} from "./blog-router";
 import {userValidation, validateId} from "../validators/userValidators";
 import {CreateUserBodyType, ReturnsUserType} from "./types/usersTypes";
-import {ValidateError} from "../utils/validateError";
+import {ValidateErrorRequest} from "../utils/validateErrorRequest";
 import {UserRepository} from "../repositories/user-repository";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
 import {GetUsersQuery, UserItemType, UserViewModel,} from "../models/userModels";
@@ -37,7 +37,7 @@ userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuer
 
 })
 userRouter.get('/:id', authMiddleware, validateId, async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<UserViewModel>) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
@@ -61,7 +61,7 @@ userRouter.get('/:id', authMiddleware, validateId, async (req: RequestType<Param
 })
 
 userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{}, CreateUserBodyType, {}>, res: ResponseType<ReturnsUserType>) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку,
     if (isError) return
 const newUser = await UserService.createUser(req.body, res)
@@ -78,7 +78,7 @@ const newUser = await UserService.createUser(req.body, res)
 })
 
 userRouter.delete('/:id', authMiddleware,validateId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
-const isError = ValidateError(req,res)
+const isError = ValidateErrorRequest(req,res)
     if(isError) return
     const isDeleted = await UserRepository.deleteUser(req.params.id)
     if (isDeleted) {

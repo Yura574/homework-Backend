@@ -7,7 +7,7 @@ import {HTTP_STATUSES} from "../utils/httpStatuses";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {authMiddleware} from "../middleware/auth/auth-middleware";
 import {commentValidators} from "../validators/commentValidators";
-import {ValidateError} from "../utils/validateError";
+import {ValidateErrorRequest} from "../utils/validateErrorRequest";
 
 
 export const commentsRouter = express.Router()
@@ -29,7 +29,7 @@ commentsRouter.delete('/:id', authMiddleware, async (req: RequestType<ParamsType
 })
 
 commentsRouter.put('/:id', authMiddleware, commentValidators(), async (req: RequestType<ParamsType, CommentInputModel, {}>, res: Response) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if(isError) return
     const userId = req.user?.userId.toString()
     if (!userId) return res.status(HTTP_STATUSES.NOT_AUTHORIZATION_401)

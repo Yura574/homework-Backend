@@ -3,7 +3,7 @@ import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
 import {blogValidators, findBlog} from '../validators/blogValidators';
-import {ValidateError} from '../utils/validateError';
+import {ValidateErrorRequest} from '../utils/validateErrorRequest';
 import {BlogService} from '../service/BlogService';
 import {postValidation} from '../validators/post-validators';
 import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../models/blogModels";
@@ -50,7 +50,7 @@ export type GetPostsType = {
 }
 
 blogRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBody<BodyType>, res: Response) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
@@ -65,7 +65,7 @@ blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: ResponseTyp
     return res.status(HTTP_STATUSES.OK_200).send(result.data)
 })
 blogRouter.get('/:id', findBlog, async (req: RequestWithParams<ParamsType>, res: ResponseType<BlogViewModel | null>) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
     const result: ObjectResult<BlogViewModel | null> = await BlogService.getBlogById(req.params.id)
@@ -87,7 +87,7 @@ blogRouter.get('/:id/posts', async (
 })
 blogRouter.post('/:id/posts', authMiddleware, validateId, postValidation(), async (req: RequestType<ParamsType, BlogPostInputModel, {}>, res: ResponseType<PostViewModel | null>) => {
 
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) return
     const result = await BlogService.createPostForBlog(req.params.id, req.body)
     console.log(result)
@@ -95,7 +95,7 @@ blogRouter.post('/:id/posts', authMiddleware, validateId, postValidation(), asyn
     return handleErrorObjectResult(result, res)
 })
 blogRouter.delete('/:id', authMiddleware,  async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
     const result: ObjectResult = await BlogService.deleteBlog(req.params.id)
@@ -106,7 +106,7 @@ blogRouter.delete('/:id', authMiddleware,  async (req: RequestType<ParamsType, {
 
 })
 blogRouter.put('/:id', authMiddleware, blogValidators(), async (req: RequestType<ParamsType, BlogInputModel, {}>, res: ResponseType<ObjectResult>) => {
-    const isError = ValidateError(req, res)
+    const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
     const id = req.params.id
