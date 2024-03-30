@@ -18,19 +18,10 @@ export const db = {
     }
 }
 
-// export async function runDB() {
-//     try {
-//         await client.connect();
-//         console.log("Successfully connected to Atlas");
-//     } catch (err) {
-//         console.log(err);
-//     }
-//
-// }
-
 export const database = db.client.db("backhomework")
 
 export const blogCollection = database.collection('blogs')
 export const postCollection = database.collection('posts')
 export const userCollection = database.collection('users')
 export const commentCollection = database.collection('comments')
+export const blacklistTokenCollection = database.collection('blacklist')

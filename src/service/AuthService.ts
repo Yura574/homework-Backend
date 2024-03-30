@@ -6,10 +6,11 @@ import {EmailService} from "./EmailService";
 import {v4} from "uuid";
 import {validateError} from "../utils/validateError";
 import {UserService} from "./UserService";
-import {add} from "date-fns";
+import {add, sub} from "date-fns";
 import {LoginInputModel, TokenResponseModel} from "../models/authModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import {BlacklistRepository} from "../repositories/blacklist-repository";
 
 
 export class AuthService {
@@ -157,13 +158,17 @@ export class AuthService {
 
     }
 
-    static async refreshToken(refreshToken: string): Promise<ObjectResult<TokenResponseModel | null>>{
+    static async refreshToken(refreshToken: string): Promise<ObjectResult<TokenResponseModel | null>> {
         try {
             const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
             const findUser = await UserRepository.getUserById(dataToken.userId)
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
             }
+            const token = await BlacklistRepository.findToken(refreshToken)
+            if (token) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
+            await BlacklistRepository.addToken(refreshToken)
+            console.log('find token', token)
             const payload = {userId: findUser._id.toString(),}
             const tokens = {
                 accessToken: {
@@ -173,26 +178,28 @@ export class AuthService {
                     refreshToken: jwt.sign(payload, 'REFRESH_SECRET', {expiresIn: '20s'})
                 }
             }
-            return  {status: ResultStatus.Success, data: tokens}
-        }
-        catch (err) {
+            return {status: ResultStatus.Success, data: tokens}
+        } catch (err) {
             // console.log(err.expiredAt)
             return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
         }
     }
 
-    static async deleteToken(refreshToken: string): Promise<ObjectResult>  {
+    static async deleteToken(refreshToken: string): Promise<ObjectResult> {
         try {
             const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
             const findUser = await UserRepository.getUserById(dataToken.userId)
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
             }
+            const token = await BlacklistRepository.findToken(refreshToken)
+            if (token) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
+            console.log(new Date(dataToken.exp))
+            await BlacklistRepository.addToken(refreshToken)
             return {status: ResultStatus.Success, data: null}
-        }
-        catch (err) {
+        } catch (err) {
             // console.log(err.expiredAt)
             return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
         }
-}
+    }
 }
