@@ -11,7 +11,6 @@ export class CommentRepository {
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
         const comments = await commentCollection.find({postId}).sort(sortObject).skip(skip).limit(pageSize).toArray()
-        console.log(comments, totalCount)
         return {comments, totalCount}
     }
 

@@ -11,7 +11,7 @@ export class UserService {
         const {email, login, password} = data
         const errors = await UserRepository.uniqueUser(email, login)
 
-        if (errors) {
+        if (errors.length> 0) {
             return {status: ResultStatus.BadRequest, errorsMessages: validateError(errors), data: null}
         }
 

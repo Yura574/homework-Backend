@@ -62,7 +62,6 @@ export class CommentService {
     static async createComment(data: CommentInputModel, postId: string, userId: string): Promise<ObjectResult<CommentViewModel | null>> {
 
         const post = await PostRepository.getPostById(postId)
-        console.log(post)
         if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         const user = await UserRepository.getUserById(new ObjectId(userId))
         if (!user) return {status: ResultStatus.NoContent, errorsMessages: 'User not found', data: null}
@@ -80,7 +79,6 @@ export class CommentService {
             const comment = await CommentRepository.createComment(newComment)
             const createdComment: CommentViewModel = {
                 id: comment!._id.toString(),
-                // postId: postId,
                 content: comment?.content,
                 createdAt: comment?.createdAt,
                 commentatorInfo: {
