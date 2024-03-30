@@ -6,7 +6,7 @@ import {CreateUserBodyType, ReturnsUserType} from "./types/usersTypes";
 import {ValidateErrorRequest} from "../utils/validateErrorRequest";
 import {UserRepository} from "../repositories/user-repository";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
-import {GetUsersQuery, UserItemType, UserViewModel,} from "../models/userModels";
+import {GetUsersQuery,  UserViewModel,} from "../models/userModels";
 import {ResponsePostType} from "./post-router";
 import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
@@ -18,9 +18,9 @@ import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 export const userRouter = express.Router()
 
 
-userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuery>, res: ResponsePostType<ReturnViewModel<UserItemType[]>>) => {
+userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuery>, res: ResponsePostType<ReturnViewModel<UserViewModel[]>>) => {
     const {totalCount, users, pagesCount, pageSize, pageNumber} = await UserRepository.getAllUsers(req.query)
-    const returnUsers: ReturnViewModel<UserItemType[]> = {
+    const returnUsers: ReturnViewModel<UserViewModel[]> = {
         page: +pageNumber,
         pageSize: +pageSize,
         totalCount,

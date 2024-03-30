@@ -7,7 +7,7 @@ import {v4} from "uuid";
 import {validateError} from "../utils/validateError";
 import {UserService} from "./UserService";
 import {add} from "date-fns";
-import {LoginInputModel, LoginResponse, TokenResponseModel} from "../models/authModel";
+import {LoginInputModel, TokenResponseModel} from "../models/authModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -156,4 +156,43 @@ export class AuthService {
         }
 
     }
+
+    static async refreshToken(refreshToken: string): Promise<ObjectResult<TokenResponseModel | null>>{
+        try {
+            const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
+            const findUser = await UserRepository.getUserById(dataToken.userId)
+            if (!findUser) {
+                return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
+            }
+            const payload = {userId: findUser._id.toString(),}
+            const tokens = {
+                accessToken: {
+                    accessToken: jwt.sign(payload, 'ACCESS_SECRET', {expiresIn: '10s'})
+                },
+                refreshToken: {
+                    refreshToken: jwt.sign(payload, 'REFRESH_SECRET', {expiresIn: '20s'})
+                }
+            }
+            return  {status: ResultStatus.Success, data: tokens}
+        }
+        catch (err) {
+            // console.log(err.expiredAt)
+            return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
+        }
+    }
+
+    static async deleteToken(refreshToken: string): Promise<ObjectResult>  {
+        try {
+            const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
+            const findUser = await UserRepository.getUserById(dataToken.userId)
+            if (!findUser) {
+                return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
+            }
+            return {status: ResultStatus.Success, data: null}
+        }
+        catch (err) {
+            // console.log(err.expiredAt)
+            return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
+        }
+}
 }

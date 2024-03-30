@@ -14,19 +14,17 @@ export type GetUsersQuery = {
     searchEmailTerm: string
 }
 
-
-export type UserItemType ={
-    id: string,
-    login: string,
-    email: string,
-    createdAt: string
-}
-
 export type UserInputModel = {
     login: string
     password: string
     email: string
 }
+export type UserMeModel = {
+    email: string
+    login: string
+    userId: string
+}
+
 
 export type UserViewModel = {
     id: string
