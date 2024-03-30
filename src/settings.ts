@@ -6,6 +6,7 @@ import {database} from './db/db';
 import {authRouter} from "./routes/auth-router";
 import {userRouter} from "./routes/users-router";
 import {commentsRouter} from "./routes/comment-router";
+import cookieParser from "cookie-parser";
 
 dotenv.config()
 
@@ -18,6 +19,7 @@ export const routerPaths = {
     deleteAllData: '/testing/all-data'
 }
 export const app = express()
+app.use(cookieParser())
 export const port = process.env.PORT
 
 app.use(express.json())

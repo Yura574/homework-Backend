@@ -70,8 +70,8 @@ export class UserRepository {
 
     }
 
-    static async getUserById(userId: ObjectId) {
-        return await userCollection.findOne({_id: userId})
+    static async getUserById(userId: string) {
+        return await userCollection.findOne({_id: new ObjectId(userId)})
     }
 
     static async updateUser(data: UserModel) {

@@ -7,9 +7,42 @@ import {v4} from "uuid";
 import {validateError} from "../utils/validateError";
 import {UserService} from "./UserService";
 import {add} from "date-fns";
+import {LoginInputModel, LoginResponse, TokenResponseModel} from "../models/authModel";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 
 export class AuthService {
+
+    static async login(data: LoginInputModel): Promise<ObjectResult<TokenResponseModel | null>> {
+        const {loginOrEmail, password} = data
+        const findUser = await UserRepository.findUser(loginOrEmail)
+        if (!findUser) {
+            return {status: ResultStatus.Unauthorized, errorsMessages: 'User or password incorrect', data: null}
+        }
+        if (!findUser.emailConfirmation.isConfirm) {
+            return {status: ResultStatus.Forbidden, errorsMessages: 'Confirmed our email', data: null}
+        }
+        const isCompare = await bcrypt.compare(password, findUser.password)
+        if (isCompare) {
+            const payload = {userId: findUser._id.toString(),}
+            return {
+                status: ResultStatus.Success,
+                data: {
+                    accessToken: {
+                        accessToken: jwt.sign(payload, 'ACCESS_SECRET', {expiresIn: '10s'})
+                    },
+                    refreshToken: {
+                        refreshToken: jwt.sign(payload, 'REFRESH_SECRET', {expiresIn: '20s'})
+                    }
+                }
+            }
+
+        }
+        return {status: ResultStatus.Unauthorized, errorsMessages: 'User or password incorrect', data: null}
+
+    }
+
     static async registration(data: UserInputModel): Promise<ObjectResult<string | null>> {
         const {email, login, password} = data
         const error = await UserRepository.uniqueUser(email, login)

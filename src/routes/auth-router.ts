@@ -1,4 +1,4 @@
-import express, {Response} from "express";
+import express, {Response, Request} from "express";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
 import {RequestType, ResponseType} from "./blog-router";
 import {AuthRepository} from "../repositories/auth-repository";
@@ -18,6 +18,10 @@ import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {emailValidator, userValidation} from "../validators/userValidators";
 import {UserRepository} from "../repositories/user-repository";
+import {UserService} from "../service/UserService";
+import {refreshTokenMiddleware} from "../middleware/auth/refreshToken-middleware";
+import jwt from "jsonwebtoken";
+import {ObjectId} from "mongodb";
 
 
 export const authRouter = express.Router()
@@ -27,8 +31,12 @@ authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInp
     if (isError) {
         return
     }
-    const result = await AuthRepository.login(req.body)
-    if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
+    const result = await AuthService.login(req.body)
+    if (result.status === ResultStatus.Success) {
+        return res.cookie('refreshToken', result.data?.refreshToken, {httpOnly: true, secure: true})
+            .status(HTTP_STATUSES.OK_200)
+            .send(result.data?.accessToken)
+    }
     console.log(result)
     return handleErrorObjectResult(result, res)
 })
@@ -57,7 +65,7 @@ authRouter.get('/confirm-email', async (req: RequestType<{}, {}, ConfirmEmailQue
 
     const {code} = req.query
 
-    const result: ObjectResult<string | null> = await AuthService.confirmEmail( code)
+    const result: ObjectResult<string | null> = await AuthService.confirmEmail(code)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
@@ -74,7 +82,7 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
     //userId получаем из accessToken
     if (!req.user?.userId) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
-    const user = await UserRepository.getUserById(req.user.userId)
+    const user = await UserRepository.getUserById(req.user.userId.toString())
     const userData = {
         email: user?.email,
         login: user?.login,
@@ -83,4 +91,33 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
     return res.send(userData)
 
 
+})
+
+authRouter.post('/refresh-token',  async (req: Request, res: Response)=> {
+    const refreshToken = req.cookies.refreshToken.refreshToken
+    try {
+        const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
+        console.log(typeof dataToken.userId)
+        const findUser = await UserRepository.getUserById(dataToken.userId)
+        console.log(findUser)
+        if (!findUser) {
+            return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
+        }
+        const payload = {userId: findUser._id.toString(),}
+        const tokens = {
+                accessToken: {
+                    accessToken: jwt.sign(payload, 'ACCESS_SECRET', {expiresIn: '10s'})
+                },
+                refreshToken: {
+                    refreshToken: jwt.sign(payload, 'REFRESH_SECRET', {expiresIn: '20s'})
+                }
+        }
+        return  res.cookie('refreshToken', tokens.refreshToken, {httpOnly: true, secure: true})
+            .status(HTTP_STATUSES.OK_200)
+            .send(tokens.accessToken)
+    }
+    catch (err) {
+        // console.log(err.expiredAt)
+        return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    }
 })

@@ -69,7 +69,7 @@ userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{
 const result = await UserService.createUser(req.body)
     // const newUser = await UserRepository.createUser(req.body)
 
- if(result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
+ if(result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
 return handleErrorObjectResult(result, res)
 })
 

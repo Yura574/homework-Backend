@@ -4,7 +4,6 @@ import {CommentInputModel, CommentViewModel, NewCommentModel} from "../models/co
 import {QueryType} from "../routes/post-router";
 import {PostRepository} from "../repositories/post-repository";
 import {UserRepository} from "../repositories/user-repository";
-import {ObjectId} from "mongodb";
 import {ReturnViewModel} from "../models/commonModels";
 
 export class CommentService {
@@ -63,7 +62,7 @@ export class CommentService {
 
         const post = await PostRepository.getPostById(postId)
         if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
-        const user = await UserRepository.getUserById(new ObjectId(userId))
+        const user = await UserRepository.getUserById(userId)
         if (!user) return {status: ResultStatus.NoContent, errorsMessages: 'User not found', data: null}
 // const me = AuthService.
         const newComment: NewCommentModel = {

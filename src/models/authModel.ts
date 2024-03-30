@@ -10,7 +10,17 @@ export type RegistrationConfirmationCodeModel = {
 }
 
 export type LoginResponse = {
-    accessToken: String
+    accessToken: string
+    // refreshToken: { refreshToken: string }
+}
+
+export type TokenResponseModel = {
+    accessToken: {
+        accessToken: string
+    }
+    refreshToken: {
+        refreshToken: string
+    }
 }
 
 export type LoginInputModel = {

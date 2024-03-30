@@ -6,28 +6,5 @@ import {ObjectResult, ResultStatus} from "../utils/objectResult";
 
 
 export class AuthRepository {
-    static async login(data: LoginInputModel): Promise<ObjectResult<LoginResponse | null>> {
-        const {loginOrEmail, password} = data
-        const findUser = await UserRepository.findUser(loginOrEmail)
-        if (!findUser) {
-            return {status: ResultStatus.Unauthorized, errorsMessages: 'User or password incorrect', data: null}
-        }
-        console.log(findUser)
-        if (!findUser.emailConfirmation.isConfirm) {
-    return {status: ResultStatus.Forbidden, errorsMessages: 'Confirmed our email', data: null}
-        }
-        const isCompare = await bcrypt.compare(password, findUser.password)
-        if (isCompare) {
-            const payload = {userId: findUser._id.toString(),}
-            return {
-                status: ResultStatus.Success,
-                data: {
-                    accessToken: jwt.sign(payload, 'SECRET', {expiresIn: '1h'})
-                }
-            }
 
-        }
-        return {status: ResultStatus.Unauthorized, errorsMessages: 'User or password incorrect', data: null}
-
-    }
 }
