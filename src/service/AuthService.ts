@@ -6,7 +6,7 @@ import {EmailService} from "./EmailService";
 import {v4} from "uuid";
 import {validateError} from "../utils/validateError";
 import {UserService} from "./UserService";
-import {add, sub} from "date-fns";
+import {add} from "date-fns";
 import {LoginInputModel, TokenResponseModel} from "../models/authModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -165,10 +165,12 @@ export class AuthService {
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
             }
-            const token = await BlacklistRepository.findToken(refreshToken)
-            if (token) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
+            const blacklistToken = await BlacklistRepository.findToken(refreshToken)
+            if (blacklistToken) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
             await BlacklistRepository.addToken(refreshToken)
-            console.log('find token', token)
+            setTimeout(async () => {
+                await BlacklistRepository.deleteToken(refreshToken)
+            }, 20000)
             const payload = {userId: findUser._id.toString(),}
             const tokens = {
                 accessToken: {
@@ -196,6 +198,9 @@ export class AuthService {
             if (token) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
             console.log(new Date(dataToken.exp))
             await BlacklistRepository.addToken(refreshToken)
+            setTimeout(async () => {
+                await BlacklistRepository.deleteToken(refreshToken)
+            }, 20000)
             return {status: ResultStatus.Success, data: null}
         } catch (err) {
             // console.log(err.expiredAt)

@@ -1,6 +1,5 @@
 import {MongoClient} from 'mongodb';
 import dotenv from 'dotenv';
-import {app} from "../settings";
 import {appConfig} from "../appConfig";
 
 dotenv.config()
@@ -24,4 +23,6 @@ export const blogCollection = database.collection('blogs')
 export const postCollection = database.collection('posts')
 export const userCollection = database.collection('users')
 export const commentCollection = database.collection('comments')
+
+export const deviceAuthCollection = database.collection('deviceAuth')
 export const blacklistTokenCollection = database.collection('blacklist')
