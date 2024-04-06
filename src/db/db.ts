@@ -24,5 +24,5 @@ export const postCollection = database.collection('posts')
 export const userCollection = database.collection('users')
 export const commentCollection = database.collection('comments')
 
-export const deviceAuthCollection = database.collection('deviceAuth')
+export const devicesCollection = database.collection('deviceAuth')
 export const blacklistTokenCollection = database.collection('blacklist')

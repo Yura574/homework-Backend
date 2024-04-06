@@ -5,8 +5,7 @@ import {confirmationCode, loginValidator} from "../validators/authValidators";
 import {
     ConfirmEmailQuery,
     LoginInputModel,
-    LoginResponse,
-    RegistrationConfirmationCodeModel,
+        RegistrationConfirmationCodeModel,
     ResendingEmailBody
 } from "../models/authModel";
 import {authMiddleware} from "../middleware/auth/auth-middleware";
@@ -17,19 +16,38 @@ import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {emailValidator, userValidation} from "../validators/userValidators";
 import {UserRepository} from "../repositories/user-repository";
+import jwt from "jsonwebtoken";
+import {UserService} from "../service/UserService";
 
 
 export const authRouter = express.Router()
 
-authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: ResponseType<LoginResponse | null>) => {
+//Исправить ResponseType
+authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
-    const result = await AuthService.login(req.body)
 
+    const ip = req.ip
+    const deviceName = req.headers["user-agent"]
+    //если пользователь зологинен, выдаем ошибку
+    if(req.cookies.refreshToken){
+        try{
+            const tokenData: any = jwt.verify(req.cookies.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
+            console.log(tokenData)
+            const {data} = await UserService.getUserById(tokenData.userId)
+            console.log(data)
+        } catch (e) {
+
+        }
+
+
+    }
+
+    const result = await AuthService.login({...req.body, deviceName, ip})
     if (result.status === ResultStatus.Success) {
-        return res.cookie('refreshToken', result.data?.refreshToken.refreshToken, {httpOnly: true, secure: true})
+        return res.cookie('refreshToken', result.data?.refreshToken, {httpOnly: true, secure: true})
             .status(HTTP_STATUSES.OK_200)
             .send(result.data?.accessToken)
     }
@@ -92,11 +110,13 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
 
 })
 
-authRouter.post('/refresh-token',  async (req: Request, res: ResponseType<LoginResponse | null>)=> {
-    const refreshToken = req.cookies.refreshToken
+authRouter.post('/refresh-token',  async (req: Request, res: any)=> {
+    const refreshToken = req.cookies.refreshToken.refreshToken
+    console.log(refreshToken)
     if(!refreshToken) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await AuthService.refreshToken(refreshToken)
-   if(result.status === ResultStatus.Success) return res.cookie('refreshToken', result.data?.refreshToken.refreshToken, {httpOnly: true, secure: true})
+    console.log(result)
+   if(result.status === ResultStatus.Success) return res.cookie('refreshToken', result.data?.refreshToken, {httpOnly: true, secure: true})
        .status(HTTP_STATUSES.OK_200)
        .send(result.data?.accessToken)
     return  handleErrorObjectResult(result, res)

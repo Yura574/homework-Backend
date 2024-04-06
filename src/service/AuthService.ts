@@ -11,32 +11,52 @@ import {LoginInputModel, TokenResponseModel} from "../models/authModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {BlacklistRepository} from "../repositories/blacklist-repository";
+import {SecurityDevicesService} from "./SecurityDevicesService";
 
 
 export class AuthService {
 
     static async login(data: LoginInputModel): Promise<ObjectResult<TokenResponseModel | null>> {
-        const {loginOrEmail, password} = data
+        const {loginOrEmail, password, deviceName, ip} = data
         const findUser = await UserRepository.findUser(loginOrEmail)
         if (!findUser) {
             return {status: ResultStatus.Unauthorized, errorsMessages: 'User or password incorrect', data: null}
         }
+
         if (!findUser.emailConfirmation.isConfirm) {
             return {status: ResultStatus.Forbidden, errorsMessages: 'Confirmed our email', data: null}
         }
         const isCompare = await bcrypt.compare(password, findUser.password)
         if (isCompare) {
-            const payload = {userId: findUser._id.toString(),}
+            const accessPayload = {userId: findUser._id.toString()}
+            const refreshPayload = {
+                userId: findUser._id.toString(),
+                deviceId: v4()
+            }
+
+            const accessToken = {
+                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '10s'})
+            }
+            const refreshToken = {
+                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '20s'})
+            }
+
+//добавляем для пользователя новое устройство
+            try {
+                const {iat, deviceId}: any = jwt.verify(refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
+                await SecurityDevicesService.addDevice({userId: findUser._id.toString(), issuedAt: iat, deviceId, deviceName, ip})
+
+            } catch (err) {
+                console.log(err)
+                return {
+                    status: ResultStatus.SomethingWasWrong,
+                    errorsMessages: 'Something was wrong',
+                    data: null
+                }
+            }
             return {
                 status: ResultStatus.Success,
-                data: {
-                    accessToken: {
-                        accessToken: jwt.sign(payload, 'ACCESS_SECRET', {expiresIn: '10s'})
-                    },
-                    refreshToken: {
-                        refreshToken: jwt.sign(payload, 'REFRESH_SECRET', {expiresIn: '20s'})
-                    }
-                }
+                data: {accessToken, refreshToken}
             }
 
         }
@@ -158,9 +178,12 @@ export class AuthService {
 
     }
 
-    static async refreshToken(refreshToken: string): Promise<ObjectResult<TokenResponseModel | null>> {
+// Исправить return Promise
+    static async refreshToken(refreshToken: string) {
         try {
+            console.log('refresh', refreshToken)
             const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
+            console.log('data token', dataToken)
             const findUser = await UserRepository.getUserById(dataToken.userId)
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
@@ -182,6 +205,7 @@ export class AuthService {
             }
             return {status: ResultStatus.Success, data: tokens}
         } catch (err) {
+            console.log(err)
             // console.log(err.expiredAt)
             return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
         }

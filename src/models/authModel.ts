@@ -15,17 +15,24 @@ export type LoginResponse = {
 }
 
 export type TokenResponseModel = {
-    accessToken: {
-        accessToken: string
-    }
-    refreshToken: {
-        refreshToken: string
-    }
+
+        accessToken: {
+            accessToken: string
+        }
+
+
+        refreshToken:{
+            refreshToken:string
+        }
+
 }
 
 export type LoginInputModel = {
     loginOrEmail: string,
-    password: string
+    password: string,
+    deviceName?: string
+    ip? : string
+
 }
 
 export type LoginSuccessViewModel = {

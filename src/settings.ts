@@ -7,6 +7,7 @@ import {authRouter} from "./routes/auth-router";
 import {userRouter} from "./routes/users-router";
 import {commentsRouter} from "./routes/comment-router";
 import cookieParser from "cookie-parser";
+import {securityDevicesRouter} from "./routes/securityDevices-router";
 
 dotenv.config()
 
@@ -16,9 +17,13 @@ export const routerPaths = {
     blogs: '/blogs',
     posts: '/posts',
     comments:'/comments',
+    security: '/security',
     deleteAllData: '/testing/all-data'
 }
 export const app = express()
+
+// app.set('trust proxy', true)
+app.set('trust proxy', true)
 app.use(cookieParser())
 export const port = process.env.PORT
 
@@ -28,6 +33,7 @@ app.use(routerPaths.users, userRouter)
 app.use(routerPaths.blogs, blogRouter)
 app.use(routerPaths.posts, postRouter)
 app.use(routerPaths.comments, commentsRouter)
+app.use(routerPaths.security, securityDevicesRouter)
 
 
 app.delete(routerPaths.deleteAllData, async (req: Request, res: Response) => {

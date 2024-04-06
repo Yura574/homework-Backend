@@ -42,7 +42,6 @@ export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next
 
     if (!auth) return res.sendStatus(401)
 
-    console.log(auth)
     const [type, token] = auth.split(' ')
 
     if (type !== "Basic" && type !== 'Bearer') return res.sendStatus(401)
@@ -54,10 +53,11 @@ export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next
                 userId: new ObjectId(dataToken.userId),
                 userLogin: dataToken.userLogin
             }
+            console.log('login', dataToken.userLogin)
             return next()
 
         } catch (err) {
-            console.warn(err)
+            console.warn('auth', err)
             return res.sendStatus(401)
 
         }

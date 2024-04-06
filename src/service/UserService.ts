@@ -1,4 +1,4 @@
-import {UserInputModel, UserModel, UserUpdateModel} from "../models/userModels";
+import {UserInputModel, UserModel, UserUpdateModel, UserViewModel} from "../models/userModels";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {UserRepository} from "../repositories/user-repository";
 import {newUser} from "../utils/newUser";
@@ -44,6 +44,18 @@ export class UserService {
 
     }
 
+
+    static async getUserById(userId: string): Promise<ObjectResult<ReturnsUserType | null>>{
+        const findUser = await UserRepository.getUserById(userId)
+        if(!findUser) return {status: ResultStatus.NotFound, errorsMessages: 'User not found', data: null}
+        const user: UserViewModel = {
+            id: findUser._id.toString(),
+            login: findUser.login,
+            email: findUser.email,
+            createdAt: findUser.createdAt
+        }
+        return {status: ResultStatus.Success, data: user}
+    }
 
     static async updateUser(userEmail: string, data: UserUpdateModel): Promise<ObjectResult> {
         const {
