@@ -12,6 +12,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {BlacklistRepository} from "../repositories/blacklist-repository";
 import {SecurityDevicesService} from "./SecurityDevicesService";
+import {somethingWasWrong} from "../utils/somethingWasWrong";
 
 
 export class AuthService {
@@ -43,16 +44,18 @@ export class AuthService {
 
 //добавляем для пользователя новое устройство
             try {
+                //дату создания и id получаем из только что созданного токена
                 const {iat, deviceId}: any = jwt.verify(refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
-                await SecurityDevicesService.addDevice({userId: findUser._id.toString(), issuedAt: iat, deviceId, deviceName, ip})
-
+                const result = await SecurityDevicesService.addDevice({
+                    userId: findUser._id.toString(),
+                    issuedAt: iat,
+                    deviceId,
+                    deviceName,
+                    ip
+                })
+                if (result.status !== ResultStatus.Success) return somethingWasWrong
             } catch (err) {
-                console.log(err)
-                return {
-                    status: ResultStatus.SomethingWasWrong,
-                    errorsMessages: 'Something was wrong',
-                    data: null
-                }
+                return somethingWasWrong
             }
             return {
                 status: ResultStatus.Success,

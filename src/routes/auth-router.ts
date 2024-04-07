@@ -5,7 +5,7 @@ import {confirmationCode, loginValidator} from "../validators/authValidators";
 import {
     ConfirmEmailQuery,
     LoginInputModel,
-        RegistrationConfirmationCodeModel,
+    RegistrationConfirmationCodeModel,
     ResendingEmailBody
 } from "../models/authModel";
 import {authMiddleware} from "../middleware/auth/auth-middleware";
@@ -16,34 +16,30 @@ import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {emailValidator, userValidation} from "../validators/userValidators";
 import {UserRepository} from "../repositories/user-repository";
-import jwt from "jsonwebtoken";
-import {UserService} from "../service/UserService";
-
 
 export const authRouter = express.Router()
 
 //Исправить ResponseType
 authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
-    if (isError) {
-        return
-    }
+    if (isError) return
 
     const ip = req.ip
     const deviceName = req.headers["user-agent"]
     //если пользователь зологинен, выдаем ошибку
-    if(req.cookies.refreshToken){
-        try{
-            const tokenData: any = jwt.verify(req.cookies.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
-            console.log(tokenData)
-            const {data} = await UserService.getUserById(tokenData.userId)
-            console.log(data)
-        } catch (e) {
-
-        }
-
-
-    }
+    // if(req.cookies.refreshToken){
+    //     try{
+    //         const tokenData: any = jwt.verify(req.cookies.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
+    //         const session = await SecurityDevicesService.getDevices(tokenData.userId)
+    //         console.log('session',session.data?.map(device => {
+    //             console.log(device.deviceId === tokenData.deviceId  && device.ip === req.ip? console.log('forbidden'): '')
+    //         }))
+    //     } catch (e) {
+    //         console.log('error')
+    //     }
+    //
+    //
+    // }
 
     const result = await AuthService.login({...req.body, deviceName, ip})
     if (result.status === ResultStatus.Success) {
@@ -99,7 +95,7 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
 
 
     const user = await UserRepository.getUserById(req.user.userId.toString())
-    if(!user) return {status: ResultStatus.NotFound, errorMessage: 'User not found', data: null}
+    if (!user) return {status: ResultStatus.NotFound, errorMessage: 'User not found', data: null}
     const userData: UserMeModel = {
         email: user.email,
         login: user.login,
@@ -110,27 +106,30 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
 
 })
 
-authRouter.post('/refresh-token',  async (req: Request, res: any)=> {
+authRouter.post('/refresh-token', async (req: Request, res: any) => {
     const refreshToken = req.cookies.refreshToken.refreshToken
     console.log(refreshToken)
-    if(!refreshToken) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    if (!refreshToken) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await AuthService.refreshToken(refreshToken)
     console.log(result)
-   if(result.status === ResultStatus.Success) return res.cookie('refreshToken', result.data?.refreshToken, {httpOnly: true, secure: true})
-       .status(HTTP_STATUSES.OK_200)
-       .send(result.data?.accessToken)
-    return  handleErrorObjectResult(result, res)
+    if (result.status === ResultStatus.Success) return res.cookie('refreshToken', result.data?.refreshToken, {
+        httpOnly: true,
+        secure: true
+    })
+        .status(HTTP_STATUSES.OK_200)
+        .send(result.data?.accessToken)
+    return handleErrorObjectResult(result, res)
 })
 
-authRouter.post('/logout',  async (req: Request, res: Response)=> {
+authRouter.post('/logout', async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken
     console.log(req.cookies)
-    if(!refreshToken) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    if (!refreshToken) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const result = await AuthService.deleteToken(refreshToken)
     console.log(result)
-    if(result.status === ResultStatus.Success) return res.clearCookie('refreshToken')
+    if (result.status === ResultStatus.Success) return res.clearCookie('refreshToken')
         .sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 
-    return  handleErrorObjectResult(result, res)
+    return handleErrorObjectResult(result, res)
 })
