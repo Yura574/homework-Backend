@@ -36,10 +36,10 @@ export class AuthService {
             }
 
             const accessToken = {
-                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '10s'})
+                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '1h'})
             }
             const refreshToken = {
-                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '20s'})
+                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '2h'})
             }
 
 //добавляем для пользователя новое устройство
@@ -184,9 +184,7 @@ export class AuthService {
 // Исправить return Promise
     static async refreshToken(refreshToken: string) {
         try {
-            console.log('refresh', refreshToken)
             const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
-            console.log('data token', dataToken)
             const findUser = await UserRepository.getUserById(dataToken.userId)
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
@@ -197,15 +195,19 @@ export class AuthService {
             setTimeout(async () => {
                 await BlacklistRepository.deleteToken(refreshToken)
             }, 20000)
-            const payload = {userId: findUser._id.toString(),}
+            const accessPayload = {userId: findUser._id.toString(),}
+            const refreshPayload = {userId: findUser._id.toString(), deviceId: dataToken.deviceId}
             const tokens = {
                 accessToken: {
-                    accessToken: jwt.sign(payload, 'ACCESS_SECRET', {expiresIn: '10s'})
+                    accessToken: jwt.sign(accessPayload, 'ACCESS_SECRET', {expiresIn: '1h'})
                 },
                 refreshToken: {
-                    refreshToken: jwt.sign(payload, 'REFRESH_SECRET', {expiresIn: '20s'})
+                    refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '2h'})
                 }
             }
+            const newDataToken: any  =jwt.verify(tokens.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
+            await SecurityDevicesService.updateDevice(newDataToken.deviceId, newDataToken.iat)
+
             return {status: ResultStatus.Success, data: tokens}
         } catch (err) {
             console.log(err)

@@ -26,20 +26,6 @@ authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInp
 
     const ip = req.ip
     const deviceName = req.headers["user-agent"]
-    //если пользователь зологинен, выдаем ошибку
-    // if(req.cookies.refreshToken){
-    //     try{
-    //         const tokenData: any = jwt.verify(req.cookies.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
-    //         const session = await SecurityDevicesService.getDevices(tokenData.userId)
-    //         console.log('session',session.data?.map(device => {
-    //             console.log(device.deviceId === tokenData.deviceId  && device.ip === req.ip? console.log('forbidden'): '')
-    //         }))
-    //     } catch (e) {
-    //         console.log('error')
-    //     }
-    //
-    //
-    // }
 
     const result = await AuthService.login({...req.body, deviceName, ip})
     if (result.status === ResultStatus.Success) {
@@ -108,16 +94,15 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
 
 authRouter.post('/refresh-token', async (req: Request, res: any) => {
     const refreshToken = req.cookies.refreshToken.refreshToken
-    console.log(refreshToken)
     if (!refreshToken) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await AuthService.refreshToken(refreshToken)
-    console.log(result)
-    if (result.status === ResultStatus.Success) return res.cookie('refreshToken', result.data?.refreshToken, {
-        httpOnly: true,
-        secure: true
-    })
-        .status(HTTP_STATUSES.OK_200)
-        .send(result.data?.accessToken)
+    if (result.status === ResultStatus.Success) {
+        res.cookie('refreshToken', result.data?.refreshToken, {
+            httpOnly: true,
+            secure: true
+        })
+        return res.status(HTTP_STATUSES.OK_200).send(result.data?.accessToken)
+    }
     return handleErrorObjectResult(result, res)
 })
 

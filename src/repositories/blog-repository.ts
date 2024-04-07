@@ -5,7 +5,7 @@ import {ObjectResult, ResultStatus} from "../utils/objectResult";
 
 export class BlogRepository {
     static async getBlogById(id: string) {
-        return await blogCollection.findOne({"_id": new ObjectId(id)})
+        return await blogCollection.findOne({_id: new ObjectId(id)})
 
     }
 

@@ -8,6 +8,7 @@ import {userRouter} from "./routes/users-router";
 import {commentsRouter} from "./routes/comment-router";
 import cookieParser from "cookie-parser";
 import {securityDevicesRouter} from "./routes/securityDevices-router";
+import cors from 'cors';
 
 dotenv.config()
 
@@ -25,6 +26,10 @@ export const app = express()
 // app.set('trust proxy', true)
 app.set('trust proxy', true)
 app.use(cookieParser())
+app.use(cors({
+    origin: true,
+    credentials: true
+}))
 export const port = process.env.PORT
 
 app.use(express.json())

@@ -8,6 +8,14 @@ export class SecurityDevicesRepository {
         return await devicesCollection.findOne({_id: insertedId})
     }
 
+    static async updateDevice(deviceId: string, issuedAt: string){
+        await devicesCollection.updateOne({deviceId}, {$set:{issuedAt}})
+    }
+
+    static async getDeviceById(deviceId: string){
+        return  await devicesCollection.findOne({deviceId})
+
+    }
     static async getDevices(userId: string) {
         return await devicesCollection.find({userId}).toArray()
     }

@@ -23,6 +23,11 @@ export class SecurityDevicesService {
 
     }
 
+    static async updateDevice(deviceId: string, issuedAt: string): Promise<ObjectResult> {
+        await SecurityDevicesRepository.updateDevice(deviceId, issuedAt)
+        return {status: ResultStatus.Success, data: null}
+    }
+
     static async getDevices(userId: string): Promise<ObjectResult<SecurityDeviceViewModel[] | null>> {
         const devices = await SecurityDevicesRepository.getDevices(userId)
         const returnData = devices.map(device => {
@@ -36,6 +41,20 @@ export class SecurityDevicesService {
         return {status: ResultStatus.Success, data: returnData}
     }
 
+    static async getDeviceById(deviceId: string): Promise<ObjectResult<any>>{
+      const device = await SecurityDevicesRepository.getDeviceById(deviceId)
+        if(!device) return {status: ResultStatus.NotFound, errorsMessages: 'Device not found', data: null }
+        const newDevice = {
+            id: device._id,
+            userId: device.userId,
+            issuedAt: device.issuedAt,
+            deviceId: device.deviceId,
+            deviceName: device.deviceName,
+            ip: device.ip
+
+        }
+return {status: ResultStatus.Success, data: newDevice}
+    }
     static async deleteDeviceById(deviceId: string): Promise<ObjectResult> {
         try {
             await SecurityDevicesRepository.deleteDevice(deviceId)
