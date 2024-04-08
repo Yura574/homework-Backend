@@ -34,16 +34,15 @@ securityDevicesRouter.get('/devices/:id', async (req: RequestType<ParamsType, an
 
 securityDevicesRouter.delete('/devices/:deviceId', async (req: RequestType<any, {}, {}>, res: ResponseType<any>) => {
     // const resultToken = await SecurityDevicesService.getDeviceById(req.params.deviceId)
+    const deviceId = req.params.deviceId
+    if(!deviceId) return res.sendStatus((HTTP_STATUSES.NOT_FOUND_404))
     const resultToken = getDataRefreshToken(req)
     if (!resultToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const device = await SecurityDevicesService.getDeviceById(resultToken.data.deviceId)
     if (device.status !== ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
-    console.log(device)
     const allUserDevices = await SecurityDevicesService.getDevices(resultToken.data.userId)
-    console.log(allUserDevices)
     const findDevice = allUserDevices.data?.find(device => device.deviceId === req.params.deviceId)
-    console.log(findDevice)
     if (!findDevice) return res.sendStatus(HTTP_STATUSES.FORBIDDEN_403)
 
 
