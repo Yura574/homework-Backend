@@ -14,23 +14,27 @@ securityDevicesRouter.get('/devices', async (req: RequestType<{}, {}, {}>, res: 
 
 
     const resultToken = getDataRefreshToken(req)
+
     //проверемяем токен, если токен не валидный дата не запишется
+
     if (!resultToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    const device = await SecurityDevicesService.getDeviceById(resultToken.data.deviceId)
+    if (device.status !== ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await SecurityDevicesService.getDevices(resultToken.data.userId)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return res.send(200)
 
 })
-securityDevicesRouter.get('/devices/:id', async (req: RequestType<ParamsType, any, any>, res: Response)=> {
+securityDevicesRouter.get('/devices/:id', async (req: RequestType<ParamsType, any, any>, res: Response) => {
     console.log('starts')
     const result = await SecurityDevicesService.getDeviceById(req.params.id)
-    if(result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
+    if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
 
 securityDevicesRouter.delete('/devices/:deviceId', async (req: RequestType<any, {}, {}>, res: ResponseType<any>) => {
-    const device = await SecurityDevicesService.getDeviceById(req.params.deviceId)
-    if(!device) return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    const resultToken = await SecurityDevicesService.getDeviceById(req.params.deviceId)
+    if (!resultToken.data) return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
     const result = await SecurityDevicesService.deleteDeviceById(req.params.deviceId)
     if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)

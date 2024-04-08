@@ -115,7 +115,6 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const result = await AuthService.deleteToken(refreshToken)
-    console.log(result)
     if (result.status === ResultStatus.Success) return res.clearCookie('refreshToken')
         .sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 
