@@ -29,6 +29,8 @@ securityDevicesRouter.get('/devices/:id', async (req: RequestType<ParamsType, an
 })
 
 securityDevicesRouter.delete('/devices/:deviceId', async (req: RequestType<any, {}, {}>, res: ResponseType<any>) => {
+    const device = await SecurityDevicesService.getDeviceById(req.params.deviceId)
+    if(!device) return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
     const result = await SecurityDevicesService.deleteDeviceById(req.params.deviceId)
     if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)

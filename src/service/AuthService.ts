@@ -48,7 +48,7 @@ export class AuthService {
                 const {iat, deviceId}: any = jwt.verify(refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
                 const result = await SecurityDevicesService.addDevice({
                     userId: findUser._id.toString(),
-                    issuedAt: iat,
+                    issuedAt: (new Date(iat*1000)).toISOString(),
                     deviceId,
                     deviceName,
                     ip
@@ -206,7 +206,7 @@ export class AuthService {
                 }
             }
             const newDataToken: any  =jwt.verify(tokens.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
-            await SecurityDevicesService.updateDevice(newDataToken.deviceId, newDataToken.iat)
+            await SecurityDevicesService.updateDevice(newDataToken.deviceId, new Date(newDataToken.iat*1000).toISOString())
 
             return {status: ResultStatus.Success, data: tokens}
         } catch (err) {
