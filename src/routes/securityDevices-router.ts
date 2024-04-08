@@ -33,8 +33,20 @@ securityDevicesRouter.get('/devices/:id', async (req: RequestType<ParamsType, an
 })
 
 securityDevicesRouter.delete('/devices/:deviceId', async (req: RequestType<any, {}, {}>, res: ResponseType<any>) => {
-    const resultToken = await SecurityDevicesService.getDeviceById(req.params.deviceId)
-    if (!resultToken.data) return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    // const resultToken = await SecurityDevicesService.getDeviceById(req.params.deviceId)
+    const resultToken = getDataRefreshToken(req)
+    if (!resultToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+
+    const device = await SecurityDevicesService.getDeviceById(resultToken.data.deviceId)
+    if (device.status !== ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    console.log(device)
+    const allUserDevices = await SecurityDevicesService.getDevices(resultToken.data.userId)
+    console.log(allUserDevices)
+    const findDevice = allUserDevices.data?.find(device => device.deviceId === req.params.deviceId)
+    console.log(findDevice)
+    if (!findDevice) return res.sendStatus(HTTP_STATUSES.FORBIDDEN_403)
+
+
     const result = await SecurityDevicesService.deleteDeviceById(req.params.deviceId)
     if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
@@ -43,6 +55,8 @@ securityDevicesRouter.delete('/devices', async (req: Request, res: ResponseType<
     const resultToken = getDataRefreshToken(req)
     //проверемяем токен, если токен не валидный дата не запишется
     if (!resultToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    const device = await SecurityDevicesService.getDeviceById(resultToken.data.deviceId)
+    if (device.status !== ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     //удаляет все подключенные устройства, кроме с которого делает запрос
     const result = await SecurityDevicesService.deleteAllUserDevices(resultToken.data.userId, resultToken.data.deviceId)

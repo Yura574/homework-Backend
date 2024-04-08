@@ -36,10 +36,10 @@ export class AuthService {
             }
 
             const accessToken = {
-                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '10s'})
+                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '1h'})
             }
             const refreshToken = {
-                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '20s'})
+                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '2h'})
             }
 
 //добавляем для пользователя новое устройство
@@ -199,10 +199,10 @@ export class AuthService {
             const refreshPayload = {userId: findUser._id.toString(), deviceId: dataToken.deviceId}
             const tokens = {
                 accessToken: {
-                    accessToken: jwt.sign(accessPayload, 'ACCESS_SECRET', {expiresIn: '10s'})
+                    accessToken: jwt.sign(accessPayload, 'ACCESS_SECRET', {expiresIn: '1h'})
                 },
                 refreshToken: {
-                    refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '20s'})
+                    refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '2h'})
                 }
             }
             const newDataToken: any  =jwt.verify(tokens.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
@@ -225,7 +225,8 @@ export class AuthService {
             }
             const token = await BlacklistRepository.findToken(refreshToken)
             if (token) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
-            console.log(new Date(dataToken.exp))
+
+            await SecurityDevicesService.deleteDeviceById(dataToken.deviceId)
             await BlacklistRepository.addToken(refreshToken)
             setTimeout(async () => {
                 await BlacklistRepository.deleteToken(refreshToken)
