@@ -18,6 +18,7 @@ import {emailValidator, userValidation} from "../validators/userValidators";
 import {UserRepository} from "../repositories/user-repository";
 import jwt from "jsonwebtoken";
 import {getDataRefreshToken} from "../utils/getDataRefreshToken";
+import {SecurityDevicesService} from "../service/SecurityDevicesService";
 
 export const authRouter = express.Router()
 
@@ -95,9 +96,14 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
 })
 
 authRouter.post('/refresh-token', async (req: Request, res: any) => {
-    const refreshToken = req.cookies.refreshToken.refreshToken
+    const refreshToken = req.cookies.refreshToken?.refreshToken
     const dataToken = getDataRefreshToken(req)
     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+
+    const allUserDevices = await SecurityDevicesService.getDevices(dataToken.data.userId)
+    const findDevice = allUserDevices.data?.find(device => device.deviceId === req.params.deviceId)
+    if (!findDevice) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+
     const result = await AuthService.refreshToken(refreshToken)
     if (result.status === ResultStatus.Success) {
 
@@ -113,6 +119,10 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken.refreshToken
    const dataToken = getDataRefreshToken(req)
     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+
+    const allUserDevices = await SecurityDevicesService.getDevices(dataToken.data.userId)
+    const findDevice = allUserDevices.data?.find(device => device.deviceId === req.params.deviceId)
+    if (!findDevice) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const result = await AuthService.deleteToken(refreshToken)
     if (result.status === ResultStatus.Success) return res.clearCookie('refreshToken')

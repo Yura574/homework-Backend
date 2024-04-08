@@ -41,6 +41,8 @@ securityDevicesRouter.delete('/devices/:deviceId', async (req: RequestType<any, 
 
     const device = await SecurityDevicesService.getDeviceById(resultToken.data.deviceId)
     if (device.status !== ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+
+
     const allUserDevices = await SecurityDevicesService.getDevices(resultToken.data.userId)
     const findDevice = allUserDevices.data?.find(device => device.deviceId === req.params.deviceId)
     if (!findDevice) return res.sendStatus(HTTP_STATUSES.FORBIDDEN_403)
