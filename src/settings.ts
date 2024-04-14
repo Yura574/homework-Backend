@@ -9,6 +9,7 @@ import {commentsRouter} from "./routes/comment-router";
 import cookieParser from "cookie-parser";
 import {securityDevicesRouter} from "./routes/securityDevices-router";
 import cors from 'cors';
+import mongoose from "mongoose";
 
 dotenv.config()
 

@@ -16,15 +16,16 @@ import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {emailValidator, userValidation} from "../validators/userValidators";
 import {UserRepository} from "../repositories/user-repository";
-import jwt from "jsonwebtoken";
 import {getDataRefreshToken} from "../utils/getDataRefreshToken";
 import {SecurityDevicesService} from "../service/SecurityDevicesService";
 import {ipRestrictionMiddleware} from "../middleware/auth/ipRestriction-middleware";
+import {NewPasswordRecoveryInputModel, RecoveryPasswordInputModel} from "../models/recoveryPasswordModel";
+import {newPasswordRecoveryValidator} from "../validators/newPasswordValidators";
 
 export const authRouter = express.Router()
 
 //Исправить ResponseType
-authRouter.post('/login',ipRestrictionMiddleware, loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: Response) => {
+authRouter.post('/login', ipRestrictionMiddleware, loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
@@ -51,7 +52,7 @@ authRouter.post('/registration', ipRestrictionMiddleware, userValidation(), asyn
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
-authRouter.post('/registration-confirmation',ipRestrictionMiddleware, confirmationCode, async (req: RequestType<{}, RegistrationConfirmationCodeModel, {}>, res: Response) => {
+authRouter.post('/registration-confirmation', ipRestrictionMiddleware, confirmationCode, async (req: RequestType<{}, RegistrationConfirmationCodeModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
@@ -61,7 +62,7 @@ authRouter.post('/registration-confirmation',ipRestrictionMiddleware, confirmati
     return handleErrorObjectResult(result, res)
 })
 
-authRouter.get('/confirm-email', ipRestrictionMiddleware,async (req: RequestType<{}, {}, ConfirmEmailQuery>, res: Response) => {
+authRouter.get('/confirm-email', ipRestrictionMiddleware, async (req: RequestType<{}, {}, ConfirmEmailQuery>, res: Response) => {
 
     const {code} = req.query
 
@@ -69,7 +70,7 @@ authRouter.get('/confirm-email', ipRestrictionMiddleware,async (req: RequestType
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
-authRouter.post('/registration-email-resending',ipRestrictionMiddleware, emailValidator, async (req: RequestType<{}, ResendingEmailBody, {}>, res: Response) => {
+authRouter.post('/registration-email-resending', ipRestrictionMiddleware, emailValidator, async (req: RequestType<{}, ResendingEmailBody, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
@@ -78,6 +79,25 @@ authRouter.post('/registration-email-resending',ipRestrictionMiddleware, emailVa
     if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 })
+
+authRouter.post('/password-recovery', ipRestrictionMiddleware, emailValidator, async (req: RequestType<{}, RecoveryPasswordInputModel, {}>, res: Response) => {
+    const isError = ValidateErrorRequest(req, res)
+    if (isError) return
+    // const email = req.body.email
+    // if (!email) return res.status(HTTP_STATUSES.BAD_REQUEST_400).send('email not found')
+    const result = await AuthService.recoveryPassword(req.body.email)
+    if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    return handleErrorObjectResult(result, res)
+})
+authRouter.post('/new-password', ipRestrictionMiddleware, newPasswordRecoveryValidator(), async (req: RequestType<{}, NewPasswordRecoveryInputModel, {}>, res: Response)=>{
+    const isError = ValidateErrorRequest(req, res)
+    if (isError) return
+    const result = await AuthService.newPassword(req.body)
+    if(result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+return handleErrorObjectResult(result, res)
+})
+
+
 authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: ResponseType<UserMeModel>) => {
     //userId получаем из accessToken
     console.log('me')
@@ -99,7 +119,7 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
 authRouter.post('/refresh-token', async (req: Request, res: any) => {
     const refreshToken = req.cookies.refreshToken?.refreshToken
     const dataToken = getDataRefreshToken(req)
-     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+    if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const allUserDevices = await SecurityDevicesService.getDevices(dataToken.data.userId)
     console.log(req.params.deviceId)
@@ -110,7 +130,7 @@ authRouter.post('/refresh-token', async (req: Request, res: any) => {
     const result = await AuthService.refreshToken(refreshToken)
     if (result.status === ResultStatus.Success) {
 
-        return  res.cookie('refreshToken', result.data?.refreshToken, {
+        return res.cookie('refreshToken', result.data?.refreshToken, {
             httpOnly: true,
             secure: true
         }).status(HTTP_STATUSES.OK_200).send(result.data?.accessToken)
@@ -120,7 +140,7 @@ authRouter.post('/refresh-token', async (req: Request, res: any) => {
 
 authRouter.post('/logout', async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken.refreshToken
-   const dataToken = getDataRefreshToken(req)
+    const dataToken = getDataRefreshToken(req)
     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const allUserDevices = await SecurityDevicesService.getDevices(dataToken.data.userId)

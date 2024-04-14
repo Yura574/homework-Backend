@@ -34,3 +34,9 @@ export type LoginInputModel = {
 export type LoginSuccessViewModel = {
     accessToken: string
 }
+
+export type DataRecoveryCode = {
+    email: string
+    recoveryCode: string
+    expirationDate: Date
+}

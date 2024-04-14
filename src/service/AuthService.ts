@@ -1,4 +1,4 @@
-import {UserInputModel} from "../models/userModels";
+import {UserInputModel, UserUpdateModel} from "../models/userModels";
 import {UserRepository} from "../repositories/user-repository";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {newUser} from "../utils/newUser";
@@ -7,12 +7,14 @@ import {v4} from "uuid";
 import {validateError} from "../utils/validateError";
 import {UserService} from "./UserService";
 import {add} from "date-fns";
-import {LoginInputModel, TokenResponseModel} from "../models/authModel";
+import {DataRecoveryCode, LoginInputModel, TokenResponseModel} from "../models/authModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {BlacklistRepository} from "../repositories/blacklist-repository";
 import {SecurityDevicesService} from "./SecurityDevicesService";
 import {somethingWasWrong} from "../utils/somethingWasWrong";
+import {RecoveryPasswordRepository} from "../repositories/recoveryPassword-repository";
+import {NewPasswordRecoveryInputModel} from "../models/recoveryPasswordModel";
 
 
 export class AuthService {
@@ -48,7 +50,7 @@ export class AuthService {
                 const {iat, deviceId}: any = jwt.verify(refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
                 const result = await SecurityDevicesService.addDevice({
                     userId: findUser._id.toString(),
-                    issuedAt: (new Date(iat*1000)).toISOString(),
+                    issuedAt: (new Date(iat * 1000)).toISOString(),
                     deviceId,
                     deviceName,
                     ip
@@ -181,8 +183,7 @@ export class AuthService {
 
     }
 
-// Исправить return Promise
-    static async refreshToken(refreshToken: string) {
+    static async refreshToken(refreshToken: string): Promise<ObjectResult<TokenResponseModel | null>> {
         try {
             const dataToken: any = jwt.verify(refreshToken, "REFRESH_SECRET")
             const findUser = await UserRepository.getUserById(dataToken.userId)
@@ -205,8 +206,8 @@ export class AuthService {
                     refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '20s'})
                 }
             }
-            const newDataToken: any  =jwt.verify(tokens.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
-            await SecurityDevicesService.updateDevice(newDataToken.deviceId, new Date(newDataToken.iat*1000).toISOString())
+            const newDataToken: any = jwt.verify(tokens.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)
+            await SecurityDevicesService.updateDevice(newDataToken.deviceId, new Date(newDataToken.iat * 1000).toISOString())
 
             return {status: ResultStatus.Success, data: tokens}
         } catch (err) {
@@ -236,5 +237,37 @@ export class AuthService {
             // console.log(err.expiredAt)
             return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
         }
+    }
+
+    static async recoveryPassword(email: string): Promise<ObjectResult> {
+
+        const recoveryCode = v4()
+        await EmailService.sendEmailForRecoveryPassword(email, recoveryCode)
+        const dataRecoveryCode: DataRecoveryCode = {
+            email,
+            recoveryCode,
+            expirationDate: add(new Date(), {
+                minutes: 10
+            })
+        }
+
+        await RecoveryPasswordRepository.addUserRecoveryPassword(dataRecoveryCode)
+        return {status: ResultStatus.Success, data: null}
+    }
+
+    static async newPassword(data: NewPasswordRecoveryInputModel): Promise<ObjectResult> {
+        const {newPassword, recoveryCode} = data
+        const recoveryUser = await RecoveryPasswordRepository.getUserRecoveryPassword(recoveryCode)
+
+        if (!recoveryUser || recoveryUser.expirationDate < new Date()) {
+            return {status: ResultStatus.BadRequest, errorsMessages: 'Expiration date expired', data: null}
+        }
+
+        const hashPassword = await bcrypt.hash(newPassword, 10)
+        const updateData: UserUpdateModel = {
+            password: hashPassword,
+        }
+       const result =  await UserService.updateUser(recoveryUser.email, updateData)
+        return {status: ResultStatus.Success, data: null}
     }
 }

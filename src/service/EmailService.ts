@@ -28,8 +28,22 @@ export class EmailService {
                              </div>
                            </p>`
             })
+        } catch (err) {
+            console.log(err)
+        }
 
+    }
 
+    static async sendEmailForRecoveryPassword(email: string, recoveryPassword: string){
+        try {
+            await transporter.sendMail({
+                from: process.env.SMTP_EMAIL,
+                to: email,
+                subject: "Код восстановления пароля",
+                html: `<h1>Our Code for recovery password</h1>
+                        <div>Code ${recoveryPassword}</div>
+                           `
+            })
         } catch (err) {
             console.log(err)
         }
