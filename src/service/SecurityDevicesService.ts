@@ -42,7 +42,9 @@ export class SecurityDevicesService {
     }
 
     static async getDeviceById(deviceId: string): Promise<ObjectResult<any>> {
+
         const device = await SecurityDevicesRepository.getDeviceById(deviceId)
+        console.log(device)
         if (!device) return {status: ResultStatus.NotFound, errorsMessages: 'Device not found', data: null}
         const newDevice = {
             id: device._id.toString(),

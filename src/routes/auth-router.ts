@@ -98,10 +98,12 @@ authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: 
 authRouter.post('/refresh-token', async (req: Request, res: any) => {
     const refreshToken = req.cookies.refreshToken?.refreshToken
     const dataToken = getDataRefreshToken(req)
-    if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
+     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const allUserDevices = await SecurityDevicesService.getDevices(dataToken.data.userId)
-    const findDevice = allUserDevices.data?.find(device => device.deviceId === req.params.deviceId)
+    console.log(req.params.deviceId)
+    const findDevice = allUserDevices.data?.find(device => device.deviceId === dataToken.data?.deviceId)
+    console.log(findDevice)
     if (!findDevice) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const result = await AuthService.refreshToken(refreshToken)
@@ -121,7 +123,7 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const allUserDevices = await SecurityDevicesService.getDevices(dataToken.data.userId)
-    const findDevice = allUserDevices.data?.find(device => device.deviceId === req.params.deviceId)
+    const findDevice = allUserDevices.data?.find(device => device.deviceId === dataToken.data?.deviceId)
     if (!findDevice) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const result = await AuthService.deleteToken(refreshToken)
