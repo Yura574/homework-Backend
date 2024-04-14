@@ -242,6 +242,8 @@ export class AuthService {
     static async recoveryPassword(email: string): Promise<ObjectResult> {
 
         const recoveryCode = v4()
+        const user = await UserRepository.findUser(email)
+        if (!user) return {status: ResultStatus.Success, data: null}
         await EmailService.sendEmailForRecoveryPassword(email, recoveryCode)
         const dataRecoveryCode: DataRecoveryCode = {
             email,
@@ -258,16 +260,22 @@ export class AuthService {
     static async newPassword(data: NewPasswordRecoveryInputModel): Promise<ObjectResult> {
         const {newPassword, recoveryCode} = data
         const recoveryUser = await RecoveryPasswordRepository.getUserRecoveryPassword(recoveryCode)
-
+        console.log()
         if (!recoveryUser || recoveryUser.expirationDate < new Date()) {
-            return {status: ResultStatus.BadRequest, errorsMessages: 'Expiration date expired', data: null}
+            return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field: 'recoveryCode', message: 'recovery code incorrect'}]), data: null}
         }
 
         const hashPassword = await bcrypt.hash(newPassword, 10)
         const updateData: UserUpdateModel = {
             password: hashPassword,
         }
-       const result =  await UserService.updateUser(recoveryUser.email, updateData)
-        return {status: ResultStatus.Success, data: null}
+        try{
+            await UserService.updateUser(recoveryUser.email, updateData)
+            await RecoveryPasswordRepository.deleteUserRecoveryPassword(recoveryCode)
+            return {status: ResultStatus.Success,  data: null}
+        } catch (err){
+            return  {status: ResultStatus.SomethingWasWrong, data: null}
+        }
+
     }
 }

@@ -6,11 +6,10 @@ export class RecoveryPasswordRepository {
     static async addUserRecoveryPassword(data: DataRecoveryCode) {
         return await recoveryPasswordCollection.insertOne(data)
     }
-    static async getRecoveryPassword() {
-        return recoveryPasswordCollection.find({}).toArray()
-    }
-
     static async getUserRecoveryPassword(recoveryCode: string) {
         return await recoveryPasswordCollection.findOne({recoveryCode})
+    }
+    static async deleteUserRecoveryPassword(recoveryCode: string) {
+        return await recoveryPasswordCollection.deleteOne({recoveryCode})
     }
 }
