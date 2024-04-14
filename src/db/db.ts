@@ -25,4 +25,6 @@ export const userCollection = database.collection('users')
 export const commentCollection = database.collection('comments')
 
 export const devicesCollection = database.collection('deviceAuth')
+
+export const ipRestrictionCollection = database.collection('ipRestrictions')
 export const blacklistTokenCollection = database.collection('blacklist')

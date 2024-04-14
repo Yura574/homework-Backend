@@ -36,10 +36,10 @@ export class AuthService {
             }
 
             const accessToken = {
-                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '1h'})
+                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '10s'})
             }
             const refreshToken = {
-                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '2h'})
+                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '20s'})
             }
 
 //добавляем для пользователя новое устройство
@@ -199,10 +199,10 @@ export class AuthService {
             const refreshPayload = {userId: findUser._id.toString(), deviceId: dataToken.deviceId}
             const tokens = {
                 accessToken: {
-                    accessToken: jwt.sign(accessPayload, 'ACCESS_SECRET', {expiresIn: '1h'})
+                    accessToken: jwt.sign(accessPayload, 'ACCESS_SECRET', {expiresIn: '10s'})
                 },
                 refreshToken: {
-                    refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '2h'})
+                    refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '20s'})
                 }
             }
             const newDataToken: any  =jwt.verify(tokens.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)

@@ -19,11 +19,12 @@ import {UserRepository} from "../repositories/user-repository";
 import jwt from "jsonwebtoken";
 import {getDataRefreshToken} from "../utils/getDataRefreshToken";
 import {SecurityDevicesService} from "../service/SecurityDevicesService";
+import {ipRestrictionMiddleware} from "../middleware/auth/ipRestriction-middleware";
 
 export const authRouter = express.Router()
 
 //Исправить ResponseType
-authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: Response) => {
+authRouter.post('/login',ipRestrictionMiddleware, loginValidator(), async (req: RequestType<{}, LoginInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
@@ -40,7 +41,7 @@ authRouter.post('/login', loginValidator(), async (req: RequestType<{}, LoginInp
     return handleErrorObjectResult(result, res)
 })
 
-authRouter.post('/registration', userValidation(), async (req: RequestType<{}, UserInputModel, {}>, res: Response) => {
+authRouter.post('/registration', ipRestrictionMiddleware, userValidation(), async (req: RequestType<{}, UserInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
@@ -50,7 +51,7 @@ authRouter.post('/registration', userValidation(), async (req: RequestType<{}, U
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
-authRouter.post('/registration-confirmation', confirmationCode, async (req: RequestType<{}, RegistrationConfirmationCodeModel, {}>, res: Response) => {
+authRouter.post('/registration-confirmation',ipRestrictionMiddleware, confirmationCode, async (req: RequestType<{}, RegistrationConfirmationCodeModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
@@ -60,7 +61,7 @@ authRouter.post('/registration-confirmation', confirmationCode, async (req: Requ
     return handleErrorObjectResult(result, res)
 })
 
-authRouter.get('/confirm-email', async (req: RequestType<{}, {}, ConfirmEmailQuery>, res: Response) => {
+authRouter.get('/confirm-email', ipRestrictionMiddleware,async (req: RequestType<{}, {}, ConfirmEmailQuery>, res: Response) => {
 
     const {code} = req.query
 
@@ -68,7 +69,7 @@ authRouter.get('/confirm-email', async (req: RequestType<{}, {}, ConfirmEmailQue
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
-authRouter.post('/registration-email-resending', emailValidator, async (req: RequestType<{}, ResendingEmailBody, {}>, res: Response) => {
+authRouter.post('/registration-email-resending',ipRestrictionMiddleware, emailValidator, async (req: RequestType<{}, ResendingEmailBody, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
 
