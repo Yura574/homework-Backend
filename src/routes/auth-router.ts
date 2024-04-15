@@ -86,7 +86,7 @@ authRouter.post('/password-recovery', ipRestrictionMiddleware, emailValidator, a
     // const email = req.body.email
     // if (!email) return res.status(HTTP_STATUSES.BAD_REQUEST_400).send('email not found')
     const result = await AuthService.recoveryPassword(req.body.email)
-    if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.NO_CONTENT_204).send('Recovery code send to email')
     return handleErrorObjectResult(result, res)
 })
 authRouter.post('/new-password', ipRestrictionMiddleware, newPasswordRecoveryValidator(), async (req: RequestType<{}, NewPasswordRecoveryInputModel, {}>, res: Response)=>{
