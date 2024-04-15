@@ -34,14 +34,17 @@ export class EmailService {
 
     }
 
-    static async sendEmailForRecoveryPassword(email: string, recoveryPassword: string){
+    static async sendEmailForRecoveryPassword(email: string, recoveryCode: string){
         try {
             await transporter.sendMail({
                 from: process.env.SMTP_EMAIL,
                 to: email,
                 subject: "Код восстановления пароля",
-                html: `<h1>Our Code for recovery password</h1>
-                        <div>Code ${recoveryPassword}</div>
+                html: `<h3>
+Our Code for recovery password
+ <a href='http://localhost:5000/auth/password-recovery?recoveryCode=${recoveryCode}'>confirm complete registration</a>
+</h3>
+                        <div>Code ${recoveryCode}</div>
                            `
             })
         } catch (err) {
