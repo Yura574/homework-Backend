@@ -1,4 +1,5 @@
 import {ObjectId} from "mongodb";
+import mongoose, {Schema} from "mongoose";
 
 export type CreateUserModel = {
     userName: string
@@ -65,3 +66,27 @@ export type UserUpdateModel = {
     confirmationCode?: string,
     expirationDate?: Date
 }
+
+export type UserDBModel ={
+    email: string,
+    login: string,
+    password: string,
+    createdAt: Date,
+    emailConfirmation: {
+        confirmationCode: string,
+        expirationDate: Date
+        isConfirm: boolean
+    }
+}
+
+export const UserSchema = new Schema<UserDBModel>({
+    email: String,
+    login: String,
+    password: String,
+    createdAt: Date,
+    emailConfirmation: {
+        confirmationCode: String,
+        expirationDate: String,
+        isConfirm: Boolean
+    }
+})

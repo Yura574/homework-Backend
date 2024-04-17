@@ -1,3 +1,5 @@
+import {Schema} from "mongoose";
+
 export type CommentInputModel = {
     content: string
 }
@@ -24,3 +26,21 @@ export type NewCommentModel = {
     createdAt: string
 }
 
+
+export type CommentDBModel = {
+    content: string
+    commentatorInfo:{
+        userId: string
+        userLogin: string
+    }
+    createdAt: string
+}
+
+export const CommentSchema  = new Schema<CommentDBModel>({
+    content: String,
+    commentatorInfo: {
+        userId: String,
+        userLogin: String
+    },
+    createdAt: Date,
+})

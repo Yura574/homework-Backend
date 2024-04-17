@@ -1,31 +1,31 @@
-import {devicesCollection} from "../db/db";
 import {SecurityDeviceInputModel} from "../models/deviceAuthModel";
+import {SecurityDeviceModel} from "../db/db";
 
 
 export class SecurityDevicesRepository {
     static async addDevice(data: SecurityDeviceInputModel) {
-        const {insertedId} = await devicesCollection.insertOne(data)
-        return await devicesCollection.findOne({_id: insertedId})
+        const {_id} = await SecurityDeviceModel.create(data)
+        return  SecurityDeviceModel.findOne({_id})
     }
 
     static async updateDevice(deviceId: string, issuedAt: string){
-        await devicesCollection.updateOne({deviceId}, {$set:{issuedAt}})
+        return  SecurityDeviceModel.updateOne({deviceId}, {$set:{issuedAt}})
     }
 
     static async getDeviceById(deviceId: string){
-        return  await devicesCollection.findOne({deviceId})
+        return   SecurityDeviceModel.findOne({deviceId})
 
     }
     static async getDevices(userId: string) {
-        return await devicesCollection.find({userId}).toArray()
+        return  SecurityDeviceModel.find({userId}).lean()
     }
 
     static async deleteDevice( deviceId: string) {
-        const index = await devicesCollection.deleteOne({deviceId})
+        const index = await SecurityDeviceModel.deleteOne({deviceId})
         return !!index
     }
     static async deleteAllDevices( userId: string, deviceId: string) {
-        const index = await devicesCollection.deleteMany({userId, deviceId: {$ne: deviceId}})
+        const index = await SecurityDeviceModel.deleteMany({userId, deviceId: {$ne: deviceId}})
         return !!index
     }
 }

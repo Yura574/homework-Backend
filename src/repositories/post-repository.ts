@@ -1,20 +1,20 @@
 import {ObjectId} from 'mongodb';
-import {postCollection} from '../db/db';
 import {NewPostModel, PostInputModel, PostViewModel} from "../models/postModels";
+import {PostModel} from "../db/db";
 
 
 export class PostRepository {
     static async getPosts(pageSize: number, pageNumber: number, sortBy: string, sortDirection: 'asc' | 'desc') {
         const skip = (pageNumber - 1) * pageSize
-        const totalCount = await postCollection.countDocuments()
+        const totalCount = await PostModel.countDocuments()
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
-        const posts = await postCollection.find({}).sort(sortObject).skip(skip).limit(pageSize).toArray()
+        const posts = await PostModel.find({}).sort(sortObject).skip(skip).limit(pageSize).lean()
         return {posts, totalCount}
     }
 
     static async getPostById(id: string): Promise<PostViewModel | null> {
-        const post = await postCollection.findOne({_id: new ObjectId(id)})
+        const post = await PostModel.findOne({_id: new ObjectId(id)})
         if(!post) return null
         return {
             id: post._id.toString(),
@@ -30,7 +30,7 @@ export class PostRepository {
     static async getAllPostsByBlogId(blogId: string, pageNumber: number, pageSize: number, searchNameTerm: string, sortBy: string, sortDirection: 'asc' | 'desc') {
         let skip = (pageNumber - 1) * pageSize
 
-        const totalCount = await postCollection.countDocuments({
+        const totalCount = await PostModel.countDocuments({
             blogId,
             title: {$regex: searchNameTerm ? new RegExp(searchNameTerm, 'i') : ''}
         })
@@ -39,20 +39,21 @@ export class PostRepository {
         }
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
-        const posts = await postCollection.find({
+        const posts = await PostModel.find({
             blogId,
             title: {$regex: searchNameTerm ? new RegExp(searchNameTerm, 'i') : ''}
         })
-            .sort(sortObject).skip(skip).limit(+pageSize).toArray();
+            .sort(sortObject).skip(skip).limit(+pageSize).lean();
         return {posts, totalCount}
     }
 
     static async createPost(newPost: NewPostModel) {
-        const {insertedId} = await postCollection.insertOne(newPost)
-        const post = await postCollection.findOne({_id: insertedId})
+        const createdPost = await PostModel.create(newPost)
+        const post = await PostModel.findOne({_id: createdPost._id})
+        if(!post) return null
         const returnPost: PostViewModel = {
             id: post!._id.toString(),
-            title: post?.title,
+            title: post.title,
             content: post?.content,
             shortDescription: post?.shortDescription,
             blogId: post?.blogId,
@@ -64,7 +65,7 @@ export class PostRepository {
     }
 
     static async deletePost(id: string) {
-        const index = await postCollection.deleteOne({_id: new ObjectId(id)})
+        const index = await PostModel.deleteOne({_id: new ObjectId(id)})
         return !!index;
     }
 
@@ -79,6 +80,6 @@ export class PostRepository {
             }
 
         }
-        return await postCollection.updateOne({_id: new ObjectId(id)}, updatedPost)
+        return  PostModel.updateOne({_id: new ObjectId(id)}, updatedPost)
     }
 }

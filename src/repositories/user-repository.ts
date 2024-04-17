@@ -1,11 +1,11 @@
 import {GetUsersQuery, UserCreateModel, UserModel} from "../models/userModels";
-import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {ErrorsType, ErrorType} from "../utils/objectResult";
+import {UsersModel} from "../db/db";
 
 export class UserRepository {
     static async findUser(loginOrEmail: string) {
-        return await userCollection.findOne({
+        return await UsersModel.findOne({
             $or: [
                 {login: {$regex: loginOrEmail}},
                 {email: {$regex: loginOrEmail}}
@@ -17,12 +17,12 @@ export class UserRepository {
     static async uniqueUser(email: string, login: string): Promise<ErrorType[]> {
 
         const errors: ErrorType[]= []
-        const userEmail = await userCollection.findOne({email: {$regex: email}})
+        const userEmail = await UsersModel.findOne({email: {$regex: email}})
         if (userEmail)  {
             errors.push({field: 'email', message: 'email already exist'})
         }
 
-        const userLogin = await userCollection.findOne({login: {$regex: login}})
+        const userLogin = await UsersModel.findOne({login: {$regex: login}})
         if (userLogin) {
             errors.push({field: 'login', message: 'login already exist'})
         }
@@ -42,7 +42,7 @@ export class UserRepository {
             searchLoginTerm = null,
         } = data
 
-        const totalCount = await userCollection.countDocuments({
+        const totalCount = await UsersModel.countDocuments({
             $or: [
                 {login: {$regex: searchLoginTerm ? new RegExp(searchLoginTerm, 'i') : ''}},
                 {email: {$regex: searchEmailTerm ? new RegExp(searchEmailTerm, 'i') : ''}}
@@ -53,33 +53,33 @@ export class UserRepository {
         const skip = (+pageNumber - 1) * +pageSize
         let sort: any = {}
         sort[sortBy] = sortDirection === 'asc' ? 1 : -1
-        const users = await userCollection.find({
+        const users = await UsersModel.find({
             $or: [
                 {login: {$regex: searchLoginTerm ? new RegExp(searchLoginTerm, 'i') : ''}},
                 {email: {$regex: searchEmailTerm ? new RegExp(searchEmailTerm, 'i') : ''}}
             ]
-        }).sort(sort).skip(skip).limit(+pageSize).toArray()
+        }).sort(sort).skip(skip).limit(+pageSize).lean()
 
         return {users, totalCount, pagesCount, pageNumber, pageSize}
     }
 
     static async createUser(user: UserCreateModel) {
 
-        const createdUser = await userCollection.insertOne(user)
-        return await userCollection.findOne({_id: createdUser.insertedId})
+        const createdUser = await UsersModel.create(user)
+        return  UsersModel.findOne({_id: createdUser._id})
 
     }
 
     static async getUserById(userId: string) {
-        return await userCollection.findOne({_id: new ObjectId(userId)})
+        return  UsersModel.findOne({_id: userId})
     }
 
     static async updateUser(data: UserModel) {
-        await userCollection.replaceOne({_id: data.id}, data)
+        await UsersModel.replaceOne({_id: data.id}, data)
     }
 
     static async deleteUser(id: string) {
-        const isDeleted = await userCollection.deleteOne({_id: new ObjectId(id)})
+        const isDeleted = await UsersModel.deleteOne({_id: id})
         return !!isDeleted.deletedCount;
     }
 }

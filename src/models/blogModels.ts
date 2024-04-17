@@ -1,3 +1,5 @@
+import {WithId} from "mongodb";
+import {Schema} from "mongoose";
 
 export type BlogViewModel = {
     id: string,
@@ -27,3 +29,21 @@ export type NewBlogModel = {
     createdAt: string,
     isMembership: boolean
 }
+
+export type BlogDBType = WithId<{
+    // id: string,
+    name: string,
+    description: string,
+    websiteUrl: string,
+    createdAt: string,
+    isMembership: boolean
+}>
+
+export const BlogSchema = new Schema<BlogDBType>({
+    name: String,
+    description: String,
+    websiteUrl: String,
+    createdAt: String,
+    isMembership: Boolean
+})
+

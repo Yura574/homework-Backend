@@ -1,5 +1,4 @@
-
-
+import {Schema} from "mongoose";
 
 
 export type SecurityDeviceInputModel = {
@@ -15,3 +14,19 @@ export type SecurityDeviceViewModel = {
     lastActiveDate: string,
     deviceId: string
 }
+
+export type SecurityDeviceDBModel = {
+    userId: string
+    ip?: string
+    deviceId: string
+    issuedAt: string
+    deviceName?: string
+}
+
+export const SecurityDeviceSchema = new Schema<SecurityDeviceDBModel>({
+    userId: String,
+    deviceId: String,
+    deviceName: String,
+    ip: String,
+    issuedAt: Date
+})

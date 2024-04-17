@@ -190,12 +190,12 @@ export class AuthService {
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
             }
-            const blacklistToken = await BlacklistRepository.findToken(refreshToken)
-            if (blacklistToken) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
-            await BlacklistRepository.addToken(refreshToken)
-            setTimeout(async () => {
-                await BlacklistRepository.deleteToken(refreshToken)
-            }, 20000)
+            // const blacklistToken = await BlacklistRepository.findToken(refreshToken)
+            // if (blacklistToken) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
+            // await BlacklistRepository.addToken(refreshToken)
+            // setTimeout(async () => {
+            //     await BlacklistRepository.deleteToken(refreshToken)
+            // }, 20000)
             const accessPayload = {userId: findUser._id.toString(),}
             const refreshPayload = {userId: findUser._id.toString(), deviceId: dataToken.deviceId}
             const tokens = {
@@ -224,14 +224,14 @@ export class AuthService {
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
             }
-            const token = await BlacklistRepository.findToken(refreshToken)
-            if (token) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
+            // const token = await BlacklistRepository.findToken(refreshToken)
+            // if (token) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
 
             await SecurityDevicesService.deleteDeviceById(dataToken.deviceId)
-            await BlacklistRepository.addToken(refreshToken)
-            setTimeout(async () => {
-                await BlacklistRepository.deleteToken(refreshToken)
-            }, 20000)
+            // await BlacklistRepository.addToken(refreshToken)
+            // setTimeout(async () => {
+            //     await BlacklistRepository.deleteToken(refreshToken)
+            // }, 20000)
             return {status: ResultStatus.Success, data: null}
         } catch (err) {
             // console.log(err.expiredAt)

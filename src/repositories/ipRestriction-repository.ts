@@ -1,12 +1,12 @@
-import {ipRestrictionCollection} from "../db/db";
+import {IpRestrictionModel} from "../db/db";
 
 
 export class IPRestrictionRepository {
     static async addIpRestriction (data: any){
-        await ipRestrictionCollection.insertOne(data)
+        await IpRestrictionModel.create(data)
     }
 
     static async getAllIpRestrictions (IP: string, URL: string) {
-        return  ipRestrictionCollection.find({IP, URL}).toArray();
+        return  IpRestrictionModel.find({IP, URL}).lean();
     }
 }

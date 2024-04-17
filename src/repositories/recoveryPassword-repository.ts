@@ -1,15 +1,15 @@
-import {recoveryPasswordCollection} from "../db/db";
 import {DataRecoveryCode} from "../models/authModel";
+import {RecoveryPasswordModel} from "../db/db";
 
 
 export class RecoveryPasswordRepository {
     static async addUserRecoveryPassword(data: DataRecoveryCode) {
-        return await recoveryPasswordCollection.insertOne(data)
+        return await RecoveryPasswordModel.create(data)
     }
     static async getUserRecoveryPassword(recoveryCode: string) {
-        return await recoveryPasswordCollection.findOne({recoveryCode})
+        return  RecoveryPasswordModel.findOne({recoveryCode})
     }
     static async deleteUserRecoveryPassword(recoveryCode: string) {
-        return await recoveryPasswordCollection.deleteOne({recoveryCode})
+        return  RecoveryPasswordModel.deleteOne({recoveryCode})
     }
 }

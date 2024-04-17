@@ -1,4 +1,5 @@
-
+import {WithId} from "mongodb";
+import {Schema} from "mongoose";
 
 
 export type PostInputModel = {
@@ -25,3 +26,20 @@ export type NewPostModel = {
     blogName: string,
     createdAt: string,
 }
+export type PostDBType = WithId<{
+    title: string,
+    content: string,
+    blogId: string,
+    shortDescription: string,
+    blogName: string,
+    createdAt: string,
+}>
+
+export const PostSchema = new Schema<PostDBType>({
+    title: String,
+    blogId: String,
+    blogName: String,
+    content: String,
+    shortDescription: String,
+    createdAt: String
+})

@@ -23,10 +23,9 @@ export class CommentService {
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount,
-            items: comments.map((comment) => {
+            items: comments.map((comment: any) => {
                 return {
                     id: comment._id.toString(),
-                    // postId: comment.postId,
                     content: comment.content,
                     createdAt: comment.createdAt,
                     commentatorInfo: {
