@@ -10,7 +10,6 @@ import {add} from "date-fns";
 import {DataRecoveryCode, LoginInputModel, TokenResponseModel} from "../models/authModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {BlacklistRepository} from "../repositories/blacklist-repository";
 import {SecurityDevicesService} from "./SecurityDevicesService";
 import {somethingWasWrong} from "../utils/somethingWasWrong";
 import {RecoveryPasswordRepository} from "../repositories/recoveryPassword-repository";
@@ -164,7 +163,7 @@ export class AuthService {
             errorsMessages: validateError([{field: 'email', message: 'User with this email not found'}]),
             data: null
         }
-        if (user.emailConfirmation.isConfirm === true) {
+        if (user.emailConfirmation.isConfirm) {
             return {
                 status: ResultStatus.BadRequest,
                 errorsMessages: validateError([{field: 'email', message: 'Email already confirmed'}]),

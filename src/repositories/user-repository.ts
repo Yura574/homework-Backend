@@ -1,11 +1,10 @@
 import {GetUsersQuery, UserCreateModel, UserModel} from "../models/userModels";
-import {ObjectId} from "mongodb";
-import {ErrorsType, ErrorType} from "../utils/objectResult";
+import { ErrorType} from "../utils/objectResult";
 import {UsersModel} from "../db/db";
 
 export class UserRepository {
     static async findUser(loginOrEmail: string) {
-        return await UsersModel.findOne({
+        return  UsersModel.findOne({
             $or: [
                 {login: {$regex: loginOrEmail}},
                 {email: {$regex: loginOrEmail}}

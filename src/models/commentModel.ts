@@ -42,5 +42,5 @@ export const CommentSchema  = new Schema<CommentDBModel>({
         userId: String,
         userLogin: String
     },
-    createdAt: Date,
+    createdAt: String,
 })

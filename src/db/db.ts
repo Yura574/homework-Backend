@@ -7,6 +7,7 @@ import {CommentSchema} from "../models/commentModel";
 import {SecurityDeviceSchema} from "../models/deviceAuthModel";
 import { RecoveryPasswordSchema} from "../models/recoveryPasswordModel";
 import {IpRestrictionSchema} from "../models/ipRestrictionModel";
+import {UserSchema} from "../models/userModels";
 
 dotenv.config()
 
@@ -26,7 +27,7 @@ export const db = {
 
 export const BlogModel = mongoose.model('blogs', BlogSchema)
 export const PostModel = mongoose.model('posts', PostSchema)
-export const UsersModel = mongoose.model('users', PostSchema)
+export const UsersModel = mongoose.model('users', UserSchema)
 export const CommentModel = mongoose.model('comments', CommentSchema)
 
 export const SecurityDeviceModel = mongoose.model('securityDevices', SecurityDeviceSchema)

@@ -9,8 +9,8 @@ export type SecurityDeviceInputModel = {
     deviceName?: string
 }
 export type SecurityDeviceViewModel = {
-    ip: string,
-    title: string,
+    ip?: string,
+    title?: string,
     lastActiveDate: string,
     deviceId: string
 }
@@ -28,5 +28,5 @@ export const SecurityDeviceSchema = new Schema<SecurityDeviceDBModel>({
     deviceId: String,
     deviceName: String,
     ip: String,
-    issuedAt: Date
+    issuedAt: String
 })
