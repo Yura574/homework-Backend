@@ -10,7 +10,7 @@ export const newUser = async (email: string, login: string, password: string, is
         email,
         login,
         password: hashPassword,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
         emailConfirmation: {
             isConfirm,
             confirmationCode: v4(),

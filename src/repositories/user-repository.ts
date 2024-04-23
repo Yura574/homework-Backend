@@ -1,10 +1,10 @@
 import {GetUsersQuery, UserCreateModel, UserModel} from "../models/userModels";
-import { ErrorType} from "../utils/objectResult";
+import {ErrorType} from "../utils/objectResult";
 import {UsersModel} from "../db/db";
 
 export class UserRepository {
     static async findUser(loginOrEmail: string) {
-        return  UsersModel.findOne({
+        return UsersModel.findOne({
             $or: [
                 {login: {$regex: loginOrEmail}},
                 {email: {$regex: loginOrEmail}}
@@ -15,9 +15,9 @@ export class UserRepository {
 
     static async uniqueUser(email: string, login: string): Promise<ErrorType[]> {
 
-        const errors: ErrorType[]= []
+        const errors: ErrorType[] = []
         const userEmail = await UsersModel.findOne({email: {$regex: email}})
-        if (userEmail)  {
+        if (userEmail) {
             errors.push({field: 'email', message: 'email already exist'})
         }
 
@@ -63,14 +63,17 @@ export class UserRepository {
     }
 
     static async createUser(user: UserCreateModel) {
-
-        const createdUser = await UsersModel.create(user)
-        return  UsersModel.findOne({_id: createdUser._id})
+        console.log('create')
+        debugger
+        const createdUser = new UsersModel(user)
+        console.log('created user', createdUser)
+        await createdUser.save()
+        return createdUser
 
     }
 
     static async getUserById(userId: string) {
-        return  UsersModel.findOne({_id: userId})
+        return UsersModel.findOne({_id: userId})
     }
 
     static async updateUser(data: UserModel) {

@@ -2,7 +2,6 @@ import express, {Request, Response} from 'express';
 import {blogRouter} from './routes/blog-router';
 import {postRouter} from './routes/post-router';
 import dotenv from 'dotenv';
-import {database} from './db/db';
 import {authRouter} from "./routes/auth-router";
 import {userRouter} from "./routes/users-router";
 import {commentsRouter} from "./routes/comment-router";
@@ -43,13 +42,14 @@ app.use(routerPaths.security, securityDevicesRouter)
 
 
 app.delete(routerPaths.deleteAllData, async (req: Request, res: Response) => {
-    const collections = await database.listCollections().toArray();
+    const db = mongoose.connection.db;
+    const collections = await db.listCollections().toArray();
 
     for (const collection of collections) {
         const collectionName = collection.name;
 
         // Удалить все документы из коллекции
-        await database.collection(collectionName).deleteMany({});
+        await db.collection(collectionName).deleteMany({});
 
     }
     res.sendStatus(204)

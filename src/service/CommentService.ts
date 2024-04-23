@@ -75,13 +75,14 @@ export class CommentService {
         }
         try {
             const comment = await CommentRepository.createComment(newComment)
+            if (!comment) return {status:ResultStatus.SomethingWasWrong, data: null}
             const createdComment: CommentViewModel = {
-                id: comment!._id.toString(),
-                content: comment?.content,
-                createdAt: comment?.createdAt,
+                id: comment._id.toString(),
+                content: comment.content,
+                createdAt: comment.createdAt,
                 commentatorInfo: {
-                    userId: comment?.commentatorInfo.userId,
-                    userLogin: comment?.commentatorInfo.userLogin,
+                    userId: comment.commentatorInfo.userId,
+                    userLogin: comment.commentatorInfo.userLogin,
                 }
 
 

@@ -163,7 +163,7 @@ export class AuthService {
             errorsMessages: validateError([{field: 'email', message: 'User with this email not found'}]),
             data: null
         }
-        if (user.emailConfirmation.isConfirm) {
+        if (user.emailConfirmation.isConfirm === true) {
             return {
                 status: ResultStatus.BadRequest,
                 errorsMessages: validateError([{field: 'email', message: 'Email already confirmed'}]),

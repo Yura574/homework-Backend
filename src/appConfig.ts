@@ -5,5 +5,5 @@ config()
 
 
 export const appConfig = {
-  MONGO_URL : process.env.MONGO_URL || 'mongodb://0.0.0.0:27017'
+  MONGO_URL : process.env.MONGO_URL || 'mongodb://0.0.0.0:27017/backhomework'
 }

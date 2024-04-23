@@ -29,6 +29,7 @@ export class EmailService {
                            </p>`
             })
         } catch (err) {
+            console.log('error send email')
             console.log(err)
         }
 
