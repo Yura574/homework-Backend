@@ -1,10 +1,9 @@
 import {body, param} from 'express-validator';
-import {ObjectId} from 'mongodb';
-import {blogCollection} from '../db/db';
+import {BlogModel} from "../db/db";
 
 
 export const findBlog = param('id').custom(async (id) => {
-    const findBlog = await blogCollection.findOne({_id: new ObjectId(id)})
+    const findBlog = await BlogModel.findById({id})
     if (!findBlog) {
         throw new Error()
     }

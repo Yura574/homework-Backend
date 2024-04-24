@@ -1,5 +1,4 @@
 import {body, param} from "express-validator";
-import {userCollection} from "../db/db";
 
 const fields = {
     login: 'login',

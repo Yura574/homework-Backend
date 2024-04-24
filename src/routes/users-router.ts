@@ -8,12 +8,12 @@ import {UserRepository} from "../repositories/user-repository";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
 import {GetUsersQuery,  UserViewModel,} from "../models/userModels";
 import {ResponsePostType} from "./post-router";
-import {userCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {ReturnViewModel} from "../models/commonModels";
 import {UserService} from "../service/UserService";
 import {ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
+import {UsersModel} from "../db/db";
 
 export const userRouter = express.Router()
 
@@ -43,7 +43,7 @@ userRouter.get('/:id', authMiddleware, validateId, async (req: RequestType<Param
     if (isError) {
         return
     }
-    const response = await userCollection.findOne({_id: new ObjectId(req.params.id)})
+    const response = await UsersModel.findById({id: req.params.id})
     if (response) {
         const user: UserViewModel = {
             id: response?._id.toString(),

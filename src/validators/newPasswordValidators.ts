@@ -1,5 +1,4 @@
-import {body, param} from "express-validator";
-import {userCollection} from "../db/db";
+import {body} from "express-validator";
 
 const fields = {
     newPassword: 'newPassword',

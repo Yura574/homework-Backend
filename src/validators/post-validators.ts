@@ -1,10 +1,9 @@
 import {body, param} from 'express-validator';
-import {ObjectId} from 'mongodb';
-import {blogCollection, postCollection} from '../db/db';
+import {BlogModel, PostModel} from "../db/db";
 
 
 export const findPost = param('id').custom(async (id) => {
-    const findPost = await postCollection.findOne({_id: new ObjectId(id)})
+    const findPost = await PostModel.findOne({id})
     if (!findPost) {
         throw new Error()
     }
@@ -32,7 +31,7 @@ export const blogIdValidator = body('blogId').trim()
     .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
     .custom(async (value) => {
 
-        const blog = await blogCollection.findOne({_id: new ObjectId(value)})
+        const blog = await BlogModel.findOne({value})
         if (!blog) {
             throw new Error('Blog not found')
         }
