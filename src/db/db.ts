@@ -16,7 +16,7 @@ export const db = {
     // client: new MongoClient(appConfig.MONGO_URL),
     async run() {
         try {
-            await mongoose.connect(appConfig.MONGO_URL);
+            await mongoose.connect('mongodb://0.0.0.0:27017/backhomework');
             console.log("Successfully connected to Atlas");
         } catch (err) {
             console.log(err);
