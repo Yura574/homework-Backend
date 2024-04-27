@@ -1,20 +1,16 @@
-import {LoginInputModel, LoginSuccessViewModel} from "../../src/models/authModel";
-import {authTestManager} from "../1_testManagers/authTestManager";
-import {UserRepository} from "../../src/repositories/user-repository";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
 import request from "supertest";
-import {app, routerPaths} from "../../src/settings";
-import {HTTP_STATUSES} from "../../src/utils/httpStatuses";
-import {MongoMemoryServer} from "mongodb-memory-server";
-import {appConfig} from "../../src/appConfig";
-import {db} from "../../src/db/db";
-import {UserInputModel} from "../../src/models/userModels";
+import {app, routerPaths} from "../../settings";
+import {LoginInputModel, LoginSuccessViewModel} from "../../models/authModel";
+import {authTestManager} from "../1_testManagers/authTestManager";
+import {UserService} from "../../service/UserService";
+import {HTTP_STATUSES} from "../../utils/httpStatuses";
+import {UserInputModel} from "../../models/userModels";
 
 
 describe('tests for /auth', () => {
     beforeAll(async () => {
-        const mongoServer = await MongoMemoryServer.create()
-        appConfig.MONGO_URL = mongoServer.getUri()
-        await db.run()
+      await connectToTestDB()
     })
     beforeEach(async () => {
 
@@ -22,14 +18,14 @@ describe('tests for /auth', () => {
             .delete('/testing/all-data')
     })
     afterAll(async () => {
-        await db.client.close();
+        await disconnectFromTestDB()
     });
 
 
     describe('try login user to the system', () => {
 
         it('should return access token', async () => {
-            await UserRepository.createUser({
+            await UserService.createUser({
                 email: 'yura5742248@gmail.com',
                 login: 'yura574',
                 password: 'unbiliever13'
@@ -45,11 +41,12 @@ describe('tests for /auth', () => {
             })
 
         })
+
         it('data fields is requires ', async () => {
-            await UserRepository.createUser({
+            await UserService.createUser({
                 email: 'yura5742248@gmail.com',
                 login: 'yura574',
-                password: 'unbiliever13'
+                password: 'unbiliever13',
             })
 
             const data = {}
@@ -65,9 +62,8 @@ describe('tests for /auth', () => {
                 })
         });
 
-
         it('data fields should be string ', async () => {
-            await UserRepository.createUser({
+            await UserService.createUser({
                 email: 'yura5742248@gmail.com',
                 login: 'yura574',
                 password: 'unbiliever13'

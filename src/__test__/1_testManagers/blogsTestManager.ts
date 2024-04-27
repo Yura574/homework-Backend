@@ -1,14 +1,8 @@
 import request from 'supertest';
-import {app, routerPaths} from '../../src/settings';
-import {HTTP_STATUSES, HttpStatusType} from '../../src/utils/httpStatuses';
-import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../../src/models/blogModels";
+import {HTTP_STATUSES, HttpStatusType} from "../../utils/httpStatuses";
+import {app, routerPaths} from "../../settings";
+import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../../models/blogModels";
 
-
-// const data: BlogInputModel = {
-//     name: 'new blog',
-//     description: 'it the best blog',
-//     websiteUrl: 'https://example.com/'
-// }
 export const blogsTestManager = {
 
     async getAllBlogs(statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
@@ -18,7 +12,7 @@ export const blogsTestManager = {
         return res.body
     },
 
-    async createBlog(statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201, blogName?: string) {
+    async createBlog(token: string,statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201, blogName?: string) {
         const data: BlogInputModel = {
             name: blogName? blogName :'new blog',
             description: 'it the best blog',
@@ -26,7 +20,7 @@ export const blogsTestManager = {
         }
         const res = await request(app)
             .post(routerPaths.blogs)
-            .auth('admin', {type: 'bearer'})
+            .auth(token, {type: 'bearer'})
             .send(data)
             .expect(statusCode)
         let newBlog: BlogViewModel | null = null
@@ -38,7 +32,7 @@ export const blogsTestManager = {
                 description: data.description,
                 websiteUrl: data.websiteUrl,
                 createdAt: expect.any(String),
-                isMemberShip: false
+                isMembership: false
             })
         }
         return {newBlog, data}

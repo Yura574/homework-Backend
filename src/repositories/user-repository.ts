@@ -63,10 +63,7 @@ export class UserRepository {
     }
 
     static async createUser(user: UserCreateModel) {
-        console.log('create')
-        debugger
         const createdUser = new UsersModel(user)
-        console.log('created user', createdUser)
         await createdUser.save()
         return createdUser
 

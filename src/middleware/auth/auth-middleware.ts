@@ -43,17 +43,13 @@ export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next
     if (!auth) return res.sendStatus(401)
 
     const [type, token] = auth.split(' ')
-
     if (type !== "Basic" && type !== 'Bearer') return res.sendStatus(401)
-
     if (type === 'Bearer') {
         try {
-            const dataToken: any = jwt.verify(token, "ACCESS_SECRET")
+            const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
             req.user = {
                 userId: new ObjectId(dataToken.userId),
-                userLogin: dataToken.userLogin
             }
-            console.log('login', dataToken.userLogin)
             return next()
 
         } catch (err) {

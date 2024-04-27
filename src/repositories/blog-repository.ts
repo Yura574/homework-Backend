@@ -5,7 +5,12 @@ import {BlogModel} from "../db/db";
 
 export class BlogRepository {
     static async getBlogById(id: string) {
-        return BlogModel.findOne({_id: id})
+        try{
+            return  await BlogModel.findById(id)
+
+        }catch (err){
+            return false
+        }
 
     }
 
@@ -22,9 +27,10 @@ export class BlogRepository {
         return {blogs, totalCount}
     }
 
-   static async createBlog(data: BlogInputModel): Promise<ObjectResult<BlogViewModel | null>> {
+    static async createBlog(data: BlogInputModel): Promise<ObjectResult<BlogViewModel | null>> {
         const {name, description, websiteUrl} = data
-        const newBlog: NewBlogModel  = {
+
+        const newBlog: NewBlogModel = {
             name,
             description,
             websiteUrl,
@@ -35,7 +41,7 @@ export class BlogRepository {
         try {
             const createdBlog = await BlogModel.create(newBlog)
             const blog = await BlogModel.findOne({_id: createdBlog._id})
-            if(!blog) return {status: ResultStatus.NotFound, errorsMessages: 'Blog nor found', data: null}
+            if (!blog) return {status: ResultStatus.NotFound, errorsMessages: 'Blog not found', data: null}
             const returnBlog: BlogViewModel = {
                 id: blog._id.toString(),
                 name,
@@ -59,8 +65,7 @@ export class BlogRepository {
     }
 
     static async deleteBlog(id: string) {
-        console.log(id)
-        return  BlogModel.deleteOne({_id: new ObjectId(id)})
+        return BlogModel.deleteOne({_id: id});
 
     }
 
@@ -73,7 +78,7 @@ export class BlogRepository {
                 websiteUrl
             }
         }
-        return  BlogModel.updateOne(filter, update)
+        return BlogModel.updateOne(filter, update)
     }
 
 

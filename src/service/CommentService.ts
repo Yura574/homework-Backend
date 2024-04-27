@@ -1,6 +1,6 @@
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {CommentRepository} from "../repositories/comment-repository";
-import {CommentInputModel, CommentViewModel, NewCommentModel} from "../models/commentModel";
+import {CommentDBModel, CommentInputModel, CommentViewModel, LikeInputModel} from "../models/commentModel";
 import {QueryType} from "../routes/post-router";
 import {PostRepository} from "../repositories/post-repository";
 import {UserRepository} from "../repositories/user-repository";
@@ -31,6 +31,11 @@ export class CommentService {
                     commentatorInfo: {
                         userId: comment.commentatorInfo.userId,
                         userLogin: comment.commentatorInfo.userLogin,
+                    },
+                    likesInfo:{
+                        likesCount: comment.likesInfo.likesCount,
+                        dislikesCount: comment.likesInfo.dislikesCount,
+                        myStatus: comment.likesInfo.myStatus
                     }
                 }
             })
@@ -52,6 +57,11 @@ export class CommentService {
             commentatorInfo: {
                 userId: findComment.commentatorInfo.userId,
                 userLogin: findComment.commentatorInfo.userLogin,
+            },
+            likesInfo: {
+                likesCount: findComment.likesInfo.likesCount,
+                dislikesCount: findComment.likesInfo.dislikesCount,
+                myStatus: 'Like'
             }
         }
         return {status: ResultStatus.Success, data: comment}
@@ -64,14 +74,17 @@ export class CommentService {
         const user = await UserRepository.getUserById(userId)
         if (!user) return {status: ResultStatus.NoContent, errorsMessages: 'User not found', data: null}
 // const me = AuthService.
-        const newComment: NewCommentModel = {
+        const newComment: CommentDBModel = {
             content: data.content,
-            postId,
             commentatorInfo: {
                 userId,
                 userLogin: user.login
             },
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            likesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+            }
         }
         try {
             const comment = await CommentRepository.createComment(newComment)
@@ -81,8 +94,13 @@ export class CommentService {
                 content: comment.content,
                 createdAt: comment.createdAt,
                 commentatorInfo: {
-                    userId: comment.commentatorInfo.userId,
+                    userId: comment.commentatorInfo.userId.toString(),
                     userLogin: comment.commentatorInfo.userLogin,
+                },
+                likesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 0,
+                    myStatus: "None"
                 }
 
 
@@ -127,5 +145,12 @@ export class CommentService {
             return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
         }
 
+    }
+
+    static async setLike(commentId: string, userId: string,likeStatus: LikeInputModel): Promise<ObjectResult>{
+        const findComment = await CommentRepository.getCommentById(commentId)
+        console.log(findComment)
+
+        return {status: ResultStatus.Success, data: null}
     }
 }

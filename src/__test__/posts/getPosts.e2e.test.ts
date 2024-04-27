@@ -1,12 +1,14 @@
 import request from 'supertest';
 import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../1_testManagers/blogsTestManager';
-import {postsTestManager} from '../1_testManagers/postsTestManager';
+// import {blogsTestManager} from '../1_testManagers/blogsTestManager';
+// import {postsTestManager} from '../1_testManagers/postsTestManager';
 import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
 import {PostViewModel} from "../../src/models/postModels";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {appConfig} from "../../src/appConfig";
 import {db} from "../../src/db/db";
+import {blogsTestManager} from "../1_testManagers/blogsTestManager";
+import {MongoClient} from 'mongodb'
 
 
 describe('test for posts', () => {
@@ -20,9 +22,9 @@ describe('test for posts', () => {
         await request(app)
             .delete('/testing/all-data')
     })
-    afterAll(async () => {
-        await db.client.close();
-    });
+    // afterAll(async () => {
+    //     await db.client.close();
+    // });
 
     it('returns comments for specified post', async () => {
         const {newBlog} = await blogsTestManager.createBlog()

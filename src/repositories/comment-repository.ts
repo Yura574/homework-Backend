@@ -20,15 +20,15 @@ export class CommentRepository {
     }
 
     static async getCommentById(id: string) {
-        return  CommentModel.findOne({_id: new ObjectId(id)})
+        return  CommentModel.findOne({_id: id})
     }
 
     static async deleteComment(id: string) {
-        return  CommentModel.deleteOne({_id: new ObjectId(id)})
+        return  CommentModel.deleteOne({_id: id})
     }
 
     static async updateComment(content: string, id: string) {
-        return  CommentModel.updateOne({_id: new ObjectId(id)}, {
+        return  CommentModel.updateOne({_id: id}, {
             $set: {
                 content
             }

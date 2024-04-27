@@ -1,29 +1,28 @@
 import request from 'supertest';
-import {app, routerPaths} from '../../src/settings';
-import {HTTP_STATUSES} from "../../src/utils/httpStatuses";
+import {app, routerPaths} from "../../settings";
+import {ReturnViewModel} from "../../models/commonModels";
+import {BlogViewModel} from "../../models/blogModels";
 import {blogsTestManager} from "../1_testManagers/blogsTestManager";
+import {HTTP_STATUSES} from "../../utils/httpStatuses";
 import {postsTestManager} from "../1_testManagers/postsTestManager";
-import {BlogViewModel} from "../../src/models/blogModels";
-import {PostViewModel} from "../../src/models/postModels";
-import {ReturnViewModel} from "../../src/models/commonModels";
-import {appConfig} from "../../src/appConfig";
-import {MongoMemoryServer} from "mongodb-memory-server";
-import {db} from "../../src/db/db";
+import {PostViewModel} from "../../models/postModels";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
+import {authTestManager} from "../1_testManagers/authTestManager";
 
-
+let token: string
 describe('tests for /blogs', () => {
-    beforeAll(async ()=> {
-        const mongoServer = await  MongoMemoryServer.create()
-        appConfig.MONGO_URL = mongoServer.getUri()
-        await db.run()
+    beforeAll(async () => {
+        await connectToTestDB()
     })
     beforeEach(async () => {
 
-        await request(app)
-            .delete('/testing/all-data')
+        await request(app).delete('/testing/all-data')
+        const {accessToken} = await authTestManager.getToken()
+        token = accessToken
+
     })
     afterAll(async () => {
-        await db.client.close();
+        await disconnectFromTestDB()
     });
 
     describe('returns blogs with paging', () => {
@@ -44,10 +43,9 @@ describe('tests for /blogs', () => {
 
         it('returns  blogs with paging', async () => {
             for (let i = 0; i < 5; i++) {
-                await blogsTestManager.createBlog(HTTP_STATUSES.CREATED_201, 'blog' + i)
+                await blogsTestManager.createBlog(token, HTTP_STATUSES.CREATED_201, 'blog' + i)
             }
             const blogs: ReturnViewModel<BlogViewModel[]> = await blogsTestManager.getAllBlogs()
-
 
             expect(blogs.items.length).toBe(5)
         })
@@ -55,7 +53,7 @@ describe('tests for /blogs', () => {
 
     describe('returns blogs by id', () => {
         it('should returns blogs by id', async () => {
-            const {newBlog, data} = await blogsTestManager.createBlog()
+            const {newBlog, data} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const blog = await request(app)
                     .get(`${routerPaths.blogs}/${newBlog.id}`)
@@ -67,25 +65,25 @@ describe('tests for /blogs', () => {
                     description: data.description,
                     websiteUrl: data.websiteUrl,
                     createdAt: expect.any(String),
-                    isMemberShip: false
+                    isMembership: false
                 })
             }
 
         })
 
-        it('blog id not found', async ()=> {
+        it('blog id not found', async () => {
             await request(app)
-                .get(`${routerPaths.blogs}/assaassa`)
+                .get(`${routerPaths.blogs}/notfound`)
                 .expect(HTTP_STATUSES.NOT_FOUND_404)
         })
     })
 
     describe('returns all posts for specific blog', () => {
         it('get all posts by blog id', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 for (let i = 0; i < 5; i++) {
-                    await postsTestManager.createPost(newBlog.id, newBlog.name, 'title' + i)
+                    await postsTestManager.createPost(token,newBlog.id, newBlog.name, 'title' + i)
                 }
                 const posts: ReturnViewModel<PostViewModel[]> = await blogsTestManager.getPostsByBlogId(newBlog.id)
                 expect(posts.items.length).toBe(5)
@@ -94,10 +92,10 @@ describe('tests for /blogs', () => {
         });
 
         it('get all posts by blog id with query params', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 for (let i = 0; i < 5; i++) {
-                    await postsTestManager.createPost(newBlog.id, newBlog.name, 'title' + i)
+                    await postsTestManager.createPost(token, newBlog.id, newBlog.name, 'title' + i)
                 }
                 const params = 'pageNumber=2&pageSize=2&'
                 const posts: ReturnViewModel<PostViewModel[]> = await blogsTestManager.getPostsByBlogId(newBlog.id, params)
@@ -115,7 +113,8 @@ describe('tests for /blogs', () => {
 
         it('blog id not found', async () => {
             await request(app)
-                .get(`${routerPaths.blogs}/sasasassa/posts`)
+                .get(`${routerPaths.blogs}/notfound/posts`)
+                // .auth(token, {type:'bearer'})
                 .expect(HTTP_STATUSES.NOT_FOUND_404)
 
 

@@ -1,4 +1,3 @@
-import {clientTest} from "../../src/db/dbTest";
 import {LoginInputModel, LoginSuccessViewModel} from "../../src/models/authModel";
 import {authTestManager} from "../1_testManagers/authTestManager";
 import {UserRepository} from "../../src/repositories/user-repository";

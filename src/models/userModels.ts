@@ -86,7 +86,7 @@ export const UserSchema = new Schema<UserDBModel>({
     createdAt: String,
     emailConfirmation: {
         confirmationCode: String,
-        expirationDate: String,
+        expirationDate: Date,
         isConfirm: Boolean
     }
 })

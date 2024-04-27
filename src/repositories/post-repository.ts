@@ -14,7 +14,7 @@ export class PostRepository {
     }
 
     static async getPostById(id: string): Promise<PostViewModel | null> {
-        const post = await PostModel.findOne({_id: new ObjectId(id)})
+        const post = await PostModel.findOne({_id: id})
         if(!post) return null
         return {
             id: post._id.toString(),
@@ -65,7 +65,7 @@ export class PostRepository {
     }
 
     static async deletePost(id: string) {
-        const index = await PostModel.deleteOne({_id: new ObjectId(id)})
+        const index = await PostModel.deleteOne({_id: id})
         return !!index;
     }
 

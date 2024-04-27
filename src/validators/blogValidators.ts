@@ -3,6 +3,7 @@ import {BlogModel} from "../db/db";
 
 
 export const findBlog = param('id').custom(async (id) => {
+    // console.log('id')
     const findBlog = await BlogModel.findById({id})
     if (!findBlog) {
         throw new Error()

@@ -29,14 +29,15 @@ export const blogIdValidator = body('blogId').trim()
     .notEmpty().withMessage({field: 'blogId', message: 'blogId is required'})
     .isString().withMessage({field: 'blogId', message: 'blogId should be string'})
     .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
-    .custom(async (value) => {
-
-        const blog = await BlogModel.findOne({value})
-        if (!blog) {
-            throw new Error('Blog not found')
-        }
-        return true
-    }).withMessage({field: 'blogId', message: 'blog not found'})
+    // .custom(async (value) => {
+    //
+    //     const blog = await BlogModel.findOne({value})
+    //     if (!blog) {
+    //         throw new Error('Blog not found')
+    //     }
+    //     return true
+    // })
+    .withMessage({field: 'blogId', message: 'blog not found'})
 
 
 export const postValidation = () => [titleValidator,shortDescriptionValidator, contentValidator]

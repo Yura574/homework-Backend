@@ -100,7 +100,6 @@ return handleErrorObjectResult(result, res)
 
 authRouter.get('/me', authMiddleware, async (req: RequestType<{}, {}, {}>, res: ResponseType<UserMeModel>) => {
     //userId получаем из accessToken
-    console.log('me')
     if (!req.user?.userId) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
 
@@ -122,9 +121,7 @@ authRouter.post('/refresh-token', async (req: Request, res: any) => {
     if (!dataToken.data) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const allUserDevices = await SecurityDevicesService.getDevices(dataToken.data.userId)
-    console.log(req.params.deviceId)
     const findDevice = allUserDevices.data?.find(device => device.deviceId === dataToken.data?.deviceId)
-    console.log(findDevice)
     if (!findDevice) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
 
     const result = await AuthService.refreshToken(refreshToken)

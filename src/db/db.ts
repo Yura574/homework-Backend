@@ -16,7 +16,7 @@ export const db = {
     // client: new MongoClient(appConfig.MONGO_URL),
     async run() {
         try {
-            await mongoose.connect('mongodb://0.0.0.0:27017/backhomework');
+            await mongoose.connect(appConfig.MONGO_URL);
             console.log("Successfully connected to Atlas");
         } catch (err) {
             console.log(err);
@@ -34,16 +34,3 @@ export const SecurityDeviceModel = mongoose.model('securityDevices', SecurityDev
 
 export const RecoveryPasswordModel = mongoose.model('recoverPassword', RecoveryPasswordSchema)
 export const IpRestrictionModel = mongoose.model('ipRestriction', IpRestrictionSchema)
-// export const database = db.client.db("backhomework")
-
-// export const blogCollection = database.collection('blogs')
-// export const postCollection = database.collection('posts')
-// export const userCollection = database.collection('users')
-// export const commentCollection = database.collection('comments')
-
-// export const devicesCollection = database.collection('deviceAuth')
-
-// export const recoveryPasswordCollection = database.collection('recoverPassword')
-
-// export const ipRestrictionCollection = database.collection('ipRestrictions')
-// export const blacklistTokenCollection = database.collection('blacklist')

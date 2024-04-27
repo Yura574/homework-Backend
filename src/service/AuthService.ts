@@ -37,10 +37,10 @@ export class AuthService {
             }
 
             const accessToken = {
-                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '10s'})
+                accessToken: jwt.sign(accessPayload, process.env.ACCESS_SECRET as string, {expiresIn: '10m'})
             }
             const refreshToken = {
-                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '20s'})
+                refreshToken: jwt.sign(refreshPayload, process.env.REFRESH_SECRET as string, {expiresIn: '20m'})
             }
 
 //добавляем для пользователя новое устройство
@@ -125,6 +125,11 @@ export class AuthService {
             data: null
         }
         const user = await UserRepository.findUser(email)
+        console.log(user)
+        console.log('cod', confirmCode)
+        console.log('user', user?.emailConfirmation.confirmationCode)
+        console.log('iSTrue', confirmCode ===user?.emailConfirmation.confirmationCode)
+        console.log('iSTrue', user?.emailConfirmation!.expirationDate! > new Date())
         if (!user) return {
             status: ResultStatus.BadRequest,
             errorsMessages: validateError([{field: 'email', message: 'User not found'}]),
@@ -163,7 +168,7 @@ export class AuthService {
             errorsMessages: validateError([{field: 'email', message: 'User with this email not found'}]),
             data: null
         }
-        if (user.emailConfirmation.isConfirm === true) {
+        if (user.emailConfirmation.isConfirm ) {
             return {
                 status: ResultStatus.BadRequest,
                 errorsMessages: validateError([{field: 'email', message: 'Email already confirmed'}]),
@@ -199,10 +204,10 @@ export class AuthService {
             const refreshPayload = {userId: findUser._id.toString(), deviceId: dataToken.deviceId}
             const tokens = {
                 accessToken: {
-                    accessToken: jwt.sign(accessPayload, 'ACCESS_SECRET', {expiresIn: '10s'})
+                    accessToken: jwt.sign(accessPayload, 'ACCESS_SECRET', {expiresIn: '10m'})
                 },
                 refreshToken: {
-                    refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '20s'})
+                    refreshToken: jwt.sign(refreshPayload, 'REFRESH_SECRET', {expiresIn: '20m'})
                 }
             }
             const newDataToken: any = jwt.verify(tokens.refreshToken.refreshToken, process.env.REFRESH_SECRET as string)

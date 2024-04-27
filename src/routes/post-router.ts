@@ -35,7 +35,7 @@ postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: Respons
     return res.status(200).send(result.data)
 })
 
-postRouter.get('/:id', findPost, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
+postRouter.get('/:id',  async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
 
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
@@ -59,7 +59,7 @@ postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (r
     return handleErrorObjectResult(result, res)
 })
 
-postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Response) => {
+postRouter.delete('/:id', authMiddleware,  async (req: Request, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
@@ -75,7 +75,7 @@ postRouter.delete('/:id', authMiddleware, findPost, async (req: Request, res: Re
     return;
 })
 
-postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
+postRouter.put('/:id', authMiddleware,  blogIdValidator, postValidation(), async (req: Request, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку
     if (isError) return
@@ -89,6 +89,7 @@ postRouter.put('/:id', authMiddleware, findPost, blogIdValidator, postValidation
 //for comments
 
 postRouter.get('/:id/comments', async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]> | null>) => {
+    console.log(req.params.id)
     const result = await PostService.getCommentsForPost(req.params.id, req.query)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)

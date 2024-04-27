@@ -21,7 +21,7 @@ type RequestWithBody<B> = Request<{}, {}, B, {}>
 type RequestWithParams<P> = Request<P, {}, {}, {}>
 export type RequestWithQuery<Q> = Request<{}, {}, {}, Q>
 export type RequestWithParamsAndQuery<P, Q> = Request<P, {}, {}, Q>
-export type RequestType<P, B, Q> = Request<P, {}, B, Q> & {user?: { userId: ObjectId, userLogin: string }}
+export type RequestType<P, B, Q> = Request<P, {}, B, Q> & {user?: { userId: ObjectId}}
 
 
 export type ResponseType<R> = Response<R>
@@ -64,10 +64,9 @@ blogRouter.get('/', async (req: RequestWithQuery<GetBlogsType>, res: ResponseTyp
 
     return res.status(HTTP_STATUSES.OK_200).send(result.data)
 })
-blogRouter.get('/:id', findBlog, async (req: RequestWithParams<ParamsType>, res: ResponseType<BlogViewModel | null>) => {
+blogRouter.get('/:id',  async (req: RequestWithParams<ParamsType>, res: ResponseType<BlogViewModel | null>) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
-
     const result: ObjectResult<BlogViewModel | null> = await BlogService.getBlogById(req.params.id)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
@@ -77,7 +76,6 @@ blogRouter.get('/:id', findBlog, async (req: RequestWithParams<ParamsType>, res:
 blogRouter.get('/:id/posts', async (
     req: RequestWithParamsAndQuery<ParamsType, GetPostsType>,
     res: ResponseType<ReturnViewModel<PostViewModel[]> | null>) => {
-
     const result = await BlogService.getAllPostsByBlogId(req.params.id, req.query)
 
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)

@@ -40,7 +40,7 @@ export class BlogService {
 
     static async getBlogById(id: string): Promise<ObjectResult<BlogViewModel | null>> {
         const blog = await BlogRepository.getBlogById(id)
-        if (!blog) return {status: ResultStatus.BadRequest, errorsMessages: 'Blog not found', data: null}
+        if (!blog) return {status: ResultStatus.NotFound, errorsMessages: 'Blog not found', data: null}
         const returnBlog: BlogViewModel = {
             id: blog!._id.toString(),
             createdAt: blog?.createdAt,
@@ -109,7 +109,7 @@ export class BlogService {
 
         if (!blog) return {status: ResultStatus.NotFound, errorsMessages: 'Blog not found', data: null}
         try {
-        const res =     await BlogRepository.deleteBlog(blogId)
+         await BlogRepository.deleteBlog(blogId)
             return {status: ResultStatus.NoContent, data: null}
         } catch (err) {
             return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}

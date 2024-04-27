@@ -1,11 +1,20 @@
-import {LoginInputModel, LoginSuccessViewModel} from "../../src/models/authModel";
 import request from "supertest";
-import {app, routerPaths} from "../../src/settings";
-import {HTTP_STATUSES, HttpStatusType} from "../../src/utils/httpStatuses";
-import {UserInputModel} from "../../src/models/userModels";
+import {app, routerPaths} from "../../settings";
+import {LoginInputModel, LoginSuccessViewModel} from "../../models/authModel";
+import {HTTP_STATUSES, HttpStatusType} from "../../utils/httpStatuses";
+import {UserInputModel} from "../../models/userModels";
 
 
 export const authTestManager = {
+
+
+    async login(data: LoginInputModel, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
+        const res = await request(app)
+            .post(`${routerPaths.auth}/login`)
+            .send(data)
+            .expect(statusCode)
+        return res.body
+    },
     async getToken() {
         const dataUser = {
             email: 'yura5742248@gmail.com',
@@ -15,7 +24,7 @@ export const authTestManager = {
         //create user
         await request(app)
             .post(`${routerPaths.users}`)
-            .auth('admin', {type: 'bearer'})
+            .auth('admin', 'qwerty')
             .send(dataUser)
 
         const data: LoginInputModel = {
@@ -23,16 +32,8 @@ export const authTestManager = {
             password: 'unbiliever13'
         }
         const token: LoginSuccessViewModel = await this.login(data)
-        //
-        // return token
-    },
 
-    async login(data: LoginInputModel, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
-        const res = await request(app)
-            .post(`${routerPaths.auth}/login`)
-            .send(data)
-            .expect(statusCode)
-        return res.body
+        return token
     },
 
     async me(token: string, statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
