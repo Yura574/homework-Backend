@@ -2,7 +2,7 @@ import express, {Request, Response} from 'express';
 import {PostRepository} from '../repositories/post-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
-import {blogIdValidator, findPost, postValidation} from '../validators/post-validators';
+import {blogIdValidator,  postValidation} from '../validators/post-validators';
 import {ValidateErrorRequest} from '../utils/validateErrorRequest';
 import {PostService} from '../service/PostService';
 import {ReturnViewModel} from "../models/commonModels";
@@ -98,7 +98,7 @@ postRouter.post('/:id/comments', authMiddleware, commentValidators(), async (req
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
     const userId = req.user?.userId.toString()
-    if (!userId) return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    if (!userId) return res.sendStatus(HTTP_STATUSES.NOT_AUTHORIZATION_401)
     const result = await CommentService.createComment(req.body, req.params.id, userId)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
     return handleErrorObjectResult(result, res)

@@ -70,7 +70,7 @@ export class UserRepository {
     }
 
     static async getUserById(userId: string) {
-        return UsersModel.findOne({_id: userId})
+        return UsersModel.findById({_id: userId})
     }
 
     static async updateUser(data: UserModel) {

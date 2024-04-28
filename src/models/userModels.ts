@@ -7,12 +7,12 @@ export type CreateUserModel = {
 
 
 export type GetUsersQuery = {
-    sortBy: string,
-    sortDirection: 'asc'| 'desc',
-    pageNumber: string,
-    pageSize: string,
-    searchLoginTerm: string
-    searchEmailTerm: string
+    sortBy?: string,
+    sortDirection?: 'asc'| 'desc',
+    pageNumber?: string,
+    pageSize?: string,
+    searchLoginTerm?: string
+    searchEmailTerm?: string
 }
 
 export type UserInputModel = {

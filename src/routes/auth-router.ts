@@ -45,7 +45,6 @@ authRouter.post('/login', ipRestrictionMiddleware, loginValidator(), async (req:
 authRouter.post('/registration', ipRestrictionMiddleware, userValidation(), async (req: RequestType<{}, UserInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
-    console.log('regisctration')
     const result: ObjectResult<string | null> = await AuthService.registration(req.body)
 
     if (result.status === ResultStatus.Created) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)

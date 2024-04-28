@@ -1,33 +1,38 @@
 import request from 'supertest';
-import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../1_testManagers/blogsTestManager';
-import {postsTestManager} from '../1_testManagers/postsTestManager';
-import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
-import {PostViewModel} from "../../src/models/postModels";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
+import {app, routerPaths} from "../../settings";
+import {blogsTestManager} from "../1_testManagers/blogsTestManager";
+import {postsTestManager} from "../1_testManagers/postsTestManager";
+import {HTTP_STATUSES} from "../../utils/httpStatuses";
+import {PostViewModel} from "../../models/postModels";
+import {authTestManager} from "../1_testManagers/authTestManager";
 
-
+let token: string
 describe('test for posts', () => {
+    beforeAll(async ()=> {
+        await connectToTestDB()
+    })
     beforeEach(async () => {
-        await clientTest.connect()
-
-        await request(app)
+             await request(app)
             .delete('/testing/all-data')
+        const {accessToken} = await authTestManager.getToken()
+        token = accessToken
     })
     afterAll(async () => {
-        await clientTest.close();
+        await disconnectFromTestDB()
     });
 
 
     it('post should be create', async () => {
-        const {newBlog} = await blogsTestManager.createBlog()
+        const {newBlog} = await blogsTestManager.createBlog(token)
         if (newBlog) {
-            await postsTestManager.createPost(newBlog.id, newBlog.name)
+            await postsTestManager.createPost(token, newBlog.id, newBlog.name)
         }
 
     })
 
     it(`post shouldn't be create`, async () => {
-        const {newBlog} = await blogsTestManager.createBlog()
+        const {newBlog} = await blogsTestManager.createBlog(token)
         if(newBlog) {
             await request(app)
                 .post(routerPaths.posts)
@@ -56,9 +61,9 @@ describe('test for posts', () => {
     })
 
     it('get post by id', async () => {
-        const {newBlog} = await blogsTestManager.createBlog()
+        const {newBlog} = await blogsTestManager.createBlog(token)
         if(newBlog){
-            const {post} = await postsTestManager.createPost(newBlog.id, newBlog.name)
+            const {post} = await postsTestManager.createPost(token,newBlog.id, newBlog.name)
             if (post.id) {
                 await postsTestManager.getPostById(post.id)
             }
@@ -67,21 +72,21 @@ describe('test for posts', () => {
 
     })
     it('post should be deleted', async () => {
-        const {newBlog} = await blogsTestManager.createBlog()
+        const {newBlog} = await blogsTestManager.createBlog(token)
         if(newBlog){
-            const {post} = await postsTestManager.createPost(newBlog.id, newBlog.name)
-            post.id && await postsTestManager.deletePost(post.id)
+            const {post} = await postsTestManager.createPost(token,newBlog.id, newBlog.name)
+            post.id && await postsTestManager.deletePost(token,post.id)
         }
 
     })
     it(`post shouldn't be deleted`, async () => {
-        await postsTestManager.deletePost('23', HTTP_STATUSES.NOT_FOUND_404)
+        await postsTestManager.deletePost(token,'23', HTTP_STATUSES.NOT_FOUND_404)
     })
 
     it('post should be update', async () => {
-        const {newBlog} = await blogsTestManager.createBlog()
+        const {newBlog} = await blogsTestManager.createBlog(token)
         if(newBlog){
-            const {post} = await postsTestManager.createPost(newBlog.id, newBlog.name)
+            const {post} = await postsTestManager.createPost(token,newBlog.id, newBlog.name)
             const updatedData = {
 
                 title: "updated title",
@@ -89,7 +94,7 @@ describe('test for posts', () => {
                 shortDescription: '123',
                 blogId: newBlog.id
             }
-            post.id && await postsTestManager.updatedPost(post.id, updatedData)
+            post.id && await postsTestManager.updatedPost(token,post.id, updatedData)
             const updatedPost: PostViewModel = post.id && await postsTestManager.getPostById(post.id)
             expect(updatedPost).toEqual({
                 id: post.id,
@@ -104,9 +109,9 @@ describe('test for posts', () => {
 
     })
     it(`post shouldn't be update`, async () => {
-        const {newBlog} = await blogsTestManager.createBlog()
+        const {newBlog} = await blogsTestManager.createBlog(token)
         if(newBlog){
-            const {post} = await postsTestManager.createPost(newBlog.id, newBlog.name)
+            const {post} = await postsTestManager.createPost(token,newBlog.id, newBlog.name)
             const updatedData = {
                 content: "yo",
                 shortDescription: true,

@@ -29,6 +29,7 @@ export type CommentViewModel = {
 }
 export type NewCommentModel = {
     content: string
+    postId: string
     commentatorInfo: {
         userId: string
         userLogin: string
@@ -44,6 +45,7 @@ export type StatusCommentType = 'None' | 'Like' | 'Dislike'
 
 export type CommentDBModel = {
     content: string
+    postId: string
     commentatorInfo: {
         userId: string
         userLogin: string
@@ -52,11 +54,13 @@ export type CommentDBModel = {
     likesInfo: {
         likesCount: number,
         dislikesCount: number,
+        likeUserInfo: {userId: string, likeStatus: LikeStatus}[]
     }
 }
 
 export const CommentSchema = new Schema<CommentDBModel>({
     content: String,
+    postId: String,
     commentatorInfo: {
         userId: String,
         userLogin: String
@@ -65,5 +69,6 @@ export const CommentSchema = new Schema<CommentDBModel>({
     likesInfo: {
         likesCount: Number,
         dislikesCount: Number,
+        commentatorsInfo: Array
     }
 })

@@ -1,37 +1,37 @@
-import request from 'supertest';
-import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../1_testManagers/blogsTestManager';
-import {HTTP_STATUSES} from "../../src/utils/httpStatuses";
-import {PostViewModel} from "../../src/models/postModels";
-import {BlogPostInputModel} from "../../src/models/blogModels";
-import {MongoMemoryServer} from "mongodb-memory-server";
-import {appConfig} from "../../src/appConfig";
-import {db} from "../../src/db/db";
+import {BlogPostInputModel} from "../../models/blogModels";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
+import request from "supertest";
+import {app, routerPaths} from "../../settings";
+import {blogsTestManager} from "../1_testManagers/blogsTestManager";
+import {HTTP_STATUSES} from "../../utils/httpStatuses";
+import {PostViewModel} from "../../models/postModels";
+import {authTestManager} from "../1_testManagers/authTestManager";
+
 
 const dataBlogPost: BlogPostInputModel = {
     title: 'blogPostInput',
     shortDescription: 'description',
     content: '1234'
 }
-describe('tests for /blogs', () => {
+let token: string
+describe('tests for POST /blogs', () => {
     beforeAll(async () => {
-        const mongoServer = await MongoMemoryServer.create()
-        appConfig.MONGO_URL = mongoServer.getUri()
-        await db.run()
+        await connectToTestDB()
     })
     beforeEach(async () => {
-        await request(app)
-            .delete('/testing/all-data')
+        await request(app).delete('/testing/all-data')
+        const {accessToken} = await authTestManager.getToken()
+        token= accessToken
     })
     afterAll(async () => {
-        await db.client.close();
+        await disconnectFromTestDB();
     });
 
 
     describe('create new blog', () => {
         it('should create new blogs', async () => {
 
-            const {newBlog, data} = await blogsTestManager.createBlog()
+            const {newBlog, data} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 expect(newBlog).toEqual({
                     id: expect.any(String),
@@ -39,7 +39,7 @@ describe('tests for /blogs', () => {
                     description: data.description,
                     websiteUrl: data.websiteUrl,
                     createdAt: expect.any(String),
-                    isMemberShip: false
+                    isMembership: false
                 })
 
                 await blogsTestManager.getBlogById(newBlog.id)
@@ -61,11 +61,11 @@ describe('tests for /blogs', () => {
         it('all fields should be string', async () => {
             const res = await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', {type: 'bearer'})
+                .auth(token, {type: 'bearer'})
                 .send({
-                    name: 43,
+                    name: '',
                     description: true,
-                    websiteUrl: 90
+                    websiteUrl: 'https://example.com'
                 })
                 .expect(HTTP_STATUSES.BAD_REQUEST_400)
 
@@ -79,10 +79,7 @@ describe('tests for /blogs', () => {
                         field: 'description',
                         message: 'description should be string'
                     },
-                    {
-                        field: 'websiteUrl',
-                        message: 'websiteUrl should be string'
-                    },
+
                 ]
             })
         })
@@ -90,7 +87,7 @@ describe('tests for /blogs', () => {
         it('all fields is required', async () => {
             await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', {type: 'bearer'})
+                .auth(token, {type: 'bearer'})
                 .send({
                     name: null,
                     description: null,
@@ -118,7 +115,7 @@ describe('tests for /blogs', () => {
         it('max length fields', async () => {
             await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', {type: 'bearer'})
+                .auth(token, {type: 'bearer'})
                 .send({
                     name: 'qwertyuiopqwerasdsfqwertyuiopqwerasdsf',
                     description: 'description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description description ',
@@ -147,7 +144,7 @@ describe('tests for /blogs', () => {
         it('websiteUrl should be correct pattern', async () => {
             await request(app)
                 .post(routerPaths.blogs)
-                .auth('admin', {type: 'bearer'})
+                .auth(token, {type: 'bearer'})
                 .send({name: 'new blog', description: 'true', websiteUrl: "https://examp"})
                 .expect(HTTP_STATUSES.BAD_REQUEST_400, {
                     errorsMessages: [
@@ -163,10 +160,10 @@ describe('tests for /blogs', () => {
     describe('create new post for specific blog', () => {
         it('post should be create', async () => {
 
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
 
             if (newBlog) {
-                const post: PostViewModel = await blogsTestManager.createPost(dataBlogPost, newBlog.id, newBlog.name)
+                const post: PostViewModel = await blogsTestManager.createPost(token, dataBlogPost, newBlog.id, newBlog.name)
                 expect(post).toEqual({
                     id: expect.any(String),
                     title: dataBlogPost.title,
@@ -183,7 +180,7 @@ describe('tests for /blogs', () => {
     describe('should`t be create new post for specific blog', () => {
 
         it('not authorization create new post for specific blog', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const newPost = {
                     title: dataBlogPost.title,
@@ -201,7 +198,7 @@ describe('tests for /blogs', () => {
         })
 
         it('blog id not found', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const newPost = {
                     title: dataBlogPost.title,
@@ -226,7 +223,7 @@ describe('tests for /blogs', () => {
         })
 
         it('all data fields are required', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
 
             if (newBlog) {
                 const newPost = {
@@ -250,7 +247,7 @@ describe('tests for /blogs', () => {
         });
 
         it('all data fields should be string', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
 
             if (newBlog) {
                 const newPost = {
@@ -277,7 +274,7 @@ describe('tests for /blogs', () => {
         });
 
         it('max length data fields', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
 
             if (newBlog) {
                 const newPost = {

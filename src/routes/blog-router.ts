@@ -2,7 +2,7 @@ import express, {Request, Response} from 'express';
 import {BlogRepository} from '../repositories/blog-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
-import {blogValidators, findBlog} from '../validators/blogValidators';
+import {blogValidators} from '../validators/blogValidators';
 import {ValidateErrorRequest} from '../utils/validateErrorRequest';
 import {BlogService} from '../service/BlogService';
 import {postValidation} from '../validators/post-validators';
@@ -97,7 +97,6 @@ blogRouter.delete('/:id', authMiddleware,  async (req: RequestType<ParamsType, {
     if (isError) return
 
     const result: ObjectResult = await BlogService.deleteBlog(req.params.id)
-    console.log(result.status === ResultStatus.NoContent)
     if(result.status === ResultStatus.NoContent) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return  handleErrorObjectResult(result, res)
 
@@ -106,7 +105,7 @@ blogRouter.delete('/:id', authMiddleware,  async (req: RequestType<ParamsType, {
 blogRouter.put('/:id', authMiddleware, blogValidators(), async (req: RequestType<ParamsType, BlogInputModel, {}>, res: ResponseType<ObjectResult>) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return
-
+    console.log(typeof req.body.name)
     const id = req.params.id
     const {name, description, websiteUrl} = req.body
 

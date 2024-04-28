@@ -1,30 +1,39 @@
-import {blogsTestManager} from '../1_testManagers/blogsTestManager';
-import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
-import {clientTest} from "../../src/db/dbTest";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
+import {blogsTestManager} from "../1_testManagers/blogsTestManager";
+import {HTTP_STATUSES} from "../../utils/httpStatuses";
+import {authTestManager} from "../1_testManagers/authTestManager";
+import request from "supertest";
+import {app} from "../../settings";
 
-
-describe('tests for /blogs', () => {
+let token: string ;
+describe('tests for DELETE /blogs', () => {
     beforeAll(async () => {
-        await clientTest.connect()
+        await connectToTestDB()
+
+    })
+    beforeEach(async ()=> {
+        await request(app).delete('/testing/all-data')
+        const {accessToken} = await authTestManager.getToken()
+        token = accessToken
     })
     afterAll(async () => {
-        await clientTest.close();
+        await disconnectFromTestDB()
     });
 
 
     describe('delete blog specified by id', () => {
 
         it('blog should be deleted', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
-                await blogsTestManager.deleteBlog(newBlog.id)
+                await blogsTestManager.deleteBlog(token,newBlog.id)
 
                 await blogsTestManager.getBlogById(newBlog.id, HTTP_STATUSES.NOT_FOUND_404)
             }
         })
 
         it(`blog shouldn't be deleted`, async () => {
-            await blogsTestManager.deleteBlog('23', HTTP_STATUSES.NOT_FOUND_404)
+            await blogsTestManager.deleteBlog(token,'23', HTTP_STATUSES.NOT_FOUND_404)
         })
     })
 

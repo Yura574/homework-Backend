@@ -9,7 +9,10 @@ export const ValidateErrorRequest = (req: Request, res: Response) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
         const errors: ErrorResultModel = {
-            errorsMessages: result.array({onlyFirstError: true}).map(err => err.msg)
+            errorsMessages: result.array({onlyFirstError: true}).map(err => {
+                console.log(err.msg)
+                return err.msg
+            })
         }
         if (errors.errorsMessages[0].field === 'id') {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)

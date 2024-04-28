@@ -1,35 +1,28 @@
 import request from 'supertest';
-import {app, routerPaths} from '../../src/settings';
-// import {blogsTestManager} from '../1_testManagers/blogsTestManager';
-// import {postsTestManager} from '../1_testManagers/postsTestManager';
-import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
-import {PostViewModel} from "../../src/models/postModels";
-import {MongoMemoryServer} from "mongodb-memory-server";
-import {appConfig} from "../../src/appConfig";
-import {db} from "../../src/db/db";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
+import {app} from "../../settings";
 import {blogsTestManager} from "../1_testManagers/blogsTestManager";
-import {MongoClient} from 'mongodb'
+import {postsTestManager} from "../1_testManagers/postsTestManager";
+import {authTestManager} from "../1_testManagers/authTestManager";
 
-
+let token: string
 describe('test for posts', () => {
-    beforeAll(async ()=> {
-        const mongoServer = await  MongoMemoryServer.create()
-        appConfig.MONGO_URL = mongoServer.getUri()
-        await db.run()
+    beforeAll(async () => {
+        await connectToTestDB()
     })
     beforeEach(async () => {
-
-        await request(app)
-            .delete('/testing/all-data')
+        await request(app).delete('/testing/all-data')
+        const {accessToken} = await authTestManager.getToken()
+        token = accessToken
     })
-    // afterAll(async () => {
-    //     await db.client.close();
-    // });
+    afterAll(async () => {
+        await disconnectFromTestDB()
+    });
 
     it('returns comments for specified post', async () => {
-        const {newBlog} = await blogsTestManager.createBlog()
+        const {newBlog} = await blogsTestManager.createBlog(token)
         if (newBlog) {
-            const post = await postsTestManager.createPost(newBlog.id, newBlog.name)
+            const post = await postsTestManager.createPost(token, newBlog.id, newBlog.name)
         }
 
     })

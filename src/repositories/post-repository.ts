@@ -14,8 +14,8 @@ export class PostRepository {
     }
 
     static async getPostById(id: string): Promise<PostViewModel | null> {
-        const post = await PostModel.findOne({_id: id})
-        if(!post) return null
+        const post = await PostModel.findById({_id: id})
+        if (!post) return null
         return {
             id: post._id.toString(),
             title: post.title,
@@ -50,7 +50,7 @@ export class PostRepository {
     static async createPost(newPost: NewPostModel) {
         const createdPost = await PostModel.create(newPost)
         const post = await PostModel.findOne({_id: createdPost._id})
-        if(!post) return null
+        if (!post) return null
         const returnPost: PostViewModel = {
             id: post!._id.toString(),
             title: post.title,
@@ -65,8 +65,12 @@ export class PostRepository {
     }
 
     static async deletePost(id: string) {
-        const index = await PostModel.deleteOne({_id: id})
-        return !!index;
+        try {
+            await PostModel.deleteOne({_id: id})
+            return true
+        } catch (err) {
+            return false
+        }
     }
 
 
@@ -80,6 +84,6 @@ export class PostRepository {
             }
 
         }
-        return  PostModel.updateOne({_id: new ObjectId(id)}, updatedPost)
+        return PostModel.updateOne({_id: new ObjectId(id)}, updatedPost)
     }
 }

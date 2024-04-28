@@ -6,14 +6,12 @@ import {CreateUserBodyType, ReturnsUserType} from "./types/usersTypes";
 import {ValidateErrorRequest} from "../utils/validateErrorRequest";
 import {UserRepository} from "../repositories/user-repository";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
-import {GetUsersQuery,  UserViewModel,} from "../models/userModels";
+import {GetUsersQuery, UserViewModel,} from "../models/userModels";
 import {ResponsePostType} from "./post-router";
-import {ObjectId} from "mongodb";
 import {ReturnViewModel} from "../models/commonModels";
 import {UserService} from "../service/UserService";
 import {ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
-import {UsersModel} from "../db/db";
 
 export const userRouter = express.Router()
 
@@ -38,26 +36,15 @@ userRouter.get('/', authMiddleware, async (req: RequestType<{}, {}, GetUsersQuer
     res.send(returnUsers)
 
 })
-userRouter.get('/:id', authMiddleware, validateId, async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<UserViewModel>) => {
+userRouter.get('/:id',  validateId, async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<UserViewModel| null>) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
-    const response = await UsersModel.findById({id: req.params.id})
-    if (response) {
-        const user: UserViewModel = {
-            id: response?._id.toString(),
-            login: response.login,
-            email: response.email,
-            createdAt: response.createdAt
-        }
-        res.status(HTTP_STATUSES.OK_200).send(user)
-        return
 
-    }
-    res.sendStatus(500)
-    return
-
+    const result = await UserService.getUserById(req.params.id)
+    if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
+    return handleErrorObjectResult(result, res)
 
 
 })
@@ -66,16 +53,16 @@ userRouter.post('/', authMiddleware, userValidation(), async (req: RequestType<{
     const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку,
     if (isError) return
-const result = await UserService.createUser(req.body)
+    const result = await UserService.createUser(req.body)
     // const newUser = await UserRepository.createUser(req.body)
 
- if(result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
-return handleErrorObjectResult(result, res)
+    if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.CREATED_201).send(result.data)
+    return handleErrorObjectResult(result, res)
 })
 
-userRouter.delete('/:id', authMiddleware,validateId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
-const isError = ValidateErrorRequest(req,res)
-    if(isError) return
+userRouter.delete('/:id', authMiddleware, validateId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
+    const isError = ValidateErrorRequest(req, res)
+    if (isError) return
     const isDeleted = await UserRepository.deleteUser(req.params.id)
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)

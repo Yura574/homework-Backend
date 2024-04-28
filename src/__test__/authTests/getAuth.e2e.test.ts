@@ -1,21 +1,21 @@
-import {LoginInputModel, LoginSuccessViewModel} from "../../src/models/authModel";
-import {authTestManager} from "../1_testManagers/authTestManager";
-import {UserRepository} from "../../src/repositories/user-repository";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
 import request from "supertest";
-import {app, routerPaths} from "../../src/settings";
-import {HTTP_STATUSES} from "../../src/utils/httpStatuses";
+import {app} from "../../settings";
+import {UserInputModel} from "../../models/userModels";
 import {UsersTestManager} from "../1_testManagers/usersTestManager";
-import {UserInputModel} from "../../src/models/userModels";
+import {authTestManager} from "../1_testManagers/authTestManager";
 
-export const tokenForTests = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZjYjQ4YjYzZDFhMjkxOTA4OTQ5MjgiLCJpYXQiOjE3MTEwNjAxMDcsImV4cCI6MTcxMTA2MzcwN30.e__5azM_CExknCm08s-1hRcRQz5vmKgTFn_wZsQ8R9E'
+
 describe('tests for /auth', () => {
     beforeAll(async () => {
-        await clientTest.connect()
+        await connectToTestDB()
+    })
+    beforeEach(async () => {
         await request(app)
             .delete('/testing/all-data')
     })
     afterAll(async () => {
-        await clientTest.close();
+        await disconnectFromTestDB()
     });
 
 
@@ -27,9 +27,13 @@ describe('tests for /auth', () => {
                 login: 'yura',
                 password: '123456'
             }
-            await UsersTestManager.createTestUser(data)
+            await UsersTestManager.createUser(data)
             const token = await authTestManager.login({loginOrEmail: data.login, password: data.password})
-            console.log(token)
+            // console.log(token)
+            const result = await authTestManager.me(token.accessToken)
+            expect(result.email).toBe(data.email)
+            expect(result.login).toBe(data.login)
+            expect(result.userId).toEqual(expect.any(String))
             // await authTestManager.me('admin')
 
 

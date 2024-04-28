@@ -1,30 +1,37 @@
-import request from 'supertest';
-import {app, routerPaths} from '../../src/settings';
-import {blogsTestManager} from '../1_testManagers/blogsTestManager';
-import {HTTP_STATUSES} from '../../src/utils/httpStatuses';
-import {clientTest} from "../../src/db/dbTest";
-import {BlogInputModel, BlogViewModel} from "../../src/models/blogModels";
+import {BlogInputModel, BlogViewModel} from "../../models/blogModels";
+import {connectToTestDB, disconnectFromTestDB} from "../coonectToTestDB";
+import request from "supertest";
+import {app, routerPaths} from "../../settings";
+import {blogsTestManager} from "../1_testManagers/blogsTestManager";
+import {HTTP_STATUSES} from "../../utils/httpStatuses";
+import {authTestManager} from "../1_testManagers/authTestManager";
 
+let token: string
 const updateData: BlogInputModel = {
     name: 'name',
     description: 'new desc',
     websiteUrl: 'https://newsite.com'
 }
-describe('tests for /blogs', () => {
+describe('tests for PUT /blogs', () => {
     beforeAll(async () => {
-        await clientTest.connect()
+        await connectToTestDB()
+        const {accessToken} = await authTestManager.getToken()
+        token= accessToken
+    })
+    beforeEach(async () => {
+        await request(app).delete('/testing/all-data')
     })
     afterAll(async () => {
-        await clientTest.close();
+        await disconnectFromTestDB()
     });
 
     describe('update existing blog by id with InputModel', () => {
 
         it('blog should be update', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
 
-                const res = await blogsTestManager.updateBlog(newBlog.id, updateData)
+                const res = await blogsTestManager.updateBlog(token,newBlog.id, updateData)
                 if (res === HTTP_STATUSES.NO_CONTENT_204) {
                     const blog: BlogViewModel = await blogsTestManager.getBlogById(newBlog.id)
                     expect(blog).toEqual({
@@ -32,7 +39,7 @@ describe('tests for /blogs', () => {
                         name: updateData.name,
                         description: updateData.description,
                         websiteUrl: updateData.websiteUrl,
-                        isMemberShip: newBlog.isMemberShip,
+                        isMembership: newBlog.isMembership,
                         createdAt: newBlog.createdAt
                     })
                 }
@@ -40,7 +47,7 @@ describe('tests for /blogs', () => {
         })
 
         it('not authorization', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const updateData: BlogInputModel = {
                     name: 'name',
@@ -63,7 +70,7 @@ describe('tests for /blogs', () => {
         })
 
         it('all fields update data is required', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const updateData = {}
                 await request(app)
@@ -81,7 +88,7 @@ describe('tests for /blogs', () => {
         })
 
         it('all fields update data should be string', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const updateData = {
                     name: true,
@@ -90,7 +97,7 @@ describe('tests for /blogs', () => {
                 }
                 await request(app)
                     .put(`${routerPaths.blogs}/${newBlog.id}`)
-                    .auth('admin', 'qwerty')
+                    .auth(token, {type: 'bearer'})
                     .send(updateData)
                     .expect(HTTP_STATUSES.BAD_REQUEST_400, {
                         errorsMessages: [
@@ -103,7 +110,7 @@ describe('tests for /blogs', () => {
         })
 
         it('max length fields update data', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const updateData = {
                     name: 'ansmeeeansmeeeansmeeeansmeee',
@@ -125,7 +132,7 @@ describe('tests for /blogs', () => {
         })
 
         it('pattern website url', async () => {
-            const {newBlog} = await blogsTestManager.createBlog()
+            const {newBlog} = await blogsTestManager.createBlog(token)
             if (newBlog) {
                 const updateData = {
                     name: 'name',

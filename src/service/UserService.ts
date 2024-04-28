@@ -44,7 +44,7 @@ export class UserService {
 
     }
 
-    static async getUserById(userId: string): Promise<ObjectResult<ReturnsUserType | null>>{
+    static async getUserById(userId: string): Promise<ObjectResult<UserViewModel | null>>{
         const findUser = await UserRepository.getUserById(userId)
         if(!findUser) return {status: ResultStatus.NotFound, errorsMessages: 'User not found', data: null}
         const user: UserViewModel = {

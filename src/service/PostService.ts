@@ -70,10 +70,10 @@ export class PostService {
     }
 
     static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>| null>> {
-        console.log(dataQuery)
+        console.log('dataQuery', dataQuery)
         try{
             const post = await PostRepository.getPostById(postId)
-            console.log(post)
+            console.log('post', post)
             if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
             const result = await CommentService.getCommentsByPostId(postId, dataQuery)
 
@@ -98,6 +98,7 @@ export class PostService {
     }
 
     static async deletePost(postId: string): Promise<ObjectResult>{
+        console.log(postId)
         const post = await PostRepository.getPostById(postId)
         if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
 

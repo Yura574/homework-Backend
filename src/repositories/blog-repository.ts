@@ -22,7 +22,6 @@ export class BlogRepository {
         }
         const sortObject: any = {}
         sortObject[sortBy] = sortDirection === 'asc' ? 1 : -1
-
         const blogs = await BlogModel.find({name: {$regex: searchNameTerm ? new RegExp(searchNameTerm, 'i') : ''}}).sort(sortObject).skip(skip).limit(+pageSize).lean();
         return {blogs, totalCount}
     }

@@ -30,15 +30,18 @@
 //
 //
 // }
-import {NextFunction, Request, Response} from 'express';
+import {NextFunction,  Response} from 'express';
 import jwt from "jsonwebtoken";
 import {ObjectId} from "mongodb";
 import {RequestType} from "../../routes/blog-router";
+
+
 
 const login1 = 'admin'
 const password1 = 'qwerty'
 export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next: NextFunction) => {
     const auth = req.headers['authorization']
+
 
     if (!auth) return res.sendStatus(401)
 

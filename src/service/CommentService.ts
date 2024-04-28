@@ -10,12 +10,12 @@ export class CommentService {
 
     static async getCommentsByPostId(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]> >> {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
-
+        console.log('postId', postId)
         const {
             comments,
             totalCount
         } = await CommentRepository.getCommentsByPostId(postId, +pageSize, +pageNumber, sortBy, sortDirection)
-
+        console.log(comments)
         const pagesCount = Math.ceil(totalCount / +pageSize)
 
         const returnComments: ReturnViewModel<CommentViewModel[]> = {
@@ -68,14 +68,17 @@ export class CommentService {
     }
 
     static async createComment(data: CommentInputModel, postId: string, userId: string): Promise<ObjectResult<CommentViewModel | null>> {
-
         const post = await PostRepository.getPostById(postId)
         if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
+
         const user = await UserRepository.getUserById(userId)
-        if (!user) return {status: ResultStatus.NoContent, errorsMessages: 'User not found', data: null}
+        if (!user) {
+            return {status: ResultStatus.NoContent, errorsMessages: 'User not found', data: null}
+        }
 // const me = AuthService.
         const newComment: CommentDBModel = {
             content: data.content,
+            postId,
             commentatorInfo: {
                 userId,
                 userLogin: user.login
@@ -84,6 +87,7 @@ export class CommentService {
             likesInfo: {
                 likesCount: 0,
                 dislikesCount: 0,
+                likeUserInfo:[]
             }
         }
         try {

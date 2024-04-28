@@ -3,18 +3,33 @@ import {HTTP_STATUSES, HttpStatusType} from "../../utils/httpStatuses";
 import {app, routerPaths} from "../../settings";
 import {BlogInputModel, BlogPostInputModel, BlogViewModel} from "../../models/blogModels";
 
+export type queryBlogParamsForTest = {
+    sortBy?: string,
+    sortDirection?: "asc" | "desc",
+    pageNumber?: number,
+    pageSize?: number,
+    searchNameTerm?: string
+}
+const queryParams: queryBlogParamsForTest = {
+    sortBy: 'createdAt',
+    sortDirection: 'desc',
+    pageNumber: 1,
+    pageSize: 10,
+    searchNameTerm: ''
+}
 export const blogsTestManager = {
 
-    async getAllBlogs(statusCode: HttpStatusType = HTTP_STATUSES.OK_200) {
+    async getAllBlogs(statusCode: HttpStatusType = HTTP_STATUSES.OK_200, query: queryBlogParamsForTest = queryParams) {
+        const {sortBy='createdAt', sortDirection='desc', pageSize=10, searchNameTerm='', pageNumber=1} = query
         const res = await request(app)
-            .get(routerPaths.blogs)
+            .get(`${routerPaths.blogs}?searchNameTerm=${searchNameTerm}&pageNumber=${pageNumber}&sortBy=${sortBy}&sortDirection=${sortDirection}&pageSize=${pageSize}`)
             .expect(statusCode)
         return res.body
     },
 
-    async createBlog(token: string,statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201, blogName?: string) {
+    async createBlog(token: string, statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201, blogName?: string) {
         const data: BlogInputModel = {
-            name: blogName? blogName :'new blog',
+            name: blogName ? blogName : 'new blog',
             description: 'it the best blog',
             websiteUrl: 'https://example.com/'
         }
@@ -45,33 +60,42 @@ export const blogsTestManager = {
         return res.body
     },
 
-    async deleteBlog(id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
-      const res =  await request(app)
+    async deleteBlog(token: string,id: string, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
+        const res = await request(app)
             .delete(`${routerPaths.blogs}/${id}`)
-          .auth('admin', {type: 'bearer'})
+            .auth(token, {type: 'bearer'})
             .expect(statusCode)
 
         return res.status
     },
 
-    async updateBlog(id: string, updateData: BlogInputModel, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
+    async updateBlog(token: string,id: string, updateData: BlogInputModel, statusCode: HttpStatusType = HTTP_STATUSES.NO_CONTENT_204) {
         const res = await request(app)
             .put(`${routerPaths.blogs}/${id}`)
-            .auth('admin', {type: 'bearer'})
+            .auth(token, {type: 'bearer'})
             .send(updateData)
             .expect(statusCode)
 
         return res.status
     },
 
-    async getPostsByBlogId(blogId: string, params?: string) {
+    async getPostsByBlogId(blogId: string, query: queryBlogParamsForTest = queryParams) {
+        const {
+            sortBy = 'createdAt',
+            sortDirection = 'desc',
+            pageSize = 10,
+            searchNameTerm = '',
+            pageNumber = 1
+        } = query
+        // console.log(query)
+
         const res = await request(app)
-            .get(`${routerPaths.blogs}/${blogId}/posts?${params}`)
+            .get(`${routerPaths.blogs}/${blogId}/posts?searchNameTerm=${searchNameTerm}&pageNumber=${pageNumber}&sortBy=${sortBy}&sortDirection=${sortDirection}&pageSize=${pageSize}`)
             .expect(HTTP_STATUSES.OK_200)
         return res.body
     },
 
-    async createPost(data: BlogPostInputModel, blogId: string, blogName: string, statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
+    async createPost(token: string,data: BlogPostInputModel, blogId: string, blogName: string, statusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {
 
         const newPost = {
             title: data.title,
@@ -83,7 +107,7 @@ export const blogsTestManager = {
         }
         const res = await request(app)
             .post(`${routerPaths.blogs}/${blogId}/posts`)
-            .auth('admin', {type: 'bearer'})
+            .auth(token, {type: 'bearer'})
             .send(newPost)
             .expect(statusCode)
         return res.body
