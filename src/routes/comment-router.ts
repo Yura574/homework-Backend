@@ -1,6 +1,6 @@
 import express, {Response} from "express";
 import { ParamsType, RequestType, ResponseType} from "./blog-router";
-import {CommentInputModel, CommentViewModel, LikeInputModel} from "../models/commentModel";
+import {CommentInputModel, CommentViewModel, LikeInputModel, LikeStatus} from "../models/commentModel";
 import {CommentService} from "../service/CommentService";
 import {ResultStatus} from "../utils/objectResult";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
@@ -38,7 +38,7 @@ commentsRouter.put('/:id', authMiddleware, commentValidators(), async (req: Requ
     return handleErrorObjectResult(result, res)
 })
 
-commentsRouter.put('/:id/like-status', authMiddleware, likeStatusValidator, async (req: RequestType<ParamsType, LikeInputModel, {}>, res: Response) => {
+commentsRouter.put('/:id/like-status', authMiddleware, likeStatusValidator, async (req: RequestType<ParamsType, LikeStatus, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if(isError) return
     const userId = req.user?.userId.toString()

@@ -2,7 +2,7 @@ import express, {Request, Response} from 'express';
 import {PostRepository} from '../repositories/post-repository';
 import {HTTP_STATUSES} from '../utils/httpStatuses';
 import {authMiddleware} from '../middleware/auth/auth-middleware';
-import {blogIdValidator,  postValidation} from '../validators/post-validators';
+import {blogIdValidator, postValidation} from '../validators/post-validators';
 import {ValidateErrorRequest} from '../utils/validateErrorRequest';
 import {PostService} from '../service/PostService';
 import {ReturnViewModel} from "../models/commonModels";
@@ -13,6 +13,8 @@ import {CommentService} from "../service/CommentService";
 import {ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {commentValidators} from "../validators/commentValidators";
+import jwt from "jsonwebtoken";
+import {ObjectId} from "mongodb";
 
 
 export const postRouter = express.Router()
@@ -35,7 +37,7 @@ postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: Respons
     return res.status(200).send(result.data)
 })
 
-postRouter.get('/:id',  async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
+postRouter.get('/:id', async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
 
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
@@ -59,7 +61,7 @@ postRouter.post('/', authMiddleware, blogIdValidator, postValidation(), async (r
     return handleErrorObjectResult(result, res)
 })
 
-postRouter.delete('/:id', authMiddleware,  async (req: Request, res: Response) => {
+postRouter.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
@@ -75,7 +77,7 @@ postRouter.delete('/:id', authMiddleware,  async (req: Request, res: Response) =
     return;
 })
 
-postRouter.put('/:id', authMiddleware,  blogIdValidator, postValidation(), async (req: Request, res: Response) => {
+postRouter.put('/:id', authMiddleware, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку
     if (isError) return
@@ -89,11 +91,26 @@ postRouter.put('/:id', authMiddleware,  blogIdValidator, postValidation(), async
 //for comments
 
 postRouter.get('/:id/comments', async (req: RequestType<ParamsType, {}, QueryType>, res: ResponseType<ReturnViewModel<CommentViewModel[]> | null>) => {
-    console.log(req.params.id)
-    const result = await PostService.getCommentsForPost(req.params.id, req.query)
-    if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
-    return handleErrorObjectResult(result, res)
-})
+
+        const auth = req.headers['authorization']
+        let userId: string = ''
+        if (auth) {
+            const [type, token] = auth.split(' ')
+            if (type === 'Bearer') {
+                try{
+                    const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
+                    console.log(dataToken)
+                    userId = dataToken.userId
+                } catch (error) {}
+
+            }
+        }
+
+        const result = await PostService.getCommentsForPost(req.params.id, userId, req.query)
+        if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
+        return handleErrorObjectResult(result, res)
+    }
+)
 postRouter.post('/:id/comments', authMiddleware, commentValidators(), async (req: RequestType<ParamsType, CommentInputModel, {}>, res: ResponseType<CommentViewModel | null>) => {
     const isError = ValidateErrorRequest(req, res)
     if (isError) return

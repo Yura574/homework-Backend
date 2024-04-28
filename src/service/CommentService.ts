@@ -1,6 +1,13 @@
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {CommentRepository} from "../repositories/comment-repository";
-import {CommentDBModel, CommentInputModel, CommentViewModel, LikeInputModel} from "../models/commentModel";
+import {
+    CommentDBModel,
+    CommentInputModel,
+    CommentViewModel,
+    LikeInputModel,
+    LikeStatus,
+    LikeUserInfoType
+} from "../models/commentModel";
 import {QueryType} from "../routes/post-router";
 import {PostRepository} from "../repositories/post-repository";
 import {UserRepository} from "../repositories/user-repository";
@@ -8,14 +15,12 @@ import {ReturnViewModel} from "../models/commonModels";
 
 export class CommentService {
 
-    static async getCommentsByPostId(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]> >> {
+    static async getCommentsByPostId(postId: string, userId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>>> {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
-        console.log('postId', postId)
         const {
             comments,
             totalCount
         } = await CommentRepository.getCommentsByPostId(postId, +pageSize, +pageNumber, sortBy, sortDirection)
-        console.log(comments)
         const pagesCount = Math.ceil(totalCount / +pageSize)
 
         const returnComments: ReturnViewModel<CommentViewModel[]> = {
@@ -24,6 +29,9 @@ export class CommentService {
             pageSize: +pageSize,
             totalCount,
             items: comments.map((comment: any) => {
+                // const status = comment.likesInfo.likeUserInfo.find((likeUserInfo: {userId: string, likeStatus: LikeStatus}) => likeUserInfo.userId === userId)
+                console.log('status', comment.likesInfo.likeUserInfo)
+                // console.log(status)
                 return {
                     id: comment._id.toString(),
                     content: comment.content,
@@ -32,10 +40,10 @@ export class CommentService {
                         userId: comment.commentatorInfo.userId,
                         userLogin: comment.commentatorInfo.userLogin,
                     },
-                    likesInfo:{
+                    likesInfo: {
                         likesCount: comment.likesInfo.likesCount,
                         dislikesCount: comment.likesInfo.dislikesCount,
-                        myStatus: comment.likesInfo.myStatus
+                        myStatus: 'None'
                     }
                 }
             })
@@ -87,12 +95,12 @@ export class CommentService {
             likesInfo: {
                 likesCount: 0,
                 dislikesCount: 0,
-                likeUserInfo:[]
+                likeUserInfo: []
             }
         }
         try {
             const comment = await CommentRepository.createComment(newComment)
-            if (!comment) return {status:ResultStatus.SomethingWasWrong, data: null}
+            if (!comment) return {status: ResultStatus.SomethingWasWrong, data: null}
             const createdComment: CommentViewModel = {
                 id: comment._id.toString(),
                 content: comment.content,
@@ -120,7 +128,7 @@ export class CommentService {
         if (!findComment) {
             return {status: ResultStatus.NotFound, errorsMessages: 'Comment not found', data: null}
         }
-        if (findComment.commentatorInfo.userId!== userId) {
+        if (findComment.commentatorInfo.userId !== userId) {
             return {status: ResultStatus.Forbidden, errorsMessages: 'It isn`t your comment', data: null}
         }
 
@@ -151,9 +159,18 @@ export class CommentService {
 
     }
 
-    static async setLike(commentId: string, userId: string,likeStatus: LikeInputModel): Promise<ObjectResult>{
+    static async updateLikeStatus(commentId: string, userId: string, likeStatus: LikeStatus) {
+
+    }
+
+    static async setLike(commentId: string, userId: string, likeStatus: LikeStatus): Promise<ObjectResult<string | null>> {
         const findComment = await CommentRepository.getCommentById(commentId)
-        console.log(findComment)
+
+        if (!findComment) return {status: ResultStatus.NotFound, data: 'comment not found'}
+      const findLikeUser = findComment.likesInfo.likeUserInfo.find((userInfo: LikeUserInfoType) => userInfo.userId === userId)
+
+         // await CommentRepository.setLike(commentId, userId, likeStatus)
+
 
         return {status: ResultStatus.Success, data: null}
     }

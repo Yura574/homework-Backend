@@ -6,10 +6,11 @@ export type CommentInputModel = {
 export type LikeInputModel = {
     likeStatus: LikeStatus
 }
+
 export enum LikeStatus {
-    None= 'None',
-    Like= 'Like',
-    Dislike= 'Dislike',
+    None = 'None',
+    Like = 'Like',
+    Dislike = 'Dislike',
 }
 
 
@@ -42,7 +43,7 @@ export type NewCommentModel = {
 }
 export type StatusCommentType = 'None' | 'Like' | 'Dislike'
 
-
+export type LikeUserInfoType = { userId: string, likeStatus: LikeStatus }
 export type CommentDBModel = {
     content: string
     postId: string
@@ -54,7 +55,7 @@ export type CommentDBModel = {
     likesInfo: {
         likesCount: number,
         dislikesCount: number,
-        likeUserInfo: {userId: string, likeStatus: LikeStatus}[]
+        likeUserInfo: LikeUserInfoType[]
     }
 }
 
@@ -69,6 +70,6 @@ export const CommentSchema = new Schema<CommentDBModel>({
     likesInfo: {
         likesCount: Number,
         dislikesCount: Number,
-        commentatorsInfo: Array
+        likeUserInfo: Array
     }
 })

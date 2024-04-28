@@ -36,11 +36,12 @@ export class PostService {
         return {status: ResultStatus.Success, data: returnPosts}
     }
 
-    static async getPostById(id: string):Promise<ObjectResult<PostViewModel | null>>{
+    static async getPostById(id: string): Promise<ObjectResult<PostViewModel | null>> {
         const post = await PostRepository.getPostById(id)
-        if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
+        if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         return {status: ResultStatus.Success, data: post}
     }
+
     static async createPost(data: PostInputModel): Promise<ObjectResult<PostViewModel | null>> {
 
         const {blogId, content, shortDescription, title} = data
@@ -60,25 +61,20 @@ export class PostService {
         try {
             const createdPost = await PostRepository.createPost(newPost)
             return {status: ResultStatus.Created, data: createdPost}
+        } catch (err) {
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
         }
-        catch (err){
-            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong',data: null}
-        }
-
 
 
     }
 
-    static async getCommentsForPost(postId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]>| null>> {
-        console.log('dataQuery', dataQuery)
-        try{
+    static async getCommentsForPost(postId: string, userId: string, dataQuery: QueryType): Promise<ObjectResult<ReturnViewModel<CommentViewModel[]> | null>> {
+        try {
             const post = await PostRepository.getPostById(postId)
-            console.log('post', post)
-            if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
-            const result = await CommentService.getCommentsByPostId(postId, dataQuery)
-
+            if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
+            const result = await CommentService.getCommentsByPostId(postId, userId, dataQuery)
             return {status: ResultStatus.Success, data: result.data}
-        } catch (err){
+        } catch (err) {
             return {status: ResultStatus.SomethingWasWrong, data: null}
         }
 
@@ -86,7 +82,7 @@ export class PostService {
 
     static async updatePost(postId: string, data: PostInputModel): Promise<ObjectResult> {
         const post = await PostRepository.getPostById(postId)
-        if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
+        if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         try {
             await PostRepository.updatePost(postId, data)
             return {status: ResultStatus.NoContent, data: null}
@@ -97,18 +93,18 @@ export class PostService {
 
     }
 
-    static async deletePost(postId: string): Promise<ObjectResult>{
+    static async deletePost(postId: string): Promise<ObjectResult> {
         console.log(postId)
         const post = await PostRepository.getPostById(postId)
-        if(!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
+        if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
 
-    try {
-        await PostRepository.deletePost(postId)
-        return {status: ResultStatus.NoContent, data: null}
-    } catch (err) {
-        console.warn(err)
-        return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
+        try {
+            await PostRepository.deletePost(postId)
+            return {status: ResultStatus.NoContent, data: null}
+        } catch (err) {
+            console.warn(err)
+            return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
 
-    }
+        }
     }
 }
