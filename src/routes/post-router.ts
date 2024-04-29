@@ -99,10 +99,8 @@ postRouter.get('/:id/comments', async (req: RequestType<ParamsType, {}, QueryTyp
             if (type === 'Bearer') {
                 try{
                     const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
-                    console.log(dataToken)
                     userId = dataToken.userId
                 } catch (error) {}
-
             }
         }
 

@@ -29,9 +29,7 @@ export class CommentService {
             pageSize: +pageSize,
             totalCount,
             items: comments.map((comment: any) => {
-                // const status = comment.likesInfo.likeUserInfo.find((likeUserInfo: {userId: string, likeStatus: LikeStatus}) => likeUserInfo.userId === userId)
-                console.log('status', comment.likesInfo.likeUserInfo)
-                // console.log(status)
+                const findStatus = comment.likesInfo.likeUserInfo.find((like: LikeUserInfoType) => like.userId === userId)
                 return {
                     id: comment._id.toString(),
                     content: comment.content,
@@ -43,7 +41,7 @@ export class CommentService {
                     likesInfo: {
                         likesCount: comment.likesInfo.likesCount,
                         dislikesCount: comment.likesInfo.dislikesCount,
-                        myStatus: 'None'
+                        myStatus: findStatus ? findStatus.likeStatus : 'None'
                     }
                 }
             })
@@ -169,8 +167,7 @@ export class CommentService {
         const dislikes = findComment?.likesInfo.likeUserInfo.filter(comment => comment.likeStatus === 'Dislike')
         if (!findComment) return {status: ResultStatus.NotFound, data: 'comment not found'}
         const findLikeUser = findComment.likesInfo.likeUserInfo.find((userInfo: LikeUserInfoType) => userInfo.userId === userId)
-        console.log(findLikeUser)
-        // const likeCount = ++findComment.likesInfo.likesCount
+
         let likeCount = likes?.length
         if (!likeCount) likeCount = 0
 
@@ -187,24 +184,22 @@ export class CommentService {
             if (data.likeStatus === 'Like') {
                 ++likeCount
                 --dislikeCount
-                await CommentRepository.deleteLike(commentId, userId, dislikeCount)
-                await CommentRepository.setLike(commentId, userId, data.likeStatus, likeCount)
+                await CommentRepository.deleteLike(commentId, userId, 'dislikesCount', dislikeCount)
+                await CommentRepository.setLike(commentId, userId, data.likeStatus, 'likesCount', likeCount)
             }
             if (data.likeStatus === 'Dislike') {
                 ++dislikeCount
                 --likeCount
-                await CommentRepository.deleteLike(commentId, userId, likeCount)
-                await CommentRepository.setLike(commentId, userId, data.likeStatus, dislikeCount)
+                await CommentRepository.deleteLike(commentId, userId, 'likesCount', likeCount)
+                await CommentRepository.setLike(commentId, userId, data.likeStatus, 'dislikesCount', dislikeCount)
             }
-        }
-
-        if (data.likeStatus === 'Like') {
+        } else if (data.likeStatus === 'Like') {
+            //Если пользовальтель лайк не ставил, то в зависимости от от статуса устанавливаем лайк или дизлайк
             ++likeCount
-            await CommentRepository.setLike(commentId, userId, data.likeStatus, likeCount)
-        }
-        if (data.likeStatus === 'Dislike') {
+            await CommentRepository.setLike(commentId, userId, data.likeStatus, 'likesCount', likeCount)
+        } else if (data.likeStatus === 'Dislike') {
             ++dislikeCount
-            await CommentRepository.setLike(commentId, userId, data.likeStatus, dislikeCount)
+            await CommentRepository.setLike(commentId, userId, data.likeStatus, 'dislikesCount', dislikeCount)
         }
 
 

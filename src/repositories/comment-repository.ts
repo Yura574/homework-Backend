@@ -34,20 +34,27 @@ export class CommentRepository {
         })
     }
 
-    static async setLike(commentId: string, userId: string, likeStatus: LikeStatus, likeCount: number) {
+    static async setLike(commentId: string, userId: string, likeStatus: LikeStatus, likesCount: 'likesCount' | 'dislikesCount', count: number) {
         return CommentModel.findByIdAndUpdate({_id: commentId}, {
             $set: {
-                // likesInfo: {likesCount: likeCount},
-                'likesInfo.likeCount': 2,
+                [`likesInfo.${likesCount}`]: count,
             },
             $push: {
                 'likesInfo.likeUserInfo': {userId, likeStatus}
             }
-        }, {new: true}
+        }
         );
     }
 
-    static async deleteLike(commentId: string, userId: string, likeCount: number) {
-
+    static async deleteLike(commentId: string, userId: string,likesCount: 'likesCount' | 'dislikesCount', count: number) {
+        return CommentModel.findByIdAndUpdate({_id: commentId}, {
+                $set: {
+                    [`likesInfo.${likesCount}`]: count,
+                },
+                $pull: {
+                    'likesInfo.likeUserInfo': {userId}
+                }
+            }
+        );
     }
 }
