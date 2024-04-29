@@ -13,7 +13,7 @@ export const likeStatusValidator = body('likeStatus').trim()
     .notEmpty().withMessage({field: 'likeStatus', message: `likeStatus can't be empty`})
     .isString().withMessage({field: 'likeStatus', message: `likeStatus should be string`})
     .custom(async (likeStatus) => {
-        if (likeStatus === LikeStatus.None || likeStatus === LikeStatus.Like || likeStatus === LikeStatus.Dislike) {
+        if (likeStatus === 'None' || likeStatus === 'Like' || likeStatus === 'Dislike') {
             return true
         }
         throw new Error()

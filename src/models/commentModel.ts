@@ -7,11 +7,7 @@ export type LikeInputModel = {
     likeStatus: LikeStatus
 }
 
-export enum LikeStatus {
-    None = 'None',
-    Like = 'Like',
-    Dislike = 'Dislike',
-}
+export type LikeStatus = 'None'|'Like' |'Dislike'
 
 
 export type CommentViewModel = {

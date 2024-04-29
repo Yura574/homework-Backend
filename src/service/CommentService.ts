@@ -163,13 +163,49 @@ export class CommentService {
 
     }
 
-    static async setLike(commentId: string, userId: string, likeStatus: LikeStatus): Promise<ObjectResult<string | null>> {
+    static async setLike(commentId: string, userId: string, data: LikeInputModel): Promise<ObjectResult<string | null>> {
         const findComment = await CommentRepository.getCommentById(commentId)
-
+        const likes = findComment?.likesInfo.likeUserInfo.filter(comment => comment.likeStatus === 'Like')
+        const dislikes = findComment?.likesInfo.likeUserInfo.filter(comment => comment.likeStatus === 'Dislike')
         if (!findComment) return {status: ResultStatus.NotFound, data: 'comment not found'}
-      const findLikeUser = findComment.likesInfo.likeUserInfo.find((userInfo: LikeUserInfoType) => userInfo.userId === userId)
+        const findLikeUser = findComment.likesInfo.likeUserInfo.find((userInfo: LikeUserInfoType) => userInfo.userId === userId)
+        console.log(findLikeUser)
+        // const likeCount = ++findComment.likesInfo.likesCount
+        let likeCount = likes?.length
+        if (!likeCount) likeCount = 0
 
-         // await CommentRepository.setLike(commentId, userId, likeStatus)
+        let dislikeCount = dislikes?.length
+        if (!dislikeCount) dislikeCount = 0
+
+        // Проверяем лайкал ли пользователь комментарий
+        if (findLikeUser) {
+            //Если отпраленный статус лайка совпадает со статусом лайка в бд, то ничего не меняем
+            if (findLikeUser.likeStatus === data.likeStatus) return {status: ResultStatus.Success, data: null}
+            //Может храниться только один статус лайка пользователя
+            //Соответвенно проверяем какой статус лайка отправил пользователь, пересчитываем общее количество лайков,
+            // удаляем предыдущий статус пользователя, и записываем новый статус
+            if (data.likeStatus === 'Like') {
+                ++likeCount
+                --dislikeCount
+                await CommentRepository.deleteLike(commentId, userId, dislikeCount)
+                await CommentRepository.setLike(commentId, userId, data.likeStatus, likeCount)
+            }
+            if (data.likeStatus === 'Dislike') {
+                ++dislikeCount
+                --likeCount
+                await CommentRepository.deleteLike(commentId, userId, likeCount)
+                await CommentRepository.setLike(commentId, userId, data.likeStatus, dislikeCount)
+            }
+        }
+
+        if (data.likeStatus === 'Like') {
+            ++likeCount
+            await CommentRepository.setLike(commentId, userId, data.likeStatus, likeCount)
+        }
+        if (data.likeStatus === 'Dislike') {
+            ++dislikeCount
+            await CommentRepository.setLike(commentId, userId, data.likeStatus, dislikeCount)
+        }
 
 
         return {status: ResultStatus.Success, data: null}

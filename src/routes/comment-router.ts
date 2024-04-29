@@ -38,12 +38,12 @@ commentsRouter.put('/:id', authMiddleware, commentValidators(), async (req: Requ
     return handleErrorObjectResult(result, res)
 })
 
-commentsRouter.put('/:id/like-status', authMiddleware, likeStatusValidator, async (req: RequestType<ParamsType, LikeStatus, {}>, res: Response) => {
+commentsRouter.put('/:id/like-status', authMiddleware, likeStatusValidator, async (req: RequestType<ParamsType, LikeInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     if(isError) return
     const userId = req.user?.userId.toString()
     if (!userId) return res.sendStatus(HTTP_STATUSES.FORBIDDEN_403)
-    const result = await CommentService.setLike(req.params.id, userId,req.body)
+    const result = await CommentService.setLike(req.params.id, userId, req.body)
     if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 })

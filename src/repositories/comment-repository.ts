@@ -34,10 +34,11 @@ export class CommentRepository {
         })
     }
 
-    static async setLike(commentId: string, userId: string, likeStatus: LikeStatus) {
+    static async setLike(commentId: string, userId: string, likeStatus: LikeStatus, likeCount: number) {
         return CommentModel.findByIdAndUpdate({_id: commentId}, {
             $set: {
-                // likesInfo: {likesCount: 2},
+                // likesInfo: {likesCount: likeCount},
+                'likesInfo.likeCount': 2,
             },
             $push: {
                 'likesInfo.likeUserInfo': {userId, likeStatus}
@@ -46,7 +47,7 @@ export class CommentRepository {
         );
     }
 
-    static async deleteLike(commentId: string, userId: string) {
+    static async deleteLike(commentId: string, userId: string, likeCount: number) {
 
     }
 }
