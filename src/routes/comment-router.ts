@@ -1,6 +1,6 @@
 import express, {Response} from "express";
 import { ParamsType, RequestType, ResponseType} from "./blog-router";
-import {CommentInputModel, CommentViewModel, LikeInputModel, LikeStatus} from "../models/commentModel";
+import {CommentInputModel, CommentViewModel, LikeInputModel} from "../models/commentModel";
 import {CommentService} from "../service/CommentService";
 import {ResultStatus} from "../utils/objectResult";
 import {HTTP_STATUSES} from "../utils/httpStatuses";
@@ -8,14 +8,26 @@ import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {authMiddleware} from "../middleware/auth/auth-middleware";
 import {commentValidators, likeStatusValidator} from "../validators/commentValidators";
 import {ValidateErrorRequest} from "../utils/validateErrorRequest";
+import jwt from "jsonwebtoken";
 
 
 export const commentsRouter = express.Router()
 
 
 commentsRouter.get('/:id', async (req: RequestType<ParamsType, {}, {}>, res: ResponseType<CommentViewModel | null>) => {
-    console.log(req.params.id)
-    const result = await CommentService.getCommentById(req.params.id)
+    const auth = req.headers['authorization']
+    let userId: string = ''
+    if (auth) {
+        const [type, token] = auth.split(' ')
+        if (type === 'Bearer') {
+            try{
+                const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
+                userId = dataToken.userId
+            } catch (error) {}
+        }
+    }
+
+    const result = await CommentService.getCommentById(req.params.id, userId)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })

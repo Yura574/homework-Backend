@@ -50,11 +50,13 @@ export class CommentService {
         return {status: ResultStatus.Success, data: returnComments}
     }
 
-    static async getCommentById(id: string): Promise<ObjectResult<CommentViewModel | null>> {
-        const findComment = await CommentRepository.getCommentById(id)
+    static async getCommentById(commentId: string, userId: string): Promise<ObjectResult<CommentViewModel | null>> {
+        const findComment = await CommentRepository.getCommentById(commentId)
         if (!findComment) {
             return {status: ResultStatus.NotFound, errorsMessages: 'Comment not found', data: null}
         }
+        const findStatus = findComment.likesInfo.likeUserInfo.find((like: LikeUserInfoType) => like.userId === userId)
+
         const comment: CommentViewModel = {
             id: findComment._id.toString(),
             // postId: findComment.postId,
@@ -67,7 +69,7 @@ export class CommentService {
             likesInfo: {
                 likesCount: findComment.likesInfo.likesCount,
                 dislikesCount: findComment.likesInfo.dislikesCount,
-                myStatus: 'Like'
+                myStatus: findStatus ? findStatus.likeStatus : 'None'
             }
         }
         return {status: ResultStatus.Success, data: comment}
