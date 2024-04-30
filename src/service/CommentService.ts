@@ -5,7 +5,6 @@ import {
     CommentInputModel,
     CommentViewModel,
     LikeInputModel,
-    LikeStatus,
     LikeUserInfoType
 } from "../models/commentModel";
 import {QueryType} from "../routes/post-router";
@@ -159,9 +158,6 @@ export class CommentService {
 
     }
 
-    static async updateLikeStatus(commentId: string, userId: string, likeStatus: LikeStatus) {
-
-    }
 
     static async setLike(commentId: string, userId: string, data: LikeInputModel): Promise<ObjectResult<string | null>> {
         const findComment = await CommentRepository.getCommentById(commentId)
@@ -192,6 +188,17 @@ export class CommentService {
             if (data.likeStatus === 'Dislike') {
                 ++dislikeCount
                 --likeCount
+                await CommentRepository.deleteLike(commentId, userId, 'likesCount', likeCount)
+                await CommentRepository.setLike(commentId, userId, data.likeStatus, 'dislikesCount', dislikeCount)
+            }
+            if (data.likeStatus === 'None') {
+               if(findLikeUser.likeStatus === 'Like'){
+                   --likeCount
+                   await CommentRepository.deleteLike(commentId, userId, 'likesCount', likeCount)
+               } else {
+                   --dislikeCount
+                   await CommentRepository.deleteLike(commentId, userId, 'dislikesCount', dislikeCount)
+               }
                 await CommentRepository.deleteLike(commentId, userId, 'likesCount', likeCount)
                 await CommentRepository.setLike(commentId, userId, data.likeStatus, 'dislikesCount', dislikeCount)
             }
