@@ -10,11 +10,13 @@ import {PostInputModel, PostViewModel} from "../models/postModels";
 import {ParamsType, RequestType, ResponseType} from "./blog-router";
 import {CommentInputModel, CommentViewModel} from "../models/commentModel";
 import {CommentService} from "../service/CommentService";
-import {ResultStatus} from "../utils/objectResult";
+import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
 import {commentValidators} from "../validators/commentValidators";
 import jwt from "jsonwebtoken";
-import {ObjectId} from "mongodb";
+import {ParamsPostType} from "./types/postTypes";
+import {LikeInputModel} from "./types/commonTypes";
+import {getUserId} from "../middleware/auth/getUserId-middleware";
 
 
 export const postRouter = express.Router()
@@ -31,20 +33,21 @@ export type QueryType = {
 export type ResponsePostType<R> = Response<R>
 
 
-postRouter.get('/', async (req: RequestPostType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModel<PostViewModel[]>>) => {
-
-    const result = await PostService.getPosts(req.query)
+postRouter.get('/', getUserId,async (req: RequestType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModel<PostViewModel[]>>) => {
+const userId = req.user? req.user.userId : ''
+    const result = await PostService.getPosts(req.query, userId)
     return res.status(200).send(result.data)
 })
 
-postRouter.get('/:id', async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
+postRouter.get('/:id', getUserId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
 
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
-    const id = req.params.id
-    const result = await PostService.getPostById(id)
+    const userId = req.user? req.user.userId : ''
+    const postId = req.params.id
+    const result = await PostService.getPostById(postId, userId)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
     return handleErrorObjectResult(result, res)
 })
@@ -77,14 +80,26 @@ postRouter.delete('/:id', authMiddleware, async (req: Request, res: Response) =>
     return;
 })
 
-postRouter.put('/:id', authMiddleware, blogIdValidator, postValidation(), async (req: Request, res: Response) => {
+postRouter.put('/:id', authMiddleware, blogIdValidator, postValidation(), async (req: RequestType<ParamsType, PostInputModel, {}>, res: Response) => {
     const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку
     if (isError) return
+    const userId = req.user? req.user.userId : ''
 
-    const result = await PostService.updatePost(req.params.id, req.body)
+    const result = await PostService.updatePost(req.params.id,userId, req.body)
     if (result.status === ResultStatus.NoContent) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
+
+})
+
+postRouter.put('/:postId/like-status', getUserId, async (req: RequestType<ParamsPostType, LikeInputModel, {}>, res: Response) => {
+    const userId = req.user?.userId ? req.user.userId : ''
+
+    const result: ObjectResult = await PostService.setLikePost(req.params.postId, userId, req.body.likeStatus)
+    if(result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    return handleErrorObjectResult(result, res)
+
+
 
 })
 
@@ -97,10 +112,11 @@ postRouter.get('/:id/comments', async (req: RequestType<ParamsType, {}, QueryTyp
         if (auth) {
             const [type, token] = auth.split(' ')
             if (type === 'Bearer') {
-                try{
+                try {
                     const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
                     userId = dataToken.userId
-                } catch (error) {}
+                } catch (error) {
+                }
             }
         }
 

@@ -51,7 +51,7 @@ export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next
         try {
             const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
             req.user = {
-                userId: new ObjectId(dataToken.userId),
+                userId: dataToken.userId,
             }
             return next()
 

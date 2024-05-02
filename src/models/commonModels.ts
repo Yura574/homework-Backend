@@ -1,3 +1,6 @@
+import {LikeStatus} from "./commentModel";
+import {Schema} from "mongoose";
+
 export type ReturnViewModel<Items> = {
     pagesCount: number,
     totalCount: number,
@@ -16,3 +19,24 @@ export type FieldErrorType = {
 export type ErrorResultModel = {
     errorsMessages: FieldErrorType[]
 }
+
+export type StatusCommentType = 'None' | 'Like' | 'Dislike'
+
+export type LikeUserInfoType = { userId: string, likeStatus: LikeStatus, createdAt: string }
+
+export type LikeInfoType = {
+likesCount: number,
+dislikesCount: number,
+likeUserInfo: LikeUserInfoType[]
+}
+export const LikeUserInfoSchema = new Schema<LikeUserInfoType>({
+    userId: String,
+    likeStatus: String,
+    createdAt: String
+})
+
+export const LikeInfoSchema = new Schema<LikeInfoType>({
+    likesCount: Number,
+    dislikesCount: Number,
+    likeUserInfo: LikeUserInfoSchema
+})

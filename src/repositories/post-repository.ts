@@ -1,6 +1,12 @@
 import {ObjectId} from 'mongodb';
-import {NewPostModel, PostInputModel, PostViewModel} from "../models/postModels";
-import {PostModel} from "../db/db";
+import {
+    NewPostModel,
+    PostDBType,
+    PostInputModel,
+    PostViewModel
+} from "../models/postModels";
+import {CommentModel, PostModel} from "../db/db";
+import {LikeStatus} from "../models/commentModel";
 
 
 export class PostRepository {
@@ -13,17 +19,23 @@ export class PostRepository {
         return {posts, totalCount}
     }
 
-    static async getPostById(id: string): Promise<PostViewModel | null> {
-        const post = await PostModel.findById({_id: id})
+    static async getPostById(postId: string, userId: string): Promise<PostDBType | null> {
+        const post = await PostModel.findById({_id: postId})
         if (!post) return null
+
         return {
-            id: post._id.toString(),
+            _id: post._id,
             title: post.title,
             shortDescription: post.shortDescription,
             content: post.content,
             createdAt: post.createdAt,
             blogId: post.blogId,
-            blogName: post.blogName
+            blogName: post.blogName,
+            extendedLikesInfo: {
+                likesCount: post.extendedLikesInfo.likesCount,
+                dislikesCount: post.extendedLikesInfo.dislikesCount,
+                likeUserInfo:post.extendedLikesInfo.likeUserInfo,
+            }
         }
     }
 
@@ -59,6 +71,12 @@ export class PostRepository {
             blogId: post?.blogId,
             blogName: post?.blogName,
             createdAt: post?.createdAt,
+            extendedLikesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: 'None',
+                newestLikes: [],
+            }
         }
         return returnPost
 
@@ -73,7 +91,6 @@ export class PostRepository {
         }
     }
 
-
     static async updatePost(id: string, data: PostInputModel) {
         const {title, shortDescription, content} = data
         const updatedPost = {
@@ -86,4 +103,29 @@ export class PostRepository {
         }
         return PostModel.updateOne({_id: new ObjectId(id)}, updatedPost)
     }
+
+    static async setLikeForPost(postId: string, userId: string, likeStatus: LikeStatus, likesCount: 'likesCount' | 'dislikesCount', count: number) {
+        return PostModel.findByIdAndUpdate({_id: postId}, {
+            $set: {
+                [`likesInfo.${likesCount}`]: count,
+            },
+            $push: {
+                'likesInfo.likeUserInfo': {userId, likeStatus}
+            }
+        })
+    }
+
+    static async deleteLikeForPost(postId: string, userId: string, likesCount: 'likesCount' | 'dislikesCount', count: number) {
+        return PostModel.findByIdAndUpdate({_id: postId}, {
+                $set: {
+                    [`likesInfo.${likesCount}`]: count,
+                },
+                $pull: {
+                    'likesInfo.likeUserInfo': {userId}
+                }
+            }
+        );
+    }
+
+
 }

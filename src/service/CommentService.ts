@@ -3,7 +3,7 @@ import {CommentRepository} from "../repositories/comment-repository";
 import {
     CommentDBModel,
     CommentInputModel,
-    CommentViewModel,
+    CommentViewModel, FullCommentModal,
     LikeInputModel,
     LikeUserInfoType
 } from "../models/commentModel";
@@ -27,7 +27,7 @@ export class CommentService {
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount,
-            items: comments.map((comment: any) => {
+            items: comments.map((comment: FullCommentModal) => {
                 const findStatus = comment.likesInfo.likeUserInfo.find((like: LikeUserInfoType) => like.userId === userId)
                 return {
                     id: comment._id.toString(),
@@ -75,7 +75,7 @@ export class CommentService {
     }
 
     static async createComment(data: CommentInputModel, postId: string, userId: string): Promise<ObjectResult<CommentViewModel | null>> {
-        const post = await PostRepository.getPostById(postId)
+        const post = await PostRepository.getPostById(postId, userId)
         if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
 
         const user = await UserRepository.getUserById(userId)
@@ -161,9 +161,10 @@ export class CommentService {
 
     static async setLike(commentId: string, userId: string, data: LikeInputModel): Promise<ObjectResult<string | null>> {
         const findComment = await CommentRepository.getCommentById(commentId)
-        const likes = findComment?.likesInfo.likeUserInfo.filter(comment => comment.likeStatus === 'Like')
-        const dislikes = findComment?.likesInfo.likeUserInfo.filter(comment => comment.likeStatus === 'Dislike')
         if (!findComment) return {status: ResultStatus.NotFound, data: 'comment not found'}
+        const likes = findComment.likesInfo.likeUserInfo.filter(comment => comment.likeStatus === 'Like')
+        const dislikes = findComment.likesInfo.likeUserInfo.filter(comment => comment.likeStatus === 'Dislike')
+
         const findLikeUser = findComment.likesInfo.likeUserInfo.find((userInfo: LikeUserInfoType) => userInfo.userId === userId)
 
         let likeCount = likes?.length

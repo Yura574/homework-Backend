@@ -67,7 +67,7 @@ export class BlogService {
             pageSize: +pageSize,
             pagesCount,
             totalCount,
-            items: posts.map(post => {
+            items: posts.map((post: any) => {
                 return {
                     id: post._id.toString(),
                     blogName: post.blogName,
@@ -75,7 +75,13 @@ export class BlogService {
                     title: post.title,
                     shortDescription: post.shortDescription,
                     createdAt: post.createdAt,
-                    blogId: post.blogId
+                    blogId: post.blogId,
+                    extendedLikesInfo: {
+                        likesCount: 0,
+                        dislikesCount: 0,
+                        myStatus: 'None',
+                        newestLikes: [],
+                    }
 
                 }
             })
