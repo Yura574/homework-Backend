@@ -49,7 +49,7 @@ export class PostService {
         const post = await PostRepository.getPostById(postId, userId)
         if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         const likeInfo = getLikesInfoForPost(post, userId)
-        const returnPost : PostViewModel = {
+        const returnPost: PostViewModel = {
             id: post._id.toString(),
             title: post.title,
             content: post.content,
@@ -89,7 +89,6 @@ export class PostService {
         } catch (err) {
             return {status: ResultStatus.SomethingWasWrong, errorsMessages: 'Something was wrong', data: null}
         }
-
 
     }
 
@@ -146,7 +145,7 @@ export class PostService {
         const myStatus = findPost.extendedLikesInfo.likeUserInfo.find(like => like.userId === userId)
         if (myStatus?.likeStatus === likeStatus) return {status: ResultStatus.Success, data: null}
 
-        if(myStatus){
+        if (myStatus) {
             if (likeStatus === 'Like') {
                 ++likeCount
                 --dislikeCount
@@ -162,7 +161,7 @@ export class PostService {
                 return {status: ResultStatus.Success, data: null}
             }
             if (likeStatus === 'None') {
-                if(myStatus.likeStatus === 'Like'){
+                if (myStatus.likeStatus === 'Like') {
                     --likeCount
                     await CommentRepository.deleteLike(postId, userId, 'likesCount', likeCount)
                 } else {
@@ -181,7 +180,6 @@ export class PostService {
             ++dislikeCount
             await CommentRepository.setLike(postId, userId, likeStatus, 'dislikesCount', dislikeCount)
         }
-
 
 
         return {status: ResultStatus.Success, data: null}
