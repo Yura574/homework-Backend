@@ -49,6 +49,7 @@ export type NewPostModel = {
     shortDescription: string,
     blogName: string,
     createdAt: string,
+    extendedLikesInfo: ExtendedLikesInfoType
 }
 export type PostDBType = WithId<{
     title: string,
@@ -70,7 +71,7 @@ export const LikeUserInfoSchema = new Schema<LikeUserInfoType>({
 export const ExtendedLikesInfoSchema = new Schema<ExtendedLikesInfoType>({
     likesCount: Number,
     dislikesCount: Number,
-    likeUserInfo: LikeUserInfoSchema,
+    likeUserInfo: {type: [LikeUserInfoSchema]},
 })
 
 

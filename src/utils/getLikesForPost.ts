@@ -3,10 +3,13 @@ import {LikeUserInfoType, NewestLikesType, PostDBType} from "../models/postModel
 
 
 export const getLikesInfoForPost = (post: PostDBType, userId: string) => {
+    console.log('post',post)
     let userStatus: LikeStatus
     const likePosts: LikeUserInfoType[] = post.extendedLikesInfo.likeUserInfo
+    console.log('like', likePosts)
     let sortedLikePosts: LikeUserInfoType[] = likePosts.sort((a: LikeUserInfoType, b: LikeUserInfoType) => a.createdAt > b.createdAt ? 1 : -1)
     const likesCount = likePosts.filter((like: LikeUserInfoType) => like.likeStatus === 'Like')
+    console.log('count', likesCount)
     const dislikesCount = likePosts.filter((like: LikeUserInfoType) => like.likeStatus === 'Dislike')
     let newestLikes: NewestLikesType[] = []
     for (let i = 0; newestLikes.length < 3 && i < sortedLikePosts.length; i++) {

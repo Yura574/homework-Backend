@@ -60,7 +60,9 @@ export class PostRepository {
     }
 
     static async createPost(newPost: NewPostModel) {
+        console.log(657 )
         const createdPost = await PostModel.create(newPost)
+        console.log(createdPost)
         const post = await PostModel.findOne({_id: createdPost._id})
         if (!post) return null
         const returnPost: PostViewModel = {

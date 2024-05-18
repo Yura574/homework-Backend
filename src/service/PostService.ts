@@ -15,9 +15,10 @@ export class PostService {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
 
         const {posts, totalCount} = await PostRepository.getPosts(+pageSize, +pageNumber, sortBy, sortDirection)
-
+        console.log(posts)
         const editedPost: PostViewModel[] = posts.map(post => {
             const likeInfo = getLikesInfoForPost(post, userId)
+            console.log(likeInfo)
             return {
                 id: post._id.toString(),
                 title: post.title,
@@ -68,7 +69,7 @@ export class PostService {
     }
 
     static async createPost(data: PostInputModel): Promise<ObjectResult<PostViewModel | null>> {
-
+        console.log(123)
         const {blogId, content, shortDescription, title} = data
         const blog = await BlogRepository.getBlogById(data.blogId)
         //если блог не найден, пост нельзя создать
@@ -82,6 +83,11 @@ export class PostService {
             shortDescription,
             blogName: blog.name,
             createdAt: new Date().toISOString(),
+            extendedLikesInfo: {
+                likeUserInfo: [],
+                likesCount: 0,
+                dislikesCount: 0,
+            }
         }
         try {
             const createdPost = await PostRepository.createPost(newPost)
