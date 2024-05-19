@@ -20,10 +20,8 @@ export class PostService {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
 
         const {posts, totalCount} = await PostRepository.getPosts(+pageSize, +pageNumber, sortBy, sortDirection)
-        console.log(posts)
         const editedPost: PostViewModel[] = posts.map(post => {
             const likeInfo = getLikesInfoForPost(post, userId)
-            console.log(likeInfo)
             return {
                 id: post._id.toString(),
                 title: post.title,
@@ -53,7 +51,6 @@ export class PostService {
 
     static async getPostById(postId: string, userId: string): Promise<ObjectResult<PostViewModel | null>> {
         const post = await PostRepository.getPostById(postId, userId)
-        console.log(post)
         if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         const likeInfo = getLikesInfoForPost(post, userId)
         const returnPost: PostViewModel = {
@@ -142,7 +139,7 @@ export class PostService {
         }
     }
 
-    static async setLikePost(postId: string, userId: string,login: string, likeStatus: LikeStatus): Promise<ObjectResult> {
+    static async setLikePost(postId: string, userId: string, login: string, likeStatus: LikeStatus): Promise<ObjectResult> {
 
         const findPost = await PostRepository.getPostById(postId, userId)
         if (!findPost) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
@@ -155,19 +152,17 @@ export class PostService {
         if (!dislikeCount) dislikeCount = 0
         const myStatus = findPost.extendedLikesInfo.likeUserInfo.find(like => like.userId === userId)
         if (myStatus?.likeStatus === likeStatus) {
-            console.log('llo')
-            return  {status: ResultStatus.Success, data: null}
+            return {status: ResultStatus.Success, data: null}
 
         }
 
-        console.log(myStatus?.likeStatus)
-const createdAt = new Date().toISOString()
+        const createdAt = new Date().toISOString()
         if (myStatus) {
             if (likeStatus === 'Like') {
                 ++likeCount
                 --dislikeCount
                 await PostRepository.deleteLikeForPost(postId, userId, 'dislikesCount', dislikeCount)
-                await PostRepository.setLikeForPost(postId, userId, likeStatus, 'likesCount', likeCount, login, createdAt )
+                await PostRepository.setLikeForPost(postId, userId, likeStatus, 'likesCount', likeCount, login, createdAt)
                 return {status: ResultStatus.Success, data: null}
             }
             if (likeStatus === 'Dislike') {
@@ -197,7 +192,6 @@ const createdAt = new Date().toISOString()
             ++dislikeCount
             await PostRepository.setLikeForPost(postId, userId, likeStatus, 'dislikesCount', dislikeCount, login, createdAt)
         }
-
 
         return {status: ResultStatus.Success, data: null}
     }

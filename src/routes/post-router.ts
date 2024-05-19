@@ -34,19 +34,19 @@ export type QueryType = {
 export type ResponsePostType<R> = Response<R>
 
 
-postRouter.get('/', getUserId,async (req: RequestType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModel<PostViewModel[]>>) => {
-const userId = req.user? req.user.userId : ''
+postRouter.get('/', getUserId, async (req: RequestType<{}, {}, QueryType>, res: ResponsePostType<ReturnViewModel<PostViewModel[]>>) => {
+    const userId = req.user ? req.user.userId : ''
     const result = await PostService.getPosts(req.query, userId)
     return res.status(200).send(result.data)
 })
 
 postRouter.get('/:id', getUserId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
-
+    console.log(req.user)
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
     }
-    const userId = req.user? req.user.userId : ''
+    const userId = req.user ? req.user.userId : ''
     const postId = req.params.id
     const result = await PostService.getPostById(postId, userId)
     if (result.status === ResultStatus.Success) return res.status(HTTP_STATUSES.OK_200).send(result.data)
@@ -85,9 +85,9 @@ postRouter.put('/:id', authMiddleware, blogIdValidator, postValidation(), async 
     const isError = ValidateErrorRequest(req, res)
     //если есть ошибка, validateError возвращает клиенту ошибку
     if (isError) return
-    const userId = req.user? req.user.userId : ''
+    const userId = req.user ? req.user.userId : ''
 
-    const result = await PostService.updatePost(req.params.id,userId, req.body)
+    const result = await PostService.updatePost(req.params.id, userId, req.body)
     if (result.status === ResultStatus.NoContent) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 
@@ -95,13 +95,12 @@ postRouter.put('/:id', authMiddleware, blogIdValidator, postValidation(), async 
 
 postRouter.put('/:postId/like-status', authMiddleware, likeStatusValidator(), async (req: RequestType<ParamsPostType, LikeInputModel, {}>, res: Response) => {
     const userId = req.user?.userId ? req.user.userId : ''
-    const login = req.user?.login? req.user.login : ''
-const isError = ValidateErrorRequest(req, res)
-    if(isError) return
+    const login = req.user?.login ? req.user.login : ''
+    const isError = ValidateErrorRequest(req, res)
+    if (isError) return
     const result: ObjectResult = await PostService.setLikePost(req.params.postId, userId, login, req.body.likeStatus)
-    if(result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+    if (result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
-
 
 
 })

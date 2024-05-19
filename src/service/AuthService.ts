@@ -28,11 +28,16 @@ export class AuthService {
         if (!findUser.emailConfirmation.isConfirm) {
             return {status: ResultStatus.Forbidden, errorsMessages: 'Confirmed our email', data: null}
         }
+        console.log(findUser)
         const isCompare = await bcrypt.compare(password, findUser.password)
         if (isCompare) {
-            const accessPayload = {userId: findUser._id.toString()}
+            const accessPayload = {
+                userId: findUser._id.toString(),
+                login: findUser.login,
+            }
             const refreshPayload = {
                 userId: findUser._id.toString(),
+                login: findUser.login,
                 deviceId: v4()
             }
 
@@ -128,7 +133,7 @@ export class AuthService {
         console.log(user)
         console.log('cod', confirmCode)
         console.log('user', user?.emailConfirmation.confirmationCode)
-        console.log('iSTrue', confirmCode ===user?.emailConfirmation.confirmationCode)
+        console.log('iSTrue', confirmCode === user?.emailConfirmation.confirmationCode)
         console.log('iSTrue', user?.emailConfirmation!.expirationDate! > new Date())
         if (!user) return {
             status: ResultStatus.BadRequest,
@@ -168,7 +173,7 @@ export class AuthService {
             errorsMessages: validateError([{field: 'email', message: 'User with this email not found'}]),
             data: null
         }
-        if (user.emailConfirmation.isConfirm ) {
+        if (user.emailConfirmation.isConfirm) {
             return {
                 status: ResultStatus.BadRequest,
                 errorsMessages: validateError([{field: 'email', message: 'Email already confirmed'}]),
@@ -194,12 +199,6 @@ export class AuthService {
             if (!findUser) {
                 return {status: ResultStatus.Unauthorized, errorsMessages: 'User not found', data: null}
             }
-            // const blacklistToken = await BlacklistRepository.findToken(refreshToken)
-            // if (blacklistToken) return {status: ResultStatus.Unauthorized, errorsMessages: 'Unauthorized', data: null}
-            // await BlacklistRepository.addToken(refreshToken)
-            // setTimeout(async () => {
-            //     await BlacklistRepository.deleteToken(refreshToken)
-            // }, 20000)
             const accessPayload = {userId: findUser._id.toString(),}
             const refreshPayload = {userId: findUser._id.toString(), deviceId: dataToken.deviceId}
             const tokens = {
@@ -266,19 +265,23 @@ export class AuthService {
         const recoveryUser = await RecoveryPasswordRepository.getUserRecoveryPassword(recoveryCode)
         console.log()
         if (!recoveryUser || recoveryUser.expirationDate < new Date()) {
-            return {status: ResultStatus.BadRequest, errorsMessages: validateError([{field: 'recoveryCode', message: 'recovery code incorrect'}]), data: null}
+            return {
+                status: ResultStatus.BadRequest,
+                errorsMessages: validateError([{field: 'recoveryCode', message: 'recovery code incorrect'}]),
+                data: null
+            }
         }
 
         const hashPassword = await bcrypt.hash(newPassword, 10)
         const updateData: UserUpdateModel = {
             password: hashPassword,
         }
-        try{
+        try {
             await UserService.updateUser(recoveryUser.email, updateData)
             await RecoveryPasswordRepository.deleteUserRecoveryPassword(recoveryCode)
-            return {status: ResultStatus.Success,  data: null}
-        } catch (err){
-            return  {status: ResultStatus.SomethingWasWrong, data: null}
+            return {status: ResultStatus.Success, data: null}
+        } catch (err) {
+            return {status: ResultStatus.SomethingWasWrong, data: null}
         }
 
     }

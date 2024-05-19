@@ -14,12 +14,11 @@ export const getUserId = async (req: RequestType<any, any, any>, res: Response, 
     if (type === 'Bearer') {
         try {
             const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
-            const userData = await UserRepository.getUserById(dataToken.userId)
-            if (!userData) return res.sendStatus(401)
+
 
             req.user = {
                 userId: dataToken.userId,
-                login: userData.login
+                login: dataToken.login
             }
             return next()
 
