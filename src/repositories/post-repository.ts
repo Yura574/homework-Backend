@@ -106,13 +106,13 @@ export class PostRepository {
         return PostModel.updateOne({_id: new ObjectId(id)}, updatedPost)
     }
 
-    static async setLikeForPost(postId: string, userId: string, likeStatus: LikeStatus, likesCount: 'likesCount' | 'dislikesCount', count: number) {
-        return PostModel.findByIdAndUpdate({_id: postId}, {
+    static async setLikeForPost(postId: string, userId: string, likeStatus: LikeStatus, likesCount: 'likesCount' | 'dislikesCount', count: number, login: string, createdAt: string) {
+        return PostModel.findByIdAndUpdate( {_id: postId}, {
             $set: {
-                [`likesInfo.${likesCount}`]: count,
+                [`extendedLikesInfo.${likesCount}`]: count,
             },
             $push: {
-                'likesInfo.likeUserInfo': {userId, likeStatus}
+                ['extendedLikesInfo.likeUserInfo']: {userId, likeStatus, login, createdAt}
             }
         })
     }
@@ -120,10 +120,10 @@ export class PostRepository {
     static async deleteLikeForPost(postId: string, userId: string, likesCount: 'likesCount' | 'dislikesCount', count: number) {
         return PostModel.findByIdAndUpdate({_id: postId}, {
                 $set: {
-                    [`likesInfo.${likesCount}`]: count,
+                    [`extendedLikesInfo.${likesCount}`]: count,
                 },
                 $pull: {
-                    'likesInfo.likeUserInfo': {userId}
+                    'extendedLikesInfo.likeUserInfo': {userId}
                 }
             }
         );

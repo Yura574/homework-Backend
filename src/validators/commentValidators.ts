@@ -9,7 +9,7 @@ const contentValidator = body('content').trim()
         field: 'content',
         message: `min length content 20 symbols, max length content 300 symbols`
     })
-export const likeStatusValidator = body('likeStatus').trim()
+export const likeStatus = body('likeStatus').trim()
     .notEmpty().withMessage({field: 'likeStatus', message: `likeStatus can't be empty`})
     .isString().withMessage({field: 'likeStatus', message: `likeStatus should be string`})
     .custom(async (likeStatus) => {
@@ -23,3 +23,4 @@ export const likeStatusValidator = body('likeStatus').trim()
 
 
 export const commentValidators = () => [contentValidator]
+export const likeStatusValidator = () => [likeStatus]

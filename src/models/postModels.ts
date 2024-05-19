@@ -63,7 +63,7 @@ export type PostDBType = WithId<{
 
 export const LikeUserInfoSchema = new Schema<LikeUserInfoType>({
     userId: String,
-    likeStatus: Number,
+    likeStatus: String,
     login: String,
     createdAt: String,
 })

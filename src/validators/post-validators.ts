@@ -2,13 +2,6 @@ import {body, param} from 'express-validator';
 import {BlogModel, PostModel} from "../db/db";
 
 
-export const findPost = param('id').custom(async (id) => {
-    const findPost = await PostModel.findOne({id})
-    if (!findPost) {
-        throw new Error()
-    }
-    return true
-}).withMessage({field: 'id', message: 'post not found'})
 
 const titleValidator = body('title').trim()
     .notEmpty().withMessage({field: 'title', message: 'title is required'})
@@ -29,15 +22,8 @@ export const blogIdValidator = body('blogId').trim()
     .notEmpty().withMessage({field: 'blogId', message: 'blogId is required'})
     .isString().withMessage({field: 'blogId', message: 'blogId should be string'})
     .isLength({min: 24, max: 24}).withMessage({field: 'blogId', message: 'blogId should be 24 character'})
-    // .custom(async (value) => {
-    //
-    //     const blog = await BlogModel.findOne({value})
-    //     if (!blog) {
-    //         throw new Error('Blog not found')
-    //     }
-    //     return true
-    // })
     .withMessage({field: 'blogId', message: 'blog not found'})
+
 
 
 export const postValidation = () => [titleValidator,shortDescriptionValidator, contentValidator]

@@ -12,11 +12,12 @@ import {CommentInputModel, CommentViewModel} from "../models/commentModel";
 import {CommentService} from "../service/CommentService";
 import {ObjectResult, ResultStatus} from "../utils/objectResult";
 import {handleErrorObjectResult} from "../utils/handleErrorObjectResult";
-import {commentValidators} from "../validators/commentValidators";
+import {commentValidators, likeStatusValidator} from "../validators/commentValidators";
 import jwt from "jsonwebtoken";
 import {ParamsPostType} from "./types/postTypes";
 import {LikeInputModel} from "./types/commonTypes";
 import {getUserId} from "../middleware/auth/getUserId-middleware";
+import {validateError} from "../utils/validateError";
 
 
 export const postRouter = express.Router()
@@ -92,10 +93,12 @@ postRouter.put('/:id', authMiddleware, blogIdValidator, postValidation(), async 
 
 })
 
-postRouter.put('/:postId/like-status', getUserId, async (req: RequestType<ParamsPostType, LikeInputModel, {}>, res: Response) => {
+postRouter.put('/:postId/like-status', authMiddleware, likeStatusValidator(), async (req: RequestType<ParamsPostType, LikeInputModel, {}>, res: Response) => {
     const userId = req.user?.userId ? req.user.userId : ''
-
-    const result: ObjectResult = await PostService.setLikePost(req.params.postId, userId, req.body.likeStatus)
+    const login = req.user?.login? req.user.login : ''
+const isError = ValidateErrorRequest(req, res)
+    if(isError) return
+    const result: ObjectResult = await PostService.setLikePost(req.params.postId, userId, login, req.body.likeStatus)
     if(result.status === ResultStatus.Success) return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     return handleErrorObjectResult(result, res)
 

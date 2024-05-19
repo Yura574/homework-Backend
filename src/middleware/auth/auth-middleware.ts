@@ -30,16 +30,16 @@
 //
 //
 // }
-import {NextFunction,  Response} from 'express';
+import {NextFunction, Response} from 'express';
 import jwt from "jsonwebtoken";
 import {ObjectId} from "mongodb";
 import {RequestType} from "../../routes/blog-router";
-
+import {UserRepository} from "../../repositories/user-repository";
 
 
 const login1 = 'admin'
 const password1 = 'qwerty'
-export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: RequestType<{}, {}, {}>, res: Response, next: NextFunction) => {
     const auth = req.headers['authorization']
 
 
@@ -50,8 +50,12 @@ export const authMiddleware = (req: RequestType<{}, {}, {}>, res: Response, next
     if (type === 'Bearer') {
         try {
             const dataToken: any = jwt.verify(token, process.env.ACCESS_SECRET as string)
+            const userData = await UserRepository.getUserById(dataToken.userId)
+            if (!userData) return res.sendStatus(401)
+
             req.user = {
                 userId: dataToken.userId,
+                login: userData.login
             }
             return next()
 

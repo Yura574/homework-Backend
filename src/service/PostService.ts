@@ -8,9 +8,14 @@ import {CommentService} from "./CommentService";
 import {BlogRepository} from "../repositories/blog-repository";
 import {getLikesInfoForPost} from "../utils/getLikesForPost";
 import {CommentRepository} from "../repositories/comment-repository";
+import {UserRepository} from "../repositories/user-repository";
+import {log} from "node:util";
 
 
 export class PostService {
+    constructor() {
+    }
+
     static async getPosts(dataQuery: QueryType, userId: string): Promise<ObjectResult<ReturnViewModel<PostViewModel[]>>> {
         const {pageSize = 10, pageNumber = 1, sortBy = 'createdAt', sortDirection = 'desc'} = dataQuery
 
@@ -48,6 +53,7 @@ export class PostService {
 
     static async getPostById(postId: string, userId: string): Promise<ObjectResult<PostViewModel | null>> {
         const post = await PostRepository.getPostById(postId, userId)
+        console.log(post)
         if (!post) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
         const likeInfo = getLikesInfoForPost(post, userId)
         const returnPost: PostViewModel = {
@@ -69,7 +75,6 @@ export class PostService {
     }
 
     static async createPost(data: PostInputModel): Promise<ObjectResult<PostViewModel | null>> {
-        console.log(123)
         const {blogId, content, shortDescription, title} = data
         const blog = await BlogRepository.getBlogById(data.blogId)
         //если блог не найден, пост нельзя создать
@@ -137,7 +142,7 @@ export class PostService {
         }
     }
 
-    static async setLikePost(postId: string, userId: string, likeStatus: LikeStatus): Promise<ObjectResult> {
+    static async setLikePost(postId: string, userId: string,login: string, likeStatus: LikeStatus): Promise<ObjectResult> {
 
         const findPost = await PostRepository.getPostById(postId, userId)
         if (!findPost) return {status: ResultStatus.NotFound, errorsMessages: 'Post not found', data: null}
@@ -149,42 +154,48 @@ export class PostService {
         let dislikeCount = dislikes?.length
         if (!dislikeCount) dislikeCount = 0
         const myStatus = findPost.extendedLikesInfo.likeUserInfo.find(like => like.userId === userId)
-        if (myStatus?.likeStatus === likeStatus) return {status: ResultStatus.Success, data: null}
+        if (myStatus?.likeStatus === likeStatus) {
+            console.log('llo')
+            return  {status: ResultStatus.Success, data: null}
 
+        }
+
+        console.log(myStatus?.likeStatus)
+const createdAt = new Date().toISOString()
         if (myStatus) {
             if (likeStatus === 'Like') {
                 ++likeCount
                 --dislikeCount
                 await PostRepository.deleteLikeForPost(postId, userId, 'dislikesCount', dislikeCount)
-                await PostRepository.setLikeForPost(postId, userId, likeStatus, 'likesCount', likeCount)
+                await PostRepository.setLikeForPost(postId, userId, likeStatus, 'likesCount', likeCount, login, createdAt )
                 return {status: ResultStatus.Success, data: null}
             }
             if (likeStatus === 'Dislike') {
-                ++likeCount
-                --dislikeCount
+                --likeCount
+                ++dislikeCount
                 await PostRepository.deleteLikeForPost(postId, userId, 'likesCount', dislikeCount)
-                await PostRepository.setLikeForPost(postId, userId, likeStatus, 'dislikesCount', dislikeCount)
+                await PostRepository.setLikeForPost(postId, userId, likeStatus, 'dislikesCount', dislikeCount, login, createdAt)
                 return {status: ResultStatus.Success, data: null}
             }
             if (likeStatus === 'None') {
                 if (myStatus.likeStatus === 'Like') {
                     --likeCount
-                    await CommentRepository.deleteLike(postId, userId, 'likesCount', likeCount)
+                    await PostRepository.deleteLikeForPost(postId, userId, 'likesCount', likeCount)
                 } else {
                     --dislikeCount
-                    await CommentRepository.deleteLike(postId, userId, 'dislikesCount', dislikeCount)
+                    await PostRepository.deleteLikeForPost(postId, userId, 'dislikesCount', dislikeCount)
                 }
-                await CommentRepository.deleteLike(postId, userId, 'likesCount', likeCount)
-                await CommentRepository.setLike(postId, userId, likeStatus, 'dislikesCount', dislikeCount)
+                await PostRepository.deleteLikeForPost(postId, userId, 'likesCount', likeCount)
+                await PostRepository.setLikeForPost(postId, userId, likeStatus, 'dislikesCount', dislikeCount, login, createdAt)
             }
 
         } else if (likeStatus === 'Like') {
             //Если пользовальтель лайк не ставил, то в зависимости от от статуса устанавливаем лайк или дизлайк
             ++likeCount
-            await CommentRepository.setLike(postId, userId, likeStatus, 'likesCount', likeCount)
+            await PostRepository.setLikeForPost(postId, userId, likeStatus, 'likesCount', likeCount, login, createdAt)
         } else if (likeStatus === 'Dislike') {
             ++dislikeCount
-            await CommentRepository.setLike(postId, userId, likeStatus, 'dislikesCount', dislikeCount)
+            await PostRepository.setLikeForPost(postId, userId, likeStatus, 'dislikesCount', dislikeCount, login, createdAt)
         }
 
 
