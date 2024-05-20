@@ -41,7 +41,6 @@ postRouter.get('/', getUserId, async (req: RequestType<{}, {}, QueryType>, res: 
 })
 
 postRouter.get('/:id', getUserId, async (req: RequestType<ParamsType, {}, {}>, res: Response) => {
-    console.log(req.user)
     const isError = ValidateErrorRequest(req, res)
     if (isError) {
         return
